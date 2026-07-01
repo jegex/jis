@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /auth/
+Disallow: /customer/
+Disallow: /payment/
+Disallow: /checkout/
+Disallow: /download/
+
+Sitemap: https://jis-marine.com/sitemap.xml

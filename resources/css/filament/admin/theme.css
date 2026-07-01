@@ -1,0 +1,13 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+@import '../../../../vendor/awcodes/richer-editor/resources/css/index.css';
+@source '../../../../vendor/awcodes/richer-editor/resources/views/**/*.blade.php';
+
+@source '../../../../vendor/biostate/filament-menu-builder/resources/views/**/*';
+
+.logo svg {
+    @apply h-full text-[#000080] dark:text-white;
+}
