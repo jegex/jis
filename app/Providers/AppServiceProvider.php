@@ -10,6 +10,7 @@ use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Mechanisms\PersistentMiddleware\PersistentMiddleware;
@@ -35,6 +36,8 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        URL::forceScheme('https');
+
         $persistLocale = setting('persist_locale', []);
 
         config([
