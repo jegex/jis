@@ -50,11 +50,14 @@ final class PaymentsRelationManager extends RelationManager
                 TextColumn::make('gateway')
                     ->searchable(),
                 TextColumn::make('gateway_transaction_id')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('gateway_status')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('redirect_url')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('currency_code')
                     ->searchable(),
                 TextColumn::make('amount')
@@ -77,24 +80,6 @@ final class PaymentsRelationManager extends RelationManager
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->headerActions([
-                CreateAction::make(),
-                AssociateAction::make(),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                DissociateAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }
