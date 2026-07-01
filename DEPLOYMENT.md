@@ -1,4 +1,4 @@
-# Deployment Guide — DKIKonsultan (cPanel)
+# Deployment Guide — CMS Shop Digital (cPanel)
 
 ## Persyaratan Server
 
@@ -127,7 +127,7 @@ cp ~/laravel/.env.example ~/laravel/.env
 **Isi dengan konfigurasi produksi:**
 
 ```ini
-APP_NAME=DKIKonsultan
+APP_NAME="CMS Shop Digital"
 APP_ENV=production
 APP_KEY=base64:...   # Hasil dari: php artisan key:generate
 APP_DEBUG=false
