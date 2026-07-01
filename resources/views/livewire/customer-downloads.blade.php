@@ -5,7 +5,7 @@
             @foreach($order->items as $item)
                 @if($item->product)
                     <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ $item->product_name }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $item->product->title }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ __('Purchased on') }} {{ $order->paid_at?->format('d M Y') }}</p>
                         <a href="{{ route('payment.download', ['order' => $order->order_number, 'product' => $item->product]) }}" class="mt-4 inline-block bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark text-sm">
                             {{ __('Download') }}

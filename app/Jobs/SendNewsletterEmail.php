@@ -7,10 +7,11 @@ namespace App\Jobs;
 use App\Models\EmailTemplate;
 use App\Models\User;
 use App\Services\EmailService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-final class SendNewsletterEmail implements ShouldQueue
+final class SendNewsletterEmail implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -18,6 +19,11 @@ final class SendNewsletterEmail implements ShouldQueue
         public User $user,
         public EmailTemplate $template,
     ) {}
+
+    public function uniqueId(): string
+    {
+        return $this->user->id.'-'.$this->template->id;
+    }
 
     public function handle(EmailService $emailService): void
     {

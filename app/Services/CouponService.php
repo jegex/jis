@@ -6,12 +6,13 @@ namespace App\Services;
 
 use App\Models\Coupon;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 final class CouponService
 {
     public function validateCoupon(string $code, ?Product $product = null): ?Coupon
     {
-        $coupon = Coupon::whereRaw('LOWER(code) = ?', [mb_strtolower($code)])->first();
+        $coupon = Coupon::where('code', $code)->first();
 
         if (! $coupon || ! $coupon->isValid()) {
             return null;
@@ -24,9 +25,28 @@ final class CouponService
         return $coupon;
     }
 
+    public function validateForUse(string $code, ?Product $product = null): ?Coupon
+    {
+        return DB::transaction(function () use ($code, $product) {
+            $coupon = Coupon::lockForUpdate()->where('code', $code)->first();
+
+            if (! $coupon || ! $coupon->isValid()) {
+                return null;
+            }
+
+            if ($coupon->applies_to->value === 'specific_product' && $coupon->product_id !== $product?->id) {
+                return null;
+            }
+
+            $coupon->increment('used_count');
+
+            return $coupon;
+        });
+    }
+
     public function getValidationError(string $code, ?Product $product = null): ?string
     {
-        $coupon = Coupon::whereRaw('LOWER(code) = ?', [mb_strtolower($code)])->first();
+        $coupon = Coupon::where('code', $code)->first();
 
         if (! $coupon) {
             return __('Invalid coupon code');

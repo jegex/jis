@@ -58,12 +58,12 @@ final class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function items(): self|HasMany
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function payments(): self|HasMany
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }

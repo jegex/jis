@@ -134,9 +134,7 @@ final class EmailService
             return '#';
         }
 
-        $locale = $order->locale ?? $order->user?->locale ?? app()->getLocale();
-
-        return app(DownloadService::class)->generateDownloadUrl($order, $product, $locale);
+        return app(DownloadService::class)->generateDownloadUrl($order, $product);
     }
 
     private function send(EmailTemplate $template, string $recipient, array $variables, ?Model $loggable = null): void

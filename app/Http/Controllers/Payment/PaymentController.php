@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Payment;
 
+use App\Enums\EmailTemplateType;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendOrderEmail;
@@ -11,6 +12,7 @@ use App\Models\Order;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 final class PaymentController extends Controller
 {
@@ -65,8 +67,8 @@ final class PaymentController extends Controller
                             orderId: $orderId,
                         );
 
-                        SendOrderEmail::dispatch($order, 'confirmation');
-                        SendOrderEmail::dispatch($order, 'download');
+                        SendOrderEmail::dispatch($order, EmailTemplateType::OrderConfirmation);
+                        SendOrderEmail::dispatch($order, EmailTemplateType::DownloadLink);
                     }
                 } catch (Exception $e) {
                     Log::warning('Finish redirect: Midtrans status check failed', [
@@ -89,7 +91,15 @@ final class PaymentController extends Controller
     {
         try {
             $notification = app('payment')->callback($request->all());
+        } catch (RuntimeException $e) {
+            Log::error('Midtrans callback validation failed: '.$e->getMessage(), [
+                'order_id' => $request->input('order_id'),
+            ]);
 
+            return response('OK', 200);
+        }
+
+        try {
             $orderId = str_replace('ORDER-', '', $notification->orderId);
             $orderId = (int) explode('-', $orderId)[0];
 
@@ -110,8 +120,8 @@ final class PaymentController extends Controller
                     orderId: $notification->orderId,
                 );
 
-                SendOrderEmail::dispatch($order, 'confirmation');
-                SendOrderEmail::dispatch($order, 'download');
+                SendOrderEmail::dispatch($order, EmailTemplateType::OrderConfirmation);
+                SendOrderEmail::dispatch($order, EmailTemplateType::DownloadLink);
             }
 
             $isFailed = in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'], true);
@@ -126,12 +136,12 @@ final class PaymentController extends Controller
 
             return response('OK', 200);
         } catch (Exception $e) {
-            Log::error('Midtrans callback failed: '.$e->getMessage(), [
-                'order_id' => $request->input('order_id'),
-                'transaction_id' => $request->input('transaction_id'),
+            Log::error('Midtrans callback processing failed: '.$e->getMessage(), [
+                'order_id' => $notification->orderId,
+                'transaction_id' => $notification->transactionId,
             ]);
 
-            return response('OK', 200);
+            return response('Internal Server Error', 500);
         }
     }
 }

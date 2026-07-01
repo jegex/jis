@@ -20,12 +20,12 @@
                     <div class="flex items-center justify-between py-3 {{ !$loop->first ? 'border-t border-gray-100' : '' }}">
                         <div class="flex items-center gap-4">
                             @if($item->product?->getFirstMediaUrl('cover'))
-                                <img src="{{ $item->product->getFirstMediaUrl('cover', 'thumb') }}" alt="{{ $item->product_name }}" class="w-16 h-16 object-cover rounded-lg">
+                                <img src="{{ $item->product->getFirstMediaUrl('cover', 'thumb') }}" alt="{{ $item->product->title }}" class="w-16 h-16 object-cover rounded-lg">
                             @else
                                 <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">{{ __('No Cover') }}</div>
                             @endif
                             <div>
-                                <p class="text-sm font-medium text-gray-900">{{ $item->product_name }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $item->product->title }}</p>
                                 <p class="text-sm text-gray-500">{{ Str::price($item->price, $order->currency_code) }}</p>
                             </div>
                         </div>

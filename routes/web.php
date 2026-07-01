@@ -21,6 +21,13 @@ use App\Livewire\ProductList;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
 
+Route::get('send-email', function () {
+    $order = App\Models\Order::first();
+    app(App\Services\EmailService::class)->sendOrderConfirmation($order);
+
+    return 'Email sent';
+});
+
 // ──────────────────────────────────────────────
 // 1. NON-LOCALIZED ROUTES
 // ──────────────────────────────────────────────
@@ -33,6 +40,9 @@ Route::prefix('auth/google')->name('auth.google.')->group(function () {
 Route::get('/currency/{currency:code}', CurrencyController::class)->name('currency.switch');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
+    ->name('payment.download');
 
 // ──────────────────────────────────────────────
 // 2. LOCALIZED FRONTEND ROUTES
@@ -54,8 +64,6 @@ Route::translate(function () {
     Route::get(Localizer::url('payment.finish'), [PaymentController::class, 'finishRedirect'])->name('payment.finish');
     Route::get(Localizer::url('payment.unfinish'), [PaymentController::class, 'unfinishRedirect'])->name('payment.unfinish');
 
-    Route::get(Localizer::url('download.product'), [DownloadController::class, 'download'])->name('payment.download');
-
     Route::get(Localizer::url('pages.show'), PageController::class)->name('pages.show');
 
     Route::get(Localizer::url('blog.index'), BlogList::class)->name('blog.index');
@@ -64,7 +72,7 @@ Route::translate(function () {
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get(Localizer::url('customer.dashboard'), CustomerDashboard::class)->name('customer.dashboard');
         Route::get(Localizer::url('customer.downloads'), CustomerDownloads::class)->name('customer.downloads');
-        Route::get(Localizer::url('customer.orders.show'), OrderDetail::class)->name('customer.order.show');
+        Route::get(Localizer::url('customer.order.show'), OrderDetail::class)->name('customer.order.show');
         Route::get(Localizer::url('customer.profile'), CustomerProfile::class)->name('customer.profile');
     });
 });

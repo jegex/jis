@@ -10,6 +10,7 @@ use App\Payments\PaymentNotification;
 use App\Payments\PaymentResult;
 use App\Payments\PaymentStatusDto;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction;
@@ -46,6 +47,15 @@ final class MidtransGateway implements PaymentGateway
     public function charge(Order $order, array $params = []): PaymentResult
     {
         $item = $order->items->first();
+
+        if (! $item) {
+            return new PaymentResult(
+                success: false,
+                transactionId: '',
+                redirectUrl: '',
+                errorMessage: 'Order has no items.',
+            );
+        }
 
         $grossAmount = (int) ($params['converted_amount'] ?? $order->total);
         $itemPrice = (int) ($params['converted_item_price'] ?? $params['converted_amount'] ?? $item->price);
@@ -150,6 +160,10 @@ final class MidtransGateway implements PaymentGateway
                 status: $status->transaction_status,
             );
         } catch (Exception $e) {
+            Log::warning('Midtrans status check failed: '.$e->getMessage(), [
+                'transaction_id' => $transactionId,
+            ]);
+
             return new PaymentStatusDto(
                 transactionId: $transactionId,
                 status: 'unknown',

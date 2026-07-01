@@ -10,16 +10,10 @@ use Illuminate\Support\Facades\URL;
 
 final class DownloadService
 {
-    public function generateDownloadUrl(Order $order, Product $product, ?string $locale = null): string
+    public function generateDownloadUrl(Order $order, Product $product): string
     {
-        $locale ??= app()->getLocale();
-
-        $route = $locale === 'en'
-            ? 'without_locale.payment.download'
-            : "translated_{$locale}.payment.download";
-
         return URL::temporarySignedRoute(
-            $route,
+            'payment.download',
             now()->addHours(24),
             [
                 'order' => $order->order_number,
