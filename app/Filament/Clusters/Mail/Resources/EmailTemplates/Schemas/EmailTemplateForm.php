@@ -13,6 +13,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 final class EmailTemplateForm
@@ -25,9 +27,9 @@ final class EmailTemplateForm
                 Section::make()
                     ->schema([
                         Select::make('type')
-                            ->options(EmailTemplateType::class)
                             ->required()
-                            ->live(),
+                            ->live()
+                            ->options(EmailTemplateType::class),
 
                         Toggle::make('is_active')
                             ->default(true),
@@ -52,8 +54,9 @@ final class EmailTemplateForm
                                     ->extraInputAttributes([
                                         'style' => 'min-height: 200px;',
                                     ])
-                                    ->helperText('Supports HTML. Available variables: {name}, {email}, {order_number}, {download_url}, {total}'),
                             ]),
+
+                        Text::make(fn (Get $get) => view('filament.info-variable-email', ['type' => $get('type') ?? null]))
                     ]),
             ]);
     }

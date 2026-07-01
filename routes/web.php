@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Events\PaymentSuccess;
 use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CurrencyController;
@@ -22,8 +23,8 @@ use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
 
 Route::get('send-email', function () {
-    $order = App\Models\Order::first();
-    app(App\Services\EmailService::class)->sendOrderConfirmation($order);
+    $order = App\Models\Order::latest()->first();
+    PaymentSuccess::dispatch($order);
 
     return 'Email sent';
 });

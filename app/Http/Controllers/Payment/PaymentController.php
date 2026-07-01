@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Payment;
 
-use App\Enums\EmailTemplateType;
 use App\Enums\OrderStatus;
+use App\Events\PaymentSuccess;
 use App\Http\Controllers\Controller;
-use App\Jobs\SendOrderEmail;
 use App\Models\Order;
 use Exception;
 use Illuminate\Http\Request;
@@ -67,8 +66,7 @@ final class PaymentController extends Controller
                             orderId: $orderId,
                         );
 
-                        SendOrderEmail::dispatch($order, EmailTemplateType::OrderConfirmation);
-                        SendOrderEmail::dispatch($order, EmailTemplateType::DownloadLink);
+                        PaymentSuccess::dispatch($order);
                     }
                 } catch (Exception $e) {
                     Log::warning('Finish redirect: Midtrans status check failed', [
@@ -120,8 +118,7 @@ final class PaymentController extends Controller
                     orderId: $notification->orderId,
                 );
 
-                SendOrderEmail::dispatch($order, EmailTemplateType::OrderConfirmation);
-                SendOrderEmail::dispatch($order, EmailTemplateType::DownloadLink);
+                PaymentSuccess::dispatch($order);
             }
 
             $isFailed = in_array($transactionStatus, ['deny', 'cancel', 'expire', 'failure'], true);

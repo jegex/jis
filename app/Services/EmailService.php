@@ -25,6 +25,7 @@ final class EmailService
         }
 
         $recipient = $order->user?->email ?? $order->guest_email;
+
         if (! $recipient) {
             return;
         }
@@ -130,6 +131,7 @@ final class EmailService
     private function getDownloadUrl(Order $order): string
     {
         $product = $order->items->first()?->product;
+
         if (! $product) {
             return '#';
         }
