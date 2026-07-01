@@ -34,7 +34,7 @@
             @if($showMeta && $item->category)
                 <div class="flex items-center gap-2 text-[11px] text-gray-500 mt-2 justify-between">
                     <span class="text-primary font-medium py-1 px-3 bg-primary-100">{{ $item->category->name }}</span>
-                    <span>{{ $item->published_at?->format('d M Y') }}</span>
+                    <span>{{ $item->published_at?->format(setting('date_format', 'd M Y')) }}</span>
                 </div>
             @endif
         </div>

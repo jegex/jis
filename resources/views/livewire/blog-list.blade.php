@@ -24,7 +24,7 @@
                                 <span class="text-secondary font-semibold text-xs tracking-widest uppercase">{{ $featuredPosts->first()->category->name }}</span>
                             @endif
                             <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary mt-1">{{ $featuredPosts->first()->title }}</h3>
-                            <p class="text-sm text-gray-500 py-2">{{ $featuredPosts->first()->created_at->format('d M Y') }}</p>
+                            <p class="text-sm text-gray-500 py-2">{{ $featuredPosts->first()->created_at->format(setting('date_format', 'd M Y')) }}</p>
                             <p class="text-sm text-gray-500">{{ $featuredPosts->first()->excerpt }}</p>
                         </div>
                     </a>
@@ -40,7 +40,7 @@
                                                 <span class="text-secondary font-semibold text-xs tracking-widest uppercase">{{ $post->category->name }}</span>
                                             @endif
 
-                                            <span class="text-sm text-gray-500">{{ $post->created_at->format('d M Y') }}</span>
+                                            <span class="text-sm text-gray-500">{{ $post->created_at->format(setting('date_format', 'd M Y')) }}</span>
                                         </span>
                                         <h3 class="font-semibold text-gray-900 group-hover:text-primary my-2">{{ $post->title }}</h3>
                                         <p class="text-sm text-gray-500">{{ $post->excerpt }}</p>
@@ -122,7 +122,7 @@
                                             @endif
                                         </div>
                                         <div class="order-3 hidden md:block lg:order-3 lg:w-32 lg:text-right">
-                                            <p class="text-sm text-gray-500 py-2">{{ $post->created_at->format('d M Y') }}</p>
+                                            <p class="text-sm text-gray-500 py-2">{{ $post->created_at->format(setting('date_format', 'd M Y')) }}</p>
                                         </div>
                                     </a>
                                 @endforeach
