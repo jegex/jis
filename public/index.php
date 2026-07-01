@@ -18,5 +18,6 @@ require __DIR__.'/../vendor/autoload.php';
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
-
+$app->publicPath(__DIR__);
+$app->usePublicPath(__DIR__);
 $app->handleRequest(Request::capture());
