@@ -207,7 +207,7 @@ DB_PASSWORD=           # Password database
 1. Dashboard Midtrans → **Settings → Notification**
 2. Isi **HTTP Notification URL** dengan:
    ```
-   https://domain-anda.com/payment/callback
+   https://domain-anda.com/api/payment/callback
    ```
    *(untuk local, bisa skip atau pakai ngrok)*
 
