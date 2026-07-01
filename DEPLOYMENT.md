@@ -106,7 +106,7 @@ rm -rf public
 4. Upload folder `vendor/` terpisah (atau jalankan `composer install` di server)
 5. Upload `node_modules/` (atau jalankan `npm install` di server)
 
-### 1.3 Setup Symlink Storage
+### 2.3 Setup Symlink Storage
 
 ```bash
 # Dari folder public_html
@@ -197,7 +197,7 @@ npm install --ignore-scripts
 npm run build
 ```
 
-> **Catatan:** `php artisan storage:link` **tidak perlu** dijalankan karena symlink sudah dibuat manual di section 1.3.
+> **Catatan:** `php artisan storage:link` **tidak perlu** dijalankan karena symlink sudah dibuat manual di section 2.3.
 
 ---
 
@@ -205,9 +205,9 @@ npm run build
 
 Buka **cPanel → Cron Jobs** → Tambahkan cron job baru.
 
-### 5.1 Laravel Scheduler (WAJIB)
+### 5.1 Laravel Scheduler (Recommended / Future-Proof)
 
-Jalankan tiap menit untuk trigger scheduled tasks:
+Jalankan tiap menit untuk trigger scheduled tasks. Saat ini belum ada task terjadwal, tapi cron ini disarankan sebagai **future-proof** — jika nanti Anda menambahkan task di `routes/console.php`, cron akan menjalankannya otomatis tanpa perlu setup ulang.
 
 ```cron
 * * * * * /usr/local/bin/php /home/username/laravel/artisan schedule:run >> /dev/null 2>&1
@@ -217,20 +217,20 @@ Jalankan tiap menit untuk trigger scheduled tasks:
 - `username` → username cPanel Anda
 - `laravel` → sesuaikan jika folder penamaan berbeda
 
-> Saat ini belum ada scheduled task yang didefinisikan. Setelah menambahkan task di `routes/console.php`, cron job ini akan menjalankannya otomatis.
-
 ### 5.2 Queue Worker (jika pakai antrian)
 
 ```cron
-* * * * * /usr/local/bin/php /home/username/laravel/artisan queue:work --sleep=3 --tries=3 --max-time=3600 >> /dev/null 2>&1
+* * * * * /usr/local/bin/php /home/username/laravel/artisan queue:work --sleep=3 --tries=3 --stop-when-empty >> /dev/null 2>&1
 ```
+
+> **Catatan:** `--stop-when-empty` memastikan worker berhenti setelah semua job selesai. Aman untuk shared hosting — tidak ada risiko banyak worker numpuk. Jika ingin worker terus-menerus (VPS/dedicated), ganti `--stop-when-empty` dengan `--max-time=3600`.
 
 Atau isi via form **cPanel → Cron Jobs**:
 
 | Field | Value |
 |-------|-------|
 | Common Settings | Once Per Minute (`* * * * *`) |
-| Command | `/usr/local/bin/php /home/username/laravel/artisan schedule:run` |
+| Command | `/usr/local/bin/php /home/username/laravel/artisan queue:work --sleep=3 --tries=3 --stop-when-empty` |
 
 ### 5.3 Verifikasi Cron
 
@@ -358,6 +358,69 @@ php artisan config:cache
 php artisan route:cache
 php artisan event:cache
 php artisan icons:cache
+npm run build
+```
+
+---
+
+## 11. Update Deployment (Rilis Versi Baru)
+
+Jalankan langkah berikut setiap kali ada update kode:
+
+```bash
+cd ~/laravel
+
+# 1. Pull kode terbaru (lewat Git)
+git pull origin main
+
+# 2. Update dependensi (jika ada perubahan)
+composer install --optimize-autoloader --no-dev
+
+# 3. Jalankan migrasi baru
+php artisan migrate --force
+
+# 4. Re-cache untuk produksi
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan event:cache
+php artisan icons:cache
+
+# 5. Build ulang frontend (jika ada perubahan asset)
+npm ci --ignore-scripts
+npm run build
+
+# 6. Restart queue worker (jika ada perubahan job)
+#    Tidak perlu restart karena cron start baru tiap menit.
+#    Tapi kalau ada job yang lagi diproses, tunggu sampai selesai.
+
+# 7. Restart scheduler (jika ada perubahan jadwal)
+#    Tidak perlu — cron start baru tiap menit.
+```
+
+### Tanpa Git (Upload Manual)
+
+```bash
+cd ~/laravel
+
+# 1. Upload file yang diubah via File Manager
+#    atau upload ZIP baru → extract
+
+# 2. Update dependensi
+composer install --optimize-autoloader --no-dev
+
+# 3. Migrasi
+php artisan migrate --force
+
+# 4. Cache
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan event:cache
+php artisan icons:cache
+
+# 5. Build frontend
+npm ci --ignore-scripts
 npm run build
 ```
 
