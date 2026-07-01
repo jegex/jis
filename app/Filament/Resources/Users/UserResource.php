@@ -32,6 +32,7 @@ final class UserResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $modelLabel = 'Customer';
+
     protected static ?string $slug = 'customers';
 
     public static function form(Schema $schema): Schema

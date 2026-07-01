@@ -53,10 +53,10 @@ final class EmailTemplateForm
                                     ->columnSpanFull()
                                     ->extraInputAttributes([
                                         'style' => 'min-height: 200px;',
-                                    ])
+                                    ]),
                             ]),
 
-                        Text::make(fn (Get $get) => view('filament.info-variable-email', ['type' => $get('type') ?? null]))
+                        Text::make(fn (Get $get) => view('filament.info-variable-email', ['type' => $get('type') ?? null])),
                     ]),
             ]);
     }
