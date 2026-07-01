@@ -9,12 +9,18 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Contracts\PasswordConfirmedResponse as PasswordConfirmedResponseContract;
+use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Fortify;
 
 final class FortifyServiceProvider extends ServiceProvider
@@ -29,7 +35,59 @@ final class FortifyServiceProvider extends ServiceProvider
                     return redirect('/admin');
                 }
 
-                return redirect(config('fortify.home'));
+                return $request->wantsJson()
+                    ? response()->json(['two_factor' => false])
+                    : redirect()->intended(route('customer.dashboard'));
+            }
+        });
+
+        $this->app->instance(RegisterResponseContract::class, new class implements RegisterResponseContract
+        {
+            public function toResponse($request)
+            {
+                return $request->wantsJson()
+                    ? new JsonResponse('', 201)
+                    : redirect()->intended(route('customer.dashboard'));
+            }
+        });
+
+        $this->app->instance(TwoFactorLoginResponseContract::class, new class implements TwoFactorLoginResponseContract
+        {
+            public function toResponse($request)
+            {
+                return $request->wantsJson()
+                    ? new JsonResponse('', 204)
+                    : redirect()->intended(route('customer.dashboard'));
+            }
+        });
+
+        $this->app->instance(PasswordResetResponseContract::class, new class implements PasswordResetResponseContract
+        {
+            public function toResponse($request)
+            {
+                return $request->wantsJson()
+                    ? new JsonResponse(['message' => __('passwords.reset')], 200)
+                    : redirect(route('customer.dashboard'))->with('status', __('passwords.reset'));
+            }
+        });
+
+        $this->app->instance(VerifyEmailResponseContract::class, new class implements VerifyEmailResponseContract
+        {
+            public function toResponse($request)
+            {
+                return $request->wantsJson()
+                    ? new JsonResponse('', 204)
+                    : redirect()->intended(route('customer.dashboard').'?verified=1');
+            }
+        });
+
+        $this->app->instance(PasswordConfirmedResponseContract::class, new class implements PasswordConfirmedResponseContract
+        {
+            public function toResponse($request)
+            {
+                return $request->wantsJson()
+                    ? new JsonResponse('', 201)
+                    : redirect()->intended(route('customer.dashboard'));
             }
         });
     }
