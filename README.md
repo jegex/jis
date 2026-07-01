@@ -1,10 +1,10 @@
-# DKIKonsultan
+# CMS Shop Digital
 
-Marine & ship design consulting platform — jasa konsultan desain dan pembangunan kapal di Indonesia.
+Multi-language CMS & digital shop platform — aplikasi e-commerce multi-bahasa untuk penjualan produk digital.
 
 ![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php)
 ![Laravel](https://img.shields.io/badge/Laravel-13-F05340?logo=laravel)
-![Filament](-FF2D20?logo=filament)
+![Filament](https://img.shields.io/badge/Filament-5-FF2D20?logo=filament)
 ![Livewire](https://img.shields.io/badge/Livewire-4-4E56A6?logo=livewire)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql)
@@ -44,11 +44,11 @@ Marine & ship design consulting platform — jasa konsultan desain dan pembangun
 
 ## Tentang Aplikasi
 
-**DKIKonsultan** adalah aplikasi web e-commerce multi-bahasa (Indonesia & Inggris) yang dibuat khusus untuk konsultan marine dan pembuatan kapal. Aplikasi ini digunakan untuk:
+**CMS Shop Digital** adalah aplikasi web e-commerce multi-bahasa (Indonesia & Inggris) aplikasi e-commerce multi-bahasa untuk penjualan produk digital. Aplikasi ini digunakan untuk:
 
-- **Menjual** desain kapal (blueprint, technical drawings, dokumen teknis) secara digital
-- **Menampilkan** portofolio proyek kapal yang pernah dikerjakan
-- **Blog** artikel seputar industri perkapalan dan marine
+- **Menjual** produk digital (dokumen, desain, blueprint, file teknis) secara online
+- **Menampilkan** portofolio proyek yang pernah dikerjakan
+- **Blog** artikel informatif
 - **Customer portal** — pelanggan bisa login, lihat riwayat pembelian, dan download file digital yang sudah dibeli
 
 Dibangun dengan **Laravel 13** sebagai backend, **Filament 5** sebagai admin panel, dan **Livewire 4** untuk interaktivitas frontend tanpa perlu JavaScript framework berat.
@@ -59,12 +59,12 @@ Dibangun dengan **Laravel 13** sebagai backend, **Filament 5** sebagai admin pan
 
 | Status | Fitur | Keterangan |
 |--------|-------|------------|
-| ✅ | **E-commerce Produk Digital** | Katalog produk (desain kapal), detail produk, filter kategori |
+| ✅ | **E-commerce Produk Digital** | Katalog produk digital, detail produk, filter kategori |
 | ✅ | **Midtrans Payment Gateway** | Pembayaran via Snap popup (kartu kredit, GoPay, ShopeePay, QRIS, dll) |
 | ✅ | **Multi-Currency** | Harga otomatis dikonversi ke mata uang yang dipilih, dengan nilai tukar dinamis |
 | ✅ | **Multi-Language** | Tersedia bahasa Indonesia & Inggris, switch bahasa real-time |
 | ✅ | **Blog Engine** | Posting artikel dengan kategori, tag, author, related posts, pagination |
-| ✅ | **Portfolio Proyek** | Menampilkan proyek kapal dengan spesifikasi, foto, filter tipe proyek |
+| ✅ | **Portfolio Proyek** | Menampilkan proyek dengan spesifikasi, foto, filter tipe proyek |
 | ✅ | **Page Builder** | Halaman statis yang bisa dibuat/diedit dari admin (tentang kami, kontak, dll) |
 | ✅ | **Homepage Builder** | Blok dinamis: featured products, latest posts, projects — diatur via admin |
 | ✅ | **Customer Dashboard** | Pelanggan login, lihat riwayat order, download file digital, edit profil |
@@ -125,8 +125,8 @@ Buat yang ingin menjalankan di komputer sendiri (local development):
 
 ```bash
 # 1. Clone repositori
-git clone <url-repository> dkikonsultan
-cd dkikonsultan
+git clone <url-repository> cms-shop
+cd cms-shop
 
 # 2. Install dependency PHP
 composer install
@@ -175,8 +175,8 @@ DB_PASSWORD=           # Password database
 
 **Di cPanel:**
 - Login ke cPanel → **MySQL Databases**
-- Buat database baru (contoh: `dkikonsultan_db`)
-- Buat user database (contoh: `dkikonsultan_user`)
+- Buat database baru (contoh: `cms_shop_db`)
+- Buat user database (contoh: `cms_shop_user`)
 - Attach user ke database, kasih **ALL PRIVILEGES**
 - Isi `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` di `.env` sesuai yang dibuat
 
@@ -255,7 +255,7 @@ Google login memungkinkan user login menggunakan akun Google mereka.
 
 1. Klik dropdown project (atas kiri, samping logo Google Cloud)
 2. Klik **New Project**
-3. Isi **Project name**: `DKIKonsultan` (atau terserah)
+3. Isi **Project name**: `CMS Shop Digital` (atau terserah)
 4. Klik **Create**
 
 #### c. Aktifkan OAuth Consent Screen
@@ -263,7 +263,7 @@ Google login memungkinkan user login menggunakan akun Google mereka.
 1. Setelah project jadi, di sidebar kiri → **APIs & Services → OAuth consent screen**
 2. Pilih **External** → **Create**
 3. **App Information:**
-   - App name: `DKIKonsultan`
+   - App name: `CMS Shop Digital`
    - User support email: pilih email kamu
    - Logo: bisa upload logo atau skip
 4. **Developer contact information:**
@@ -283,7 +283,7 @@ Google login memungkinkan user login menggunakan akun Google mereka.
 1. Sidebar → **APIs & Services → Credentials**
 2. Klik **Create Credentials → OAuth client ID**
 3. **Application type:** Web application
-4. **Name:** `DKIKonsultan Login`
+4. **Name:** `CMS Shop Digital Login`
 5. **Authorized redirect URIs:**
    - Klik **Add URI**
    - Masukkan (ganti `domainmu.com` dengan domain asli):
@@ -335,7 +335,7 @@ MAIL_USERNAME=email@domainmu.com        # Email pengirim
 MAIL_PASSWORD=password_email            # Password email
 MAIL_ENCRYPTION=ssl                     # ssl atau tls
 MAIL_FROM_ADDRESS=email@domainmu.com    # Email pengirim
-MAIL_FROM_NAME="${APP_NAME}"            # Nama pengirim (DKIKonsultan)
+MAIL_FROM_NAME="${APP_NAME}"            # Nama pengirim (CMS Shop Digital)
 ```
 
 **Setting Email Hosting (cPanel):**
@@ -456,7 +456,7 @@ $app->handleRequest(Request::capture());
 5. Isi dengan konfigurasi berikut (sesuaikan dengan data kamu):
 
 ```ini
-APP_NAME=DKIKonsultan
+APP_NAME="CMS Shop Digital"
 APP_ENV=production
 APP_KEY=                   # Nanti di-generate via setup script
 APP_DEBUG=false
@@ -471,8 +471,8 @@ LOG_LEVEL=error
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=dkikonsultan_db     # Ganti dengan nama database yang dibuat
-DB_USERNAME=dkikonsultan_user   # Ganti dengan user database
+DB_DATABASE=cms_shop_db     # Ganti dengan nama database yang dibuat
+DB_USERNAME=cms_shop_user   # Ganti dengan user database
 DB_PASSWORD=password_user       # Ganti dengan password database
 
 SESSION_DRIVER=database
@@ -514,22 +514,22 @@ VITE_APP_NAME="${APP_NAME}"
 Di komputer kamu:
 ```bash
 # Di terminal lokal
-mysqldump -u root -p jis > dkikonsultan.sql
+mysqldump -u root -p jis > cms_shop.sql
 ```
-
-Atau pakai **phpMyAdmin**:
-1. Buka `http://localhost/phpmyadmin`
-2. Pilih database `jis`
-3. Tab **Export** → **Go**
-4. Simpan file `dkikonsultan.sql`
+ 
+ Atau pakai **phpMyAdmin**:
+ 1. Buka `http://localhost/phpmyadmin`
+ 2. Pilih database `jis`
+ 3. Tab **Export** → **Go**
+ 4. Simpan file `cms_shop.sql`
 
 #### b. Import Database di cPanel
 
 1. Di cPanel → **phpMyAdmin**
 2. Klik **Databases** (atas kiri)
-3. Pilih database yang sudah dibuat (misal: `dkikonsultan_db`)
+3. Pilih database yang sudah dibuat (misal: `cms_shop_db`)
 4. Klik tab **Import**
-5. **Choose File** → pilih file `dkikonsultan.sql`
+5. **Choose File** → pilih file `cms_shop.sql`
 6. Klik **Go**
 7. Tunggu sampai selesai (ada tulisan **Import has been successfully finished**)
 
@@ -712,7 +712,7 @@ Cek apakah semuanya berjalan:
 Verifikasi login:
 1. Buka `https://domainmu.com/admin`
 2. Login dengan akun yang dibuat saat seeding
-   - Default: `admin@dkikonsultan.com` / `password` (jika tidak diubah di seeder)
+   - Default: `admin@cms-shop.com` / `password` (jika tidak diubah di seeder)
 3. Jika login sukses, masuk ke dashboard admin Filament
 
 ---
