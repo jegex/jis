@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Events\PaymentSuccess;
 use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CurrencyController;
@@ -19,7 +18,6 @@ use App\Livewire\CustomerProfile;
 use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
 
