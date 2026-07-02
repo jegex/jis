@@ -19,15 +19,9 @@ use App\Livewire\CustomerProfile;
 use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
-
-Route::get('send-email', function () {
-    $order = App\Models\Order::latest()->first();
-    PaymentSuccess::dispatch($order);
-
-    return 'Email sent';
-});
 
 // ──────────────────────────────────────────────
 // 1. NON-LOCALIZED ROUTES
