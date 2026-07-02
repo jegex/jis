@@ -97,11 +97,23 @@ final class PaymentController extends Controller
             return response('OK', 200);
         }
 
+        if (! str_starts_with($notification->orderId, 'ORDER-')) {
+            return response('OK', 200);
+        }
+
         try {
             $orderId = str_replace('ORDER-', '', $notification->orderId);
             $orderId = (int) explode('-', $orderId)[0];
 
-            $order = Order::findOrFail($orderId);
+            $order = Order::find($orderId);
+
+            if (! $order) {
+                Log::warning('Midtrans callback: Order not found', [
+                    'order_id' => $notification->orderId,
+                ]);
+
+                return response('OK', 200);
+            }
 
             $rawData = $notification->rawData;
             $transactionStatus = $notification->transactionStatus;
