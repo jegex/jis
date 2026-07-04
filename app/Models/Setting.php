@@ -8,6 +8,7 @@ use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 final class Setting extends Model
 {
@@ -77,10 +78,18 @@ final class Setting extends Model
     public static function getAll(bool $fetch = false): Collection
     {
         if ($fetch) {
+            if (! Schema::hasTable('settings')) {
+                return collect();
+            }
+
             return static::pluck('value', 'key');
         }
 
         return Cache::rememberForever('settings', function () {
+            if (! Schema::hasTable('settings')) {
+                return collect();
+            }
+
             return static::pluck('value', 'key');
         });
     }

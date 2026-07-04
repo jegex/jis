@@ -17,8 +17,8 @@ final class CurrencyService
         $fromCurrency = Currency::where('code', $from)->firstOrFail();
         $toCurrency = Currency::where('code', $to)->firstOrFail();
 
-        $defaultAmount = $amount * $fromCurrency->exchange_rate;
+        $defaultAmount = $amount / $fromCurrency->exchange_rate;
 
-        return round($defaultAmount / $toCurrency->exchange_rate, $toCurrency->decimal_place);
+        return round($defaultAmount * $toCurrency->exchange_rate, $toCurrency->decimal_place);
     }
 }
