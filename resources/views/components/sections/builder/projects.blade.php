@@ -50,10 +50,14 @@
                                             </tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-100">
-                                            @foreach($allProjects as $i => $project)
-                                                @php $project = is_array($project) ? $project : (method_exists($project, 'toArray') ? $project->toArray() : []); @endphp
+                                            @foreach($allProjects as $project)
+                                                @php
+                                                    $project = is_array($project) ? $project : (method_exists($project, 'toArray') ? $project->toArray() : []);
+                                                    $number = count($allProjects) - $loop->index;
+                                                    $number = $number <= 9 ? "0$number" : $number;
+                                                @endphp
                                                 <tr class="hover:bg-primary-light/50 transition-colors">
-                                                    <td class="px-5 py-3.5 text-gray-400">{{ count($allProjects) - $i }}</td>
+                                                    <td class="px-5 py-3.5 text-gray-400">{{ $number }}</td>
                                                     <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['name'] ?? '' }}</td>
                                                     <td class="px-5 py-3.5 text-gray-500">{{ isset($project['size']) && $project['size'] ? number_format((float) $project['size'], 0, ',', '.') : '' }}{{ isset($project['unit']) && $project['unit'] ? ' ' . $project['unit'] : '' }}</td>
                                                     <td class="px-5 py-3.5 text-gray-500">{{ isset($project['date']) && $project['date'] ? \Carbon\Carbon::parse($project['date'])->format('Y') : '-' }}</td>
@@ -78,10 +82,14 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody class="divide-y divide-gray-100">
-                                                @foreach($typeProjects as $i => $project)
-                                                    @php $project = is_array($project) ? $project : (method_exists($project, 'toArray') ? $project->toArray() : []); @endphp
+                                                @foreach($typeProjects as $project)
+                                                    @php
+                                                        $project = is_array($project) ? $project : (method_exists($project, 'toArray') ? $project->toArray() : []);
+                                                        $number = count($typeProjects) - $loop->index;
+                                                        $number = $number <= 9 ? "0$number" : $number;
+                                                    @endphp
                                                     <tr class="hover:bg-primary-light/50 transition-colors">
-                                                        <td class="px-5 py-3.5 text-gray-400">{{ count($typeProjects) - $i }}</td>
+                                                        <td class="px-5 py-3.5 text-gray-400">{{ $number }}</td>
                                                         <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['name'] ?? '' }}</td>
                                                         <td class="px-5 py-3.5 text-gray-500">{{ isset($project['size']) && $project['size'] ? number_format((float) $project['size'], 0, ',', '.') : '' }}{{ isset($project['unit']) && $project['unit'] ? ' ' . $project['unit'] : '' }}</td>
                                                         <td class="px-5 py-3.5 text-gray-500">{{ isset($project['date']) && $project['date'] ? \Carbon\Carbon::parse($project['date'])->format('Y') : '-' }}</td>
