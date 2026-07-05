@@ -8,6 +8,9 @@ use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Biostate\FilamentMenuBuilder\Traits\Menuable;
 use Database\Factories\PageFactory;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -20,12 +23,13 @@ use Spatie\Sluggable\HasTranslatableSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
 
-final class Page extends Model
+final class Page extends Model implements HasRichContent
 {
     /** @use HasFactory<PageFactory> */
     use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations;
 
     use Menuable;
+    use InteractsWithRichContent;
 
     public array $translatable = ['title', 'content', 'slug'];
 
@@ -102,5 +106,14 @@ final class Page extends Model
                 ->toArray(),
             schema: $schema,
         );
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('content')
+            ->fileAttachmentProvider(
+                SpatieMediaLibraryFileAttachmentProvider::make()
+                    ->collection('content-file-attachments')
+            );
     }
 }

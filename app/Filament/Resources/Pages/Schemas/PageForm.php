@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Pages\Schemas;
 
 use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
+use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\SeoSchema;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -30,8 +31,7 @@ final class PageForm
                             TextInput::make('slug')
                                 ->required()
                                 ->maxLength(255),
-                            Textarea::make('content')
-                                ->columnSpanFull(),
+                            MyRichEditor::make('content'),
                         ]),
                 ])->columnSpan(2),
 
