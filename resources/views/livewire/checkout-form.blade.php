@@ -22,35 +22,35 @@
     @enderror
 
     <form wire:submit="pay" class="bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
-        <div>
-            <label for="coupon_code" class="block text-sm font-medium text-gray-700">{{ __('Coupon Code') }}</label>
-            <div class="mt-1 flex gap-2">
-                <x-input
-                    name="coupon_code"
-                    id="coupon_code"
-                    variant="flat"
-                    placeholder="{{ __('e.g. SAVE10') }}"
-                    wire:model="couponCode"
-                    class="flex-1"
-                />
-                <x-button
-                    type="button"
-                    size="sm"
-                    wire:click="applyCoupon"
-                    wire:loading.attr="disabled"
-                    wire:target="applyCoupon"
-                >
-                    <span wire:loading.remove wire:target="applyCoupon">{{ __('Apply') }}</span>
-                    <span wire:loading wire:target="applyCoupon">{{ __('...') }}</span>
-                </x-button>
-            </div>
-            @if($appliedCode)
-                <p class="mt-1 text-sm text-success">{{ __('Coupon ":code" applied!', ['code' => $appliedCode]) }}</p>
-            @endif
-            @error('couponCode')
-                <p class="mt-1 text-sm text-danger">{{ $message }}</p>
-            @enderror
-        </div>
+{{--        <div>--}}
+{{--            <label for="coupon_code" class="block text-sm font-medium text-gray-700">{{ __('Coupon Code') }}</label>--}}
+{{--            <div class="mt-1 flex gap-2">--}}
+{{--                <x-input--}}
+{{--                    name="coupon_code"--}}
+{{--                    id="coupon_code"--}}
+{{--                    variant="flat"--}}
+{{--                    placeholder="{{ __('e.g. SAVE10') }}"--}}
+{{--                    wire:model="couponCode"--}}
+{{--                    class="flex-1"--}}
+{{--                />--}}
+{{--                <x-button--}}
+{{--                    type="button"--}}
+{{--                    size="sm"--}}
+{{--                    wire:click="applyCoupon"--}}
+{{--                    wire:loading.attr="disabled"--}}
+{{--                    wire:target="applyCoupon"--}}
+{{--                >--}}
+{{--                    <span wire:loading.remove wire:target="applyCoupon">{{ __('Apply') }}</span>--}}
+{{--                    <span wire:loading wire:target="applyCoupon">{{ __('...') }}</span>--}}
+{{--                </x-button>--}}
+{{--            </div>--}}
+{{--            @if($appliedCode)--}}
+{{--                <p class="mt-1 text-sm text-success">{{ __('Coupon ":code" applied!', ['code' => $appliedCode]) }}</p>--}}
+{{--            @endif--}}
+{{--            @error('couponCode')--}}
+{{--                <p class="mt-1 text-sm text-danger">{{ $message }}</p>--}}
+{{--            @enderror--}}
+{{--        </div>--}}
 
         <div class="border-t border-gray-200 pt-4 flex flex-col gap-2">
             <div class="flex justify-between text-gray-600">
