@@ -113,12 +113,21 @@ final class HomepageBuilder extends SettingPage
         ];
     }
 
+    private static function activeToggle(): Toggle
+    {
+        return Toggle::make('is_active')
+            ->label('Active')
+            ->default(true)
+            ->columnSpanFull();
+    }
+
     private function heroBlock(): Block
     {
         return Block::make('hero')
             ->label('Hero')
             ->icon('heroicon-o-home')
             ->schema([
+                self::activeToggle(),
                 Toggle::make('badge_enabled')
                     ->label('Show Badge')
                     ->live()
@@ -161,6 +170,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Stats')
             ->icon('heroicon-o-chart-bar')
             ->schema([
+                self::activeToggle(),
                 Repeater::make('items')
                     ->label('Statistics')
                     ->collapsible()
@@ -204,6 +214,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Featured')
             ->icon('heroicon-o-star')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 Repeater::make('services')
                     ->label('Featured Services')
@@ -240,6 +251,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Services')
             ->icon('heroicon-o-cog')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 Repeater::make('items')
                     ->label('Services')
@@ -274,6 +286,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Projects')
             ->icon('heroicon-o-briefcase')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 TextInput::make('count')
                     ->label('Number of Projects')
@@ -296,6 +309,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Featured Products')
             ->icon('heroicon-o-shopping-bag')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 TextInput::make('count')
                     ->label('Number of Products')
@@ -327,6 +341,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Latest Posts')
             ->icon('heroicon-o-newspaper')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 TextInput::make('count')
                     ->label('Number of Posts')
@@ -356,6 +371,7 @@ final class HomepageBuilder extends SettingPage
             ->label('CTA')
             ->icon('heroicon-o-rectangle-group')
             ->schema([
+                self::activeToggle(),
                 TranslatableTabs::make('CTA Content')
                     ->schema([
                         TextInput::make('label')
@@ -377,6 +393,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Testimonials')
             ->icon('heroicon-o-chat-bubble-left-ellipsis')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 Repeater::make('items')
                     ->label('Testimonials')
@@ -420,6 +437,7 @@ final class HomepageBuilder extends SettingPage
             ->label('Partners')
             ->icon('heroicon-o-globe-alt')
             ->schema([
+                self::activeToggle(),
                 ...self::sectionHeader(),
                 Repeater::make('items')
                     ->label('Partners')

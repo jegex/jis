@@ -29,8 +29,13 @@ final class HomeController extends Controller
         $projectConfig = [];
 
         foreach ($blocks as $block) {
-            $type = $block['type'] ?? '';
             $data = $block['data'] ?? [];
+
+            if (($data['is_active'] ?? true) === false) {
+                continue;
+            }
+
+            $type = $block['type'] ?? '';
 
             if ($type === 'featured-products') {
                 $needsProducts = true;
@@ -57,8 +62,13 @@ final class HomeController extends Controller
             : collect();
 
         foreach ($blocks as $block) {
-            $type = $block['type'] ?? '';
             $data = $block['data'] ?? [];
+
+            if (($data['is_active'] ?? true) === false) {
+                continue;
+            }
+
+            $type = $block['type'] ?? '';
             $items = match ($type) {
                 'featured-products' => $products,
                 'latest-posts' => $posts,
