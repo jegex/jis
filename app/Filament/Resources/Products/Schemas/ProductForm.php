@@ -110,6 +110,8 @@ final class ProductForm
                                 ->prefix(fn ($get) => Currency::find($get('currency_id'))->code),
 
                             SpatieMediaLibraryFileUpload::make('file')
+                                ->disk('local')
+                                ->preserveFilenames()
                                 ->collection('file')
                                 ->previewable(false)
                                 ->downloadable()
