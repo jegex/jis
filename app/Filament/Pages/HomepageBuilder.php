@@ -8,6 +8,7 @@ use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Supports\SettingPage;
 use App\Models\Category;
 use BackedEnum;
+use Closure;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Repeater;
@@ -121,10 +122,15 @@ final class HomepageBuilder extends SettingPage
             ->columnSpanFull();
     }
 
+    private static function blockLabel(string $name): Closure
+    {
+        return fn ($state): string => $name.' - '.(($state['is_active'] ?? true) ? 'Active' : 'Not Active');
+    }
+
     private function heroBlock(): Block
     {
         return Block::make('hero')
-            ->label('Hero')
+            ->label(self::blockLabel('Hero'))
             ->icon('heroicon-o-home')
             ->schema([
                 self::activeToggle(),
@@ -167,7 +173,7 @@ final class HomepageBuilder extends SettingPage
     private function statsBlock(): Block
     {
         return Block::make('stats')
-            ->label('Stats')
+            ->label(self::blockLabel('Stats'))
             ->icon('heroicon-o-chart-bar')
             ->schema([
                 self::activeToggle(),
@@ -211,7 +217,7 @@ final class HomepageBuilder extends SettingPage
     private function featuredBlock(): Block
     {
         return Block::make('featured')
-            ->label('Featured')
+            ->label(self::blockLabel('Featured'))
             ->icon('heroicon-o-star')
             ->schema([
                 self::activeToggle(),
@@ -248,7 +254,7 @@ final class HomepageBuilder extends SettingPage
     private function servicesBlock(): Block
     {
         return Block::make('services')
-            ->label('Services')
+            ->label(self::blockLabel('Services'))
             ->icon('heroicon-o-cog')
             ->schema([
                 self::activeToggle(),
@@ -283,7 +289,7 @@ final class HomepageBuilder extends SettingPage
     private function projectsBlock(): Block
     {
         return Block::make('projects')
-            ->label('Projects')
+            ->label(self::blockLabel('Projects'))
             ->icon('heroicon-o-briefcase')
             ->schema([
                 self::activeToggle(),
@@ -306,7 +312,7 @@ final class HomepageBuilder extends SettingPage
     private function featuredProductsBlock(array $productCategories): Block
     {
         return Block::make('featured-products')
-            ->label('Featured Products')
+            ->label(self::blockLabel('Featured Products'))
             ->icon('heroicon-o-shopping-bag')
             ->schema([
                 self::activeToggle(),
@@ -338,7 +344,7 @@ final class HomepageBuilder extends SettingPage
     private function latestPostsBlock(array $postCategories): Block
     {
         return Block::make('latest-posts')
-            ->label('Latest Posts')
+            ->label(self::blockLabel('Latest Posts'))
             ->icon('heroicon-o-newspaper')
             ->schema([
                 self::activeToggle(),
@@ -368,7 +374,7 @@ final class HomepageBuilder extends SettingPage
     private function ctaBlock(): Block
     {
         return Block::make('cta')
-            ->label('CTA')
+            ->label(self::blockLabel('CTA'))
             ->icon('heroicon-o-rectangle-group')
             ->schema([
                 self::activeToggle(),
@@ -390,7 +396,7 @@ final class HomepageBuilder extends SettingPage
     private function testimonialsBlock(): Block
     {
         return Block::make('testimonials')
-            ->label('Testimonials')
+            ->label(self::blockLabel('Testimonials'))
             ->icon('heroicon-o-chat-bubble-left-ellipsis')
             ->schema([
                 self::activeToggle(),
@@ -434,7 +440,7 @@ final class HomepageBuilder extends SettingPage
     private function partnersBlock(): Block
     {
         return Block::make('partners')
-            ->label('Partners')
+            ->label(self::blockLabel('Partners'))
             ->icon('heroicon-o-globe-alt')
             ->schema([
                 self::activeToggle(),
