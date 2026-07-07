@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Posts\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -58,6 +60,29 @@ final class PostsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    Action::make('unpublish')
+                        ->icon(Heroicon::OutlinedXCircle)
+                        ->requiresConfirmation()
+                        ->accessSelectedRecords()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($selectedRecords) {
+                            $selectedRecords->map(function ($record) {
+                                $record->is_published = false;
+                                $record->save();
+                            });
+                        }),
+                    Action::make('publish')
+                        ->icon(Heroicon::OutlinedCheckCircle)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->accessSelectedRecords()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($selectedRecords) {
+                            $selectedRecords->map(function ($record) {
+                                $record->is_published = true;
+                                $record->save();
+                            });
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ])
