@@ -7,7 +7,6 @@ namespace App\Filament\Resources\Pages\Schemas;
 use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\SeoSchema;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;

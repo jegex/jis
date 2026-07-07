@@ -43,6 +43,8 @@ final class GoogleLoginController extends Controller
                 'email_verified_at' => now(),
                 'locale' => session('locale', app()->getLocale()),
             ]);
+        } elseif ($user->email_verified_at === null) {
+            $user->update(['email_verified_at' => now()]);
         }
 
         $user->socialAccounts()->create([

@@ -28,8 +28,8 @@ final class Page extends Model implements HasRichContent
     /** @use HasFactory<PageFactory> */
     use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations;
 
-    use Menuable;
     use InteractsWithRichContent;
+    use Menuable;
 
     public array $translatable = ['title', 'content', 'slug'];
 
