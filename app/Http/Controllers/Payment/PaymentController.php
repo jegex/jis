@@ -148,7 +148,7 @@ final class PaymentController extends Controller
                 'transaction_id' => $notification->transactionId,
             ]);
 
-            return response('Internal Server Error', 500);
+            return response('OK', 200);
         }
     }
 }

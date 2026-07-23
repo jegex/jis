@@ -146,7 +146,7 @@ final class HomeController extends Controller
 
     private function resolveProducts(array $config): mixed
     {
-        $query = Product::with('category', 'media')->where('is_published', true);
+        $query = Product::with('category', 'media');
 
         if (! empty($config['count'])) {
             $query->take((int) $config['count']);
@@ -169,7 +169,7 @@ final class HomeController extends Controller
 
     private function resolvePosts(array $config): mixed
     {
-        $query = Post::with('category', 'author', 'media')->where('is_published', true);
+        $query = Post::with('category', 'author', 'media');
 
         if (! empty($config['count'])) {
             $query->take((int) $config['count']);

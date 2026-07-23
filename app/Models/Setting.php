@@ -14,7 +14,7 @@ final class Setting extends Model
 {
     public $timestamps = false;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['key', 'value'];
 
     protected function casts(): array
     {

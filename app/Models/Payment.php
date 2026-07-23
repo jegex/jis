@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 
 final class Payment extends Model
 {
+    protected $hidden = ['raw_response'];
+
     protected $fillable = [
         'order_id',
         'gateway',

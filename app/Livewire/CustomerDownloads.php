@@ -13,7 +13,7 @@ final class CustomerDownloads extends Component
     public function render()
     {
         $orders = Order::where('user_id', auth()->id())
-            ->where('status', 'paid')
+            ->paid()
             ->with('items.product', 'items.product.media')
             ->latest('paid_at')
             ->get();
@@ -24,9 +24,16 @@ final class CustomerDownloads extends Component
 
     public function getDownloadUrl($orderId, $productId)
     {
-        $order = Order::where('id', $orderId)
-            ->where('user_id', auth()->id())
-            ->first();
+        $order = property_exists($this, 'orders')
+            ? $this->orders->firstWhere('id', $orderId)
+            : null;
+
+        if (! $order) {
+            $order = Order::where('id', $orderId)
+                ->where('user_id', auth()->id())
+                ->paid()
+                ->first();
+        }
 
         if (! $order) {
             return '#';

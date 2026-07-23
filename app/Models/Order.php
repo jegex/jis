@@ -19,6 +19,8 @@ final class Order extends Model
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
+    protected $hidden = ['guest_email', 'guest_name'];
+
     protected $fillable = [
         'order_number',
         'user_id',

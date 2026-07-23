@@ -18,6 +18,8 @@ final class Coupon extends Model
     /** @use HasFactory<CouponFactory> */
     use HasFactory;
 
+    protected $hidden = ['code'];
+
     protected $fillable = [
         'code',
         'type',

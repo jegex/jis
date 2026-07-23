@@ -33,6 +33,7 @@ final class UserForm
                             ->password()
                             ->revealable()
                             ->required(fn ($record) => $record === null)
+                            ->minLength(8)
                             ->maxLength(255)
                             ->dehydrated(fn ($state) => filled($state))
                             ->dehydrateStateUsing(fn ($state) => bcrypt($state)),

@@ -32,17 +32,27 @@ final class ProjectResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('name'),
+                TextInput::make('name')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('type')
+                    ->required()
+                    ->maxLength(255)
                     ->datalist(Project::select('type')->distinct()->get()->pluck('type', 'type')),
                 FusedGroup::make()
                     ->label('Size')
                     ->columns()
                     ->schema([
-                        TextInput::make('size'),
-                        TextInput::make('unit'),
+                        TextInput::make('size')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('unit')
+                            ->required()
+                            ->maxLength(50),
                     ]),
                 DatePicker::make('date')
+                    ->required()
                     ->native(false),
             ]);
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Currency;
+use Illuminate\Support\Facades\Cache;
 
 final class CurrencyService
 {
@@ -14,11 +15,16 @@ final class CurrencyService
             return $amount;
         }
 
-        $fromCurrency = Currency::where('code', $from)->firstOrFail();
-        $toCurrency = Currency::where('code', $to)->firstOrFail();
+        $fromCurrency = $this->getCurrency($from);
+        $toCurrency = $this->getCurrency($to);
 
         $defaultAmount = $amount / $fromCurrency->exchange_rate;
 
         return round($defaultAmount * $toCurrency->exchange_rate, $toCurrency->decimal_place);
+    }
+
+    private function getCurrency(string $code): Currency
+    {
+        return Cache::remember("currency_{$code}", now()->addHour(), fn () => Currency::where('code', $code)->firstOrFail());
     }
 }

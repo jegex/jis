@@ -14,7 +14,7 @@ return [
     /**
      * Use this setting to specify the site name that will be used in OpenGraph tags.
      */
-    'site_name' => 'JIS Marine',
+    'site_name' => env('APP_NAME', 'JIS Marine'),
 
     /**
      * Use this setting to specify the path to the sitemap of your website. This exact path will outputted, so

@@ -15,6 +15,11 @@ final class SendOrderEmail implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    /** @var array<int, int> */
+    public array $backoff = [30, 60, 120];
+
     public function __construct(
         public Order $order,
         public EmailTemplateType $type,

@@ -87,6 +87,11 @@ final class Category extends Model
         return $this->hasMany(Project::class, 'type_id', 'id');
     }
 
+    protected static function booted(): void
+    {
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
+    }
+
     #[Scope]
     protected function published(Builder $query): Builder
     {

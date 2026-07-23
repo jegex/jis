@@ -54,7 +54,7 @@ final class SitemapController extends Controller
                 $query->latest('published_at');
             }
 
-            $query->each(function ($model) use ($sitemap, $locales, $defaultLocale, $routeName) {
+            foreach ($query->cursor() as $model) {
                 foreach ($locales as $locale) {
                     $params = $this->routeParams($model, $locale);
                     $url = Url::create(route($routeName, $params))
@@ -64,7 +64,7 @@ final class SitemapController extends Controller
                     $this->addAlternates($url, $routeName, $locales, $defaultLocale, $model);
                     $sitemap->add($url);
                 }
-            });
+            }
         }
     }
 

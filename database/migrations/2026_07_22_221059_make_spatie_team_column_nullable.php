@@ -4,25 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * This migration is only required when you have multiple panels in a single
- * Laravel application where some panels use multi-tenancy and others do not.
- *
- * When Spatie's teams feature is enabled, the team_foreign_key column is added
- * as NOT NULL on the model_has_permissions and model_has_roles pivot tables.
- * This works fine when every panel has a tenant, but breaks when a non-tenant
- * panel tries to insert roles with no tenant — since all panels share the same
- * database, those records need tenant_id to be NULL.
- *
- * This migration makes the column nullable and restructures the primary key on
- * both pivot tables so records with NULL tenant_id can coexist alongside records
- * with a tenant_id, without violating database constraints.
- *
- * If you are using UUID primary keys instead of Spatie's default integer IDs,
- * replace `->unsignedBigInteger()` with `->uuid()` in the change() calls below.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -34,16 +18,42 @@ return new class extends Migration
         $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
         $modelMorphKey = $columnNames['model_morph_key'];
 
-        Schema::table($tableNames['model_has_permissions'], function (Blueprint $table) use ($teamForeignKey, $pivotPermission, $modelMorphKey) {
-            $table->dropPrimary('model_has_permissions_permission_model_type_primary');
+        $permTable = $tableNames['model_has_permissions'];
+        $rolesTable = $tableNames['model_has_roles'];
+        $driver = DB::getDriverName();
 
-            // Replace ->uuid() here if you are using UUID primary keys
-            $table->unsignedBigInteger($teamForeignKey)->nullable()->change();
+        // Fix model_has_permissions
+        Schema::table($permTable, function (Blueprint $table) use ($permTable, $teamForeignKey, $pivotPermission, $modelMorphKey, $driver) {
+            if ($driver === 'mysql') {
+                $foreignKeys = DB::select('SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL', [$permTable]);
+                foreach ($foreignKeys as $fk) {
+                    $table->dropForeign($fk->CONSTRAINT_NAME);
+                }
+            } elseif ($driver === 'sqlite') {
+                // SQLite: recreate table without FKs
+                $this->recreateSqliteTable($permTable, $teamForeignKey, $pivotPermission, $modelMorphKey);
+
+                return;
+            }
+
+            $primaryKeys = $this->getPrimaryKeys($permTable, $driver);
+            if (! empty($primaryKeys)) {
+                $table->dropPrimary('PRIMARY');
+            }
+
+            if (! Schema::hasColumn($permTable, $teamForeignKey)) {
+                $table->unsignedBigInteger($teamForeignKey)->nullable();
+            }
 
             $table->primary(
                 [$pivotPermission, $modelMorphKey, 'model_type'],
                 'model_has_permissions_permission_model_type_primary'
             );
+
+            $table->foreign($pivotPermission)
+                ->references('id')
+                ->on('permissions')
+                ->onDelete('cascade');
 
             $table->unique(
                 [$teamForeignKey, $pivotPermission, $modelMorphKey, 'model_type'],
@@ -51,16 +61,37 @@ return new class extends Migration
             );
         });
 
-        Schema::table($tableNames['model_has_roles'], function (Blueprint $table) use ($teamForeignKey, $pivotRole, $modelMorphKey) {
-            $table->dropPrimary('model_has_roles_role_model_type_primary');
+        // Fix model_has_roles
+        Schema::table($rolesTable, function (Blueprint $table) use ($rolesTable, $teamForeignKey, $pivotRole, $modelMorphKey, $driver) {
+            if ($driver === 'mysql') {
+                $foreignKeys = DB::select('SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL', [$rolesTable]);
+                foreach ($foreignKeys as $fk) {
+                    $table->dropForeign($fk->CONSTRAINT_NAME);
+                }
+            } elseif ($driver === 'sqlite') {
+                $this->recreateSqliteTable($rolesTable, $teamForeignKey, $pivotRole, $modelMorphKey);
 
-            // Replace ->uuid() here if you are using UUID primary keys
-            $table->unsignedBigInteger($teamForeignKey)->nullable()->change();
+                return;
+            }
+
+            $primaryKeys = $this->getPrimaryKeys($rolesTable, $driver);
+            if (! empty($primaryKeys)) {
+                $table->dropPrimary('PRIMARY');
+            }
+
+            if (! Schema::hasColumn($rolesTable, $teamForeignKey)) {
+                $table->unsignedBigInteger($teamForeignKey)->nullable();
+            }
 
             $table->primary(
                 [$pivotRole, $modelMorphKey, 'model_type'],
                 'model_has_roles_role_model_type_primary'
             );
+
+            $table->foreign($pivotRole)
+                ->references('id')
+                ->on('roles')
+                ->onDelete('cascade');
 
             $table->unique(
                 [$teamForeignKey, $pivotRole, $modelMorphKey, 'model_type'],
@@ -80,26 +111,57 @@ return new class extends Migration
 
         Schema::table($tableNames['model_has_permissions'], function (Blueprint $table) use ($teamForeignKey, $pivotPermission, $modelMorphKey) {
             $table->dropUnique('model_has_permissions_team_unique');
+            $table->dropForeign('model_has_permissions_permission_id_foreign');
             $table->dropPrimary('model_has_permissions_permission_model_type_primary');
-
-            $table->unsignedBigInteger($teamForeignKey)->nullable(false)->change();
+            $table->dropColumn($teamForeignKey);
 
             $table->primary(
-                [$teamForeignKey, $pivotPermission, $modelMorphKey, 'model_type'],
+                [$pivotPermission, $modelMorphKey, 'model_type'],
                 'model_has_permissions_permission_model_type_primary'
             );
+
+            $table->foreign($pivotPermission)
+                ->references('id')
+                ->on('permissions')
+                ->onDelete('cascade');
         });
 
         Schema::table($tableNames['model_has_roles'], function (Blueprint $table) use ($teamForeignKey, $pivotRole, $modelMorphKey) {
             $table->dropUnique('model_has_roles_team_unique');
+            $table->dropForeign('model_has_roles_role_id_foreign');
             $table->dropPrimary('model_has_roles_role_model_type_primary');
-
-            $table->unsignedBigInteger($teamForeignKey)->nullable(false)->change();
+            $table->dropColumn($teamForeignKey);
 
             $table->primary(
-                [$teamForeignKey, $pivotRole, $modelMorphKey, 'model_type'],
+                [$pivotRole, $modelMorphKey, 'model_type'],
                 'model_has_roles_role_model_type_primary'
             );
+
+            $table->foreign($pivotRole)
+                ->references('id')
+                ->on('roles')
+                ->onDelete('cascade');
         });
+    }
+
+    private function getPrimaryKeys(string $table, string $driver): array
+    {
+        if ($driver === 'mysql') {
+            return DB::select("SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = ? AND INDEX_NAME = 'PRIMARY'", [$table]);
+        }
+
+        return DB::select("PRAGMA table_info($table)");
+    }
+
+    private function recreateSqliteTable(string $table, string $teamForeignKey, string $pivotKey, string $modelMorphKey): void
+    {
+        $columns = DB::getSchemaBuilder()->getColumnListing($table);
+        $hasTeam = in_array($teamForeignKey, $columns);
+
+        if ($hasTeam) {
+            return;
+        }
+
+        DB::statement("ALTER TABLE {$table} ADD COLUMN {$teamForeignKey} INTEGER");
     }
 };

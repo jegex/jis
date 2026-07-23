@@ -10,6 +10,7 @@ use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -36,17 +37,21 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        URL::forceScheme('https');
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         $persistLocale = setting('persist_locale', []);
 
+        $languages = Cache::remember('languages_with_label', now()->addHour(), fn () => Language::whereIn('code', setting('supported_locales', ['en', 'id']))
+            ->get()
+            ->mapWithKeys(function (Language $language) {
+                return [$language->code => $language->name];
+            })
+            ->toArray());
+
         config([
-            'localizer.locale_with_label' => Language::whereIn('code', setting('supported_locales', ['en', 'id']))
-                ->get()
-                ->mapWithKeys(function (Language $language) {
-                    return [$language->code => $language->name];
-                })
-                ->toArray(),
+            'localizer.locale_with_label' => $languages,
             'localizer.default_locale' => setting('default_locale', config('app.fallback_locale')),
             'localizer.supported_locales' => setting('supported_locales', ['en', 'id']),
             'app.fallback_locale' => setting('default_locale', config('app.fallback_locale')),

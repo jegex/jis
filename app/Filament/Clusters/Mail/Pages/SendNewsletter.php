@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Bus;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class SendNewsletter extends Page
@@ -181,11 +182,14 @@ final class SendNewsletter extends Page
         }
 
         $count = 0;
+        $jobs = [];
 
         foreach ($users as $user) {
-            SendNewsletterEmail::dispatch($user, $template);
+            $jobs[] = new SendNewsletterEmail($user, $template);
             $count++;
         }
+
+        Bus::batch($jobs)->onQueue('emails')->dispatch();
 
         Notification::make()
             ->title("Newsletter queued for {$count} user(s)")
