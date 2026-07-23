@@ -29,12 +29,12 @@ final class PostPolicy
 
     public function update(AuthUser $authUser, Post $post): bool
     {
-        return $authUser->can('Update:Post') || ($authUser->can('ViewOwn:Post') && $post->author_id === $authUser->id);
+        return $authUser->can('Update:Post');
     }
 
     public function delete(AuthUser $authUser, Post $post): bool
     {
-        return $authUser->can('Delete:Post') || ($authUser->can('ViewOwn:Post') && $post->author_id === $authUser->id);
+        return $authUser->can('Delete:Post');
     }
 
     public function deleteAny(AuthUser $authUser): bool

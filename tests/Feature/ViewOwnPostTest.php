@@ -71,7 +71,7 @@ test('admin with ViewOwn:Post only sees own posts in list', function () {
     $this->assertFalse($results->contains('id', $otherPost->id));
 });
 
-test('admin with ViewOwn:Post can edit own post', function () {
+test('admin with ViewOwn:Post cannot edit own post without Update:Post', function () {
     $user = User::factory()->admin()->create();
     $user->assignRole($this->viewOwnRole);
 
@@ -79,7 +79,7 @@ test('admin with ViewOwn:Post can edit own post', function () {
 
     $this->actingAs($user);
 
-    $this->get('/admin/posts/'.$ownPost->id.'/edit')->assertSuccessful();
+    $this->get('/admin/posts/'.$ownPost->id.'/edit')->assertForbidden();
 });
 
 test('admin with ViewOwn:Post cannot edit other users post', function () {

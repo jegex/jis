@@ -25,8 +25,7 @@ final class AdminsTable
                 TextColumn::make('roles.name')
                     ->badge()
                     ->color(fn (User $record) => match (true) {
-                        $record->hasExactRoles(['super_admin']) => 'danger',
-                        $record->hasRole(['editor']) => 'warning',
+                        $record->hasExactRoles(['Super Admin']) => 'danger',
                         default => 'gray',
                     })
                     ->searchable(),

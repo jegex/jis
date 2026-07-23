@@ -14,6 +14,8 @@ final class DatabaseSeeder extends Seeder
     {
         Artisan::call('media-library:clean', ['--force' => true]);
 
+        Artisan::call('guardian:sync');
+
         User::factory(1)->create([
             'name' => 'Admin',
             'email' => 'admin@admin.com',

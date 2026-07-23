@@ -38,7 +38,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
     public function canImpersonate(): self|bool
     {
-        return $this->hasRole(['super_admin']);
+        return $this->hasRole(['Super Admin']);
     }
 
     public function canAccessPanel(Panel $panel): bool

@@ -220,7 +220,9 @@ class SettingPage extends Page
 
     public function canEdit(): bool
     {
-        return true;
+        $user = auth()->user();
+
+        return $user && $user->can('Update:' . class_basename(static::class));
     }
 
     protected function fillForm(): void
