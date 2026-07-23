@@ -47,12 +47,11 @@ final class PaymentController extends Controller
 
     public function finishRedirect(Request $request)
     {
-        $orderId = $request->input('order_id');
+        $orderNumber = $request->input('order_id');
         $transactionId = $request->input('transaction_id');
 
-        if ($orderId && $transactionId) {
-            $internalId = (int) explode('-', str_replace('ORDER-', '', $orderId))[0];
-            $order = Order::find($internalId);
+        if ($orderNumber && $transactionId) {
+            $order = Order::where('order_number', $orderNumber)->first();
 
             if ($order && $order->status === OrderStatus::AwaitingPayment) {
                 try {
@@ -63,14 +62,14 @@ final class PaymentController extends Controller
                             $order,
                             'midtrans',
                             $transactionId,
-                            orderId: $orderId,
+                            orderId: $orderNumber,
                         );
 
                         PaymentSuccess::dispatch($order);
                     }
                 } catch (Exception $e) {
                     Log::warning('Finish redirect: Midtrans status check failed', [
-                        'order_id' => $internalId,
+                        'order_number' => $orderNumber,
                         'error' => $e->getMessage(),
                     ]);
                 }
@@ -97,19 +96,18 @@ final class PaymentController extends Controller
             return response('OK', 200);
         }
 
-        if (! str_starts_with($notification->orderId, 'ORDER-')) {
+        $orderNumber = $notification->orderId;
+
+        if (! str_starts_with($orderNumber, 'ORDER-')) {
             return response('OK', 200);
         }
 
         try {
-            $orderId = str_replace('ORDER-', '', $notification->orderId);
-            $orderId = (int) explode('-', $orderId)[0];
-
-            $order = Order::find($orderId);
+            $order = Order::where('order_number', $orderNumber)->first();
 
             if (! $order) {
                 Log::warning('Midtrans callback: Order not found', [
-                    'order_id' => $notification->orderId,
+                    'order_number' => $orderNumber,
                 ]);
 
                 return response('OK', 200);
@@ -127,7 +125,7 @@ final class PaymentController extends Controller
                     $order,
                     'midtrans',
                     $notification->transactionId,
-                    orderId: $notification->orderId,
+                    orderId: $orderNumber,
                 );
 
                 PaymentSuccess::dispatch($order);
@@ -146,7 +144,7 @@ final class PaymentController extends Controller
             return response('OK', 200);
         } catch (Exception $e) {
             Log::error('Midtrans callback processing failed: '.$e->getMessage(), [
-                'order_id' => $notification->orderId,
+                'order_number' => $orderNumber,
                 'transaction_id' => $notification->transactionId,
             ]);
 
