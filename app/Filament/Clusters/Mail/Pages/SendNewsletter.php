@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class SendNewsletter extends Page
 {
@@ -44,7 +45,11 @@ final class SendNewsletter extends Page
 
         $permission = 'View:'.class_basename(self::class);
 
-        return $user->hasPermissionTo($permission);
+        try {
+            return $user->hasPermissionTo($permission);
+        } catch (PermissionDoesNotExist) {
+            return false;
+        }
     }
 
     public static function getNavigationLabel(): string

@@ -126,7 +126,7 @@ it('generates correct Indonesian route (with prefix)', function () {
 it('renders homepage blocks from the database setting', function () {
     refreshApplicationWithLocale('en');
 
-    Setting::set('frontend.homepage_blocks', [
+    Setting::set('homepage_blocks', [
         ['type' => 'hero', 'data' => [
             'title' => ['en' => 'Welcome Hero'],
             'badge_enabled' => false,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Closure;
 use Database\Factories\CurrencyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +31,7 @@ final class Currency extends Model
         ];
     }
 
-    public static function getDefault(): Closure|self
+    public static function getDefault(): ?self
     {
         return once(function () {
             return self::query()->firstWhere('is_default', true);

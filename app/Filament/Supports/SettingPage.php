@@ -20,6 +20,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Arr;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Throwable;
 
 /**
@@ -45,7 +46,11 @@ class SettingPage extends Page
 
         $permission = 'View:' . class_basename(static::class);
 
-        return $user->hasPermissionTo($permission);
+        try {
+            return $user->hasPermissionTo($permission);
+        } catch (PermissionDoesNotExist) {
+            return false;
+        }
     }
 
     protected static string $settings;

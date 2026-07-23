@@ -47,9 +47,9 @@ final class AppServiceProvider extends ServiceProvider
                     return [$language->code => $language->name];
                 })
                 ->toArray(),
-            'localizer.default_locale' => setting('default_locale', 'id'),
+            'localizer.default_locale' => setting('default_locale', config('app.fallback_locale')),
             'localizer.supported_locales' => setting('supported_locales', ['en', 'id']),
-            'app.fallback_locale' => setting('default_locale', 'id'),
+            'app.fallback_locale' => setting('default_locale', config('app.fallback_locale')),
             'localizer.hide_default_locale' => setting('hide_default_locale', true),
             'localizer.redirect_enabled' => setting('redirect_enabled', true),
             'localizer.persist_locale.session' => $persistLocale['session'] ?? true,
@@ -58,7 +58,7 @@ final class AppServiceProvider extends ServiceProvider
             'seo.favicon' => setting('favicon'),
         ]);
 
-        app(Localizer::class)->setActiveDefaultLocale(setting('default_locale', 'id'));
+        app(Localizer::class)->setActiveDefaultLocale(setting('default_locale', config('app.fallback_locale')));
 
         app(PersistentMiddleware::class)
             ->addPersistentMiddleware(

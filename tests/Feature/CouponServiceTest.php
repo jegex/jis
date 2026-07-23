@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Coupon;
+use App\Models\Currency;
 use App\Models\Product;
 use App\Services\CouponService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->currency = Currency::factory()->create();
     $this->service = app(CouponService::class);
 });
 
@@ -18,7 +20,7 @@ it('validates a valid coupon', function () {
         'max_uses' => 10,
         'used_count' => 0,
     ]);
-    $product = Product::factory()->create();
+    $product = Product::factory()->create(['currency_id' => $this->currency->id]);
 
     $result = $this->service->validateCoupon($coupon->code, $product);
 
@@ -41,12 +43,12 @@ it('returns null for expired coupon', function () {
 });
 
 it('returns null when specific product coupon used on wrong product', function () {
-    $product = Product::factory()->create();
+    $product = Product::factory()->create(['currency_id' => $this->currency->id]);
     $coupon = Coupon::factory()->create([
         'applies_to' => 'specific_product',
         'product_id' => $product->id,
     ]);
-    $otherProduct = Product::factory()->create();
+    $otherProduct = Product::factory()->create(['currency_id' => $this->currency->id]);
 
     $result = $this->service->validateCoupon($coupon->code, $otherProduct);
 

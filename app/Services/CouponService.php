@@ -78,7 +78,7 @@ final class CouponService
     public function calculateDiscount(Coupon $coupon, int $subtotal): int
     {
         return match ($coupon->type->value) {
-            'fixed' => min($coupon->value, $subtotal),
+            'fixed' => (int) min($coupon->value, $subtotal),
             'percentage' => (int) round($subtotal * $coupon->value / 100),
             default => 0,
         };
