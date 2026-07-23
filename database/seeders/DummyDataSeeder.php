@@ -298,7 +298,7 @@ final class DummyDataSeeder extends Seeder
         foreach ($products as $index => $data) {
             $isPublished = $data['is_published'] ?? true;
 
-            $product = Product::firstOrCreate(
+            $product = Product::withoutGlobalScope('published')->firstOrCreate(
                 ['title->en' => $data['title']['en']],
                 [
                     'title' => $data['title'],

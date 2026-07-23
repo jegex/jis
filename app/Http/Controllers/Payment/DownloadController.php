@@ -16,8 +16,10 @@ final class DownloadController extends Controller
         private DownloadService $downloadService,
     ) {}
 
-    public function download(Request $request, Order $order, Product $product)
+    public function download(Request $request, Order $order, int $product)
     {
+        $product = Product::withoutGlobalScope('published')->findOrFail($product);
+
         $isValidSignature = $request->hasValidSignature();
         $isOwner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
 

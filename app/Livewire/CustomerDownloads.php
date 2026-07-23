@@ -14,7 +14,6 @@ final class CustomerDownloads extends Component
     {
         $orders = Order::where('user_id', auth()->id())
             ->where('status', 'paid')
-            ->whereHas('items.product', fn ($q) => $q->where('is_published', true))
             ->with('items.product', 'items.product.media')
             ->latest('paid_at')
             ->get();
@@ -33,12 +32,12 @@ final class CustomerDownloads extends Component
             return '#';
         }
 
-        $product = $order->items()->where('product_id', $productId)->first()?->product;
+        $orderItem = $order->items()->where('product_id', $productId)->first();
 
-        if (! $product) {
+        if (! $orderItem?->product) {
             return '#';
         }
 
-        return app(DownloadService::class)->generateDownloadUrl($order, $product);
+        return app(DownloadService::class)->generateDownloadUrl($order, $orderItem->product);
     }
 }

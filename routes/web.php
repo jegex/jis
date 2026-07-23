@@ -35,6 +35,7 @@ Route::get('/currency/{currency:code}', CurrencyController::class)->name('curren
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
+    ->middleware('auth')
     ->name('payment.download');
 
 // ──────────────────────────────────────────────

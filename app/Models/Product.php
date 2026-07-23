@@ -14,6 +14,7 @@ use Database\Factories\ProductFactory;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,14 @@ final class Product extends Model implements HasMedia, HasRichContent
         'is_published',
         'category_id',
         'currency_id',
+    ];
+
+    protected $hidden = [
+        'currency_id',
+        'category_id',
+        'is_published',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -205,8 +214,10 @@ final class Product extends Model implements HasMedia, HasRichContent
         return $this->created_at;
     }
 
-    protected static function booted()
+    protected static function booted(): void
     {
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
+
         self::saving(function (Model $model) {
             if (! $model->currency_id) {
                 $model->currency_id = Currency::getDefault()->id;

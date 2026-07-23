@@ -43,7 +43,7 @@ final class Coupon extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withoutGlobalScope('published');
     }
 
     public function orders(): HasMany|self

@@ -13,11 +13,11 @@ final class ProductDetail extends Component
 
     public function mount(Product $product)
     {
-        $this->product = $product->load('category', 'media', 'tags');
-
-        if (! $this->product->is_published) {
+        if (! $product->is_published) {
             abort(404);
         }
+
+        $this->product = $product->load('category', 'media', 'tags');
     }
 
     public function render()
