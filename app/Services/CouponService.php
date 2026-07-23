@@ -30,7 +30,15 @@ final class CouponService
         return DB::transaction(function () use ($code, $product) {
             $coupon = Coupon::lockForUpdate()->where('code', $code)->first();
 
-            if (! $coupon || ! $coupon->isValid()) {
+            if (! $coupon) {
+                return null;
+            }
+
+            if ($coupon->expires_at !== null && $coupon->expires_at->isPast()) {
+                return null;
+            }
+
+            if ($coupon->max_uses !== null && $coupon->max_uses !== 0 && $coupon->used_count >= $coupon->max_uses) {
                 return null;
             }
 
