@@ -20,61 +20,52 @@ final class SitemapController extends Controller
 
         $sitemap = Sitemap::create();
 
-        foreach ($locales as $locale) {
-            $url = Url::create(route('home', ['locale' => $locale]))->setPriority(1.0);
-            $this->addAlternates($url, 'home', $locales, $defaultLocale);
-            $sitemap->add($url);
-        }
-
-        foreach ($locales as $locale) {
-            $url = Url::create(route('products.index', ['locale' => $locale]))->setPriority(0.9);
-            $this->addAlternates($url, 'products.index', $locales, $defaultLocale);
-            $sitemap->add($url);
-        }
-
-        foreach ($locales as $locale) {
-            $url = Url::create(route('blog.index', ['locale' => $locale]))->setPriority(0.9);
-            $this->addAlternates($url, 'blog.index', $locales, $defaultLocale);
-            $sitemap->add($url);
-        }
-
-        Page::where('is_published', true)->each(function (Page $page) use ($sitemap, $locales, $defaultLocale) {
-            foreach ($locales as $locale) {
-                $params = $this->routeParams($page, $locale);
-                $url = Url::create(route('pages.show', $params))
-                    ->setLastModificationDate($page->updated_at)
-                    ->setPriority(0.8);
-
-                $this->addAlternates($url, 'pages.show', $locales, $defaultLocale, $page);
-                $sitemap->add($url);
-            }
-        });
-
-        Product::where('is_published', true)->each(function (Product $product) use ($sitemap, $locales, $defaultLocale) {
-            foreach ($locales as $locale) {
-                $params = $this->routeParams($product, $locale);
-                $url = Url::create(route('products.show', $params))
-                    ->setLastModificationDate($product->updated_at)
-                    ->setPriority(0.8);
-
-                $this->addAlternates($url, 'products.show', $locales, $defaultLocale, $product);
-                $sitemap->add($url);
-            }
-        });
-
-        Post::where('is_published', true)->latest('published_at')->each(function (Post $post) use ($sitemap, $locales, $defaultLocale) {
-            foreach ($locales as $locale) {
-                $params = $this->routeParams($post, $locale);
-                $url = Url::create(route('blog.show', $params))
-                    ->setLastModificationDate($post->updated_at)
-                    ->setPriority(0.8);
-
-                $this->addAlternates($url, 'blog.show', $locales, $defaultLocale, $post);
-                $sitemap->add($url);
-            }
-        });
+        $this->addStaticUrls($sitemap, $locales, $defaultLocale);
+        $this->addModelUrls($sitemap, $locales, $defaultLocale);
 
         return $sitemap->toResponse(request());
+    }
+
+    private function addStaticUrls(Sitemap $sitemap, array $locales, string $defaultLocale): void
+    {
+        foreach (['home', 'products.index', 'blog.index'] as $routeName) {
+            $priority = $routeName === 'home' ? 1.0 : 0.9;
+
+            foreach ($locales as $locale) {
+                $url = Url::create(route($routeName, ['locale' => $locale]))->setPriority($priority);
+                $this->addAlternates($url, $routeName, $locales, $defaultLocale);
+                $sitemap->add($url);
+            }
+        }
+    }
+
+    private function addModelUrls(Sitemap $sitemap, array $locales, string $defaultLocale): void
+    {
+        $modelRoutes = [
+            Page::class => 'pages.show',
+            Product::class => 'products.show',
+            Post::class => 'blog.show',
+        ];
+
+        foreach ($modelRoutes as $modelClass => $routeName) {
+            $query = $modelClass::where('is_published', true);
+
+            if ($modelClass === Post::class) {
+                $query->latest('published_at');
+            }
+
+            $query->each(function ($model) use ($sitemap, $locales, $defaultLocale, $routeName) {
+                foreach ($locales as $locale) {
+                    $params = $this->routeParams($model, $locale);
+                    $url = Url::create(route($routeName, $params))
+                        ->setLastModificationDate($model->updated_at)
+                        ->setPriority(0.8);
+
+                    $this->addAlternates($url, $routeName, $locales, $defaultLocale, $model);
+                    $sitemap->add($url);
+                }
+            });
+        }
     }
 
     private function addAlternates(Url $url, string $name, array $locales, string $defaultLocale, mixed $model = null): void

@@ -190,7 +190,7 @@ final class HomeController extends Controller
 
     private function resolveProjects(array $config): mixed
     {
-        $query = Project::query();
+        $query = Project::query()->where('is_published', true);
 
         if (! empty($config['count'])) {
             $query->take((int) $config['count']);
