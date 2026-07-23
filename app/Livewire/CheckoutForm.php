@@ -98,8 +98,8 @@ final class CheckoutForm extends Component
             $order = app(OrderService::class)->createOrder(
                 product: $this->product,
                 user: $user,
-                guestEmail: null,
-                guestName: null,
+                guestEmail: $user ? null : session('guest_email'),
+                guestName: $user ? null : session('guest_name'),
                 couponCode: $this->appliedCode ?: null,
             );
 
@@ -168,6 +168,9 @@ final class CheckoutForm extends Component
 
             $this->dispatch('snap-token-ready', token: $paymentResult->snapToken);
         } catch (Exception $e) {
+            if (isset($order)) {
+                $order->update(['status' => OrderStatus::Pending]);
+            }
             $this->addError('payment', 'An error occurred. Please try again.');
         } finally {
             $this->processing = false;
