@@ -46,12 +46,12 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         return $this->is_admin;
     }
 
-    public function orders(): self|HasMany
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function posts(): self|HasMany
+    public function posts(): HasMany
     {
         return $this->hasMany(Post::class, 'author_id');
     }

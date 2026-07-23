@@ -13,7 +13,7 @@ final class OrderDetail extends Component
 
     public function mount(Order $order)
     {
-        if ($order->user_id != auth()->id()) {
+        if ((int) $order->user_id !== (int) auth()->id()) {
             abort(404);
         }
 
