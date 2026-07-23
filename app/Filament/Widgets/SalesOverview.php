@@ -14,6 +14,16 @@ final class SalesOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
+    protected ?string $heading = 'Sales';
+
+    public static function canView(): bool
+    {
+        return auth()->user()->hasPermissionTo('View:SalesOverview');
+    }
+
+    /**
+     * @return string|null
+     */
     public function getHeading(): ?string
     {
         return $this->heading;

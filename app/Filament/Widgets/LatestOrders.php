@@ -21,6 +21,14 @@ final class LatestOrders extends TableWidget
 
     protected static ?int $paginationPageSize = 5;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasPermissionTo('View:LatestOrders');
+    }
+
+    /**
+     * @return string|null
+     */
     public function getHeading(): ?string
     {
         return $this->heading;

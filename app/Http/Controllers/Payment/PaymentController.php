@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Payment;
 use App\Enums\OrderStatus;
 use App\Events\PaymentSuccess;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Models\Payment;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -51,7 +51,8 @@ final class PaymentController extends Controller
         $transactionId = $request->input('transaction_id');
 
         if ($orderNumber && $transactionId) {
-            $order = Order::where('order_number', $orderNumber)->first();
+            $payment = Payment::where('gateway_transaction_id', $orderNumber)->first();
+            $order = $payment?->order;
 
             if ($order && $order->status === OrderStatus::AwaitingPayment) {
                 try {
@@ -69,7 +70,9 @@ final class PaymentController extends Controller
                     }
                 } catch (Exception $e) {
                     Log::warning('Finish redirect: Midtrans status check failed', [
-                        'order_number' => $orderNumber,
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'midtrans_order_id' => $orderNumber,
                         'error' => $e->getMessage(),
                     ]);
                 }
@@ -103,11 +106,12 @@ final class PaymentController extends Controller
         }
 
         try {
-            $order = Order::where('order_number', $orderNumber)->first();
+            $payment = Payment::where('gateway_transaction_id', $orderNumber)->first();
+            $order = $payment?->order;
 
             if (! $order) {
                 Log::warning('Midtrans callback: Order not found', [
-                    'order_number' => $orderNumber,
+                    'midtrans_order_id' => $orderNumber,
                 ]);
 
                 return response('OK', 200);
@@ -128,6 +132,12 @@ final class PaymentController extends Controller
                     orderId: $orderNumber,
                 );
 
+                Log::info('Midtrans callback: Order marked as paid', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'midtrans_order_id' => $orderNumber,
+                ]);
+
                 PaymentSuccess::dispatch($order);
             }
 
@@ -135,16 +145,29 @@ final class PaymentController extends Controller
 
             if ($isFailed && $order->status !== OrderStatus::Paid) {
                 $order->update(['status' => OrderStatus::Failed]);
+
+                Log::info('Midtrans callback: Order marked as failed', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'midtrans_order_id' => $orderNumber,
+                    'transaction_status' => $transactionStatus,
+                ]);
             }
 
             if ($transactionStatus === 'refund' || $transactionStatus === 'partial_refund') {
                 $order->update(['status' => OrderStatus::Refunded]);
+
+                Log::info('Midtrans callback: Order marked as refunded', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'midtrans_order_id' => $orderNumber,
+                ]);
             }
 
             return response('OK', 200);
         } catch (Exception $e) {
             Log::error('Midtrans callback processing failed: '.$e->getMessage(), [
-                'order_number' => $orderNumber,
+                'midtrans_order_id' => $orderNumber,
                 'transaction_id' => $notification->transactionId,
             ]);
 

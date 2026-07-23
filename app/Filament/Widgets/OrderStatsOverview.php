@@ -15,6 +15,16 @@ final class OrderStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
+    protected ?string $heading = 'Order Stats';
+
+    public static function canView(): bool
+    {
+        return auth()->user()->hasPermissionTo('View:OrderStatsOverview');
+    }
+
+    /**
+     * @return string|null
+     */
     public function getHeading(): ?string
     {
         return $this->heading;

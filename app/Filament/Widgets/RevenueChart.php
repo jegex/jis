@@ -19,6 +19,14 @@ final class RevenueChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasPermissionTo('View:RevenueChart');
+    }
+
+    /**
+     * @return string|null
+     */
     public function getHeading(): ?string
     {
         return $this->heading;
