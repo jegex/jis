@@ -13,7 +13,8 @@ final class SeoSchema
     {
         return $schema
             ->components([
-                SEO::make()->columnSpanFull(),
+                SEO::make()
+                    ->columnSpanFull(),
             ]);
     }
 }

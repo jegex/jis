@@ -35,6 +35,19 @@ class SettingPage extends Page
      */
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        $permission = 'View:' . class_basename(static::class);
+
+        return $user->hasPermissionTo($permission);
+    }
+
     protected static string $settings;
 
     public static function getSettings(): array

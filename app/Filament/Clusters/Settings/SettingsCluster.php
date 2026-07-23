@@ -22,8 +22,8 @@ final class SettingsCluster extends Cluster
     public static function pages(): array
     {
         return [
-            Pages\GeneralSettings::class,
-            Pages\SystemSettings::class,
+            Pages\Settings::class,
+            Pages\SEO::class,
         ];
     }
 }

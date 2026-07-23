@@ -14,6 +14,11 @@ final class SalesOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
+    public function getHeading(): ?string
+    {
+        return $this->heading;
+    }
+
     protected function getStats(): array
     {
         $currency = Currency::getDefault();

@@ -19,6 +19,11 @@ final class RevenueChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    public function getHeading(): ?string
+    {
+        return $this->heading;
+    }
+
     protected function getFilters(): ?array
     {
         return [

@@ -13,6 +13,7 @@ use App\Filament\Widgets\RevenueChart;
 use App\Filament\Widgets\SalesOverview;
 use App\Http\Livewire\MenuItemForm;
 use App\Http\Middleware\ForceAdminLocale;
+use App\Models\Menu;
 use App\Models\MenuItem;
 use Backstage\Mails\Mails;
 use Backstage\Mails\MailsPlugin;
@@ -32,9 +33,12 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 use Livewire\Livewire;
+use Waguilar\FilamentGuardian\FilamentGuardianPlugin;
 use Webard\FilamentTranslatable\FilamentTranslatablePlugin;
 
 final class AdminPanelProvider extends PanelProvider
@@ -45,10 +49,11 @@ final class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->profile(isSimple: false)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandLogo(fn () => view('components.logo'))
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -86,13 +91,34 @@ final class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
+                SpatieTranslatablePlugin::make()
+                    ->persist()
+                    ->useFallbackLocale()
+                    ->defaultLocales(config('localizer.supported_locales')),
+                FilamentGuardianPlugin::make()
+                    ->navigationGroup('Settings')
+                    ->resourceSectionColumns(2)
+                    ->resourceCheckboxColumns(3)
+                    ->permissionCheckboxColumns(3),
                 FilamentMenuBuilderPlugin::make()
+                    ->usingMenuModel(Menu::class)
                     ->usingMenuItemModel(MenuItem::class)
                     ->usingMenuItemResource(MenuItemResource::class),
                 FilamentTranslatablePlugin::make()
                     ->locales(config('localizer.supported_locales')),
                 MailsPlugin::make()
-                    ->canManageMails(fn () => auth()->user()?->is_admin ?? false),
+                    ->canManageMails(function () {
+                        $user = Auth::user();
+
+                        if ($user->hasAnyPermission([
+                            'ViewAny:Mail',
+                            'View:Mail',
+                        ])) {
+                            return true;
+                        }
+
+                        return false;
+                    }),
             ])
             ->routes(fn () => Mails::routes());
     }

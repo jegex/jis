@@ -19,10 +19,15 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
+use Waguilar\FilamentGuardian\Concerns\HasResourcePolicy;
 
 final class ProductCategoryResource extends Resource
 {
+    use HasResourcePolicy;
+
     protected static ?string $model = Category::class;
+
+    protected static ?string $pluralModelLabel = 'Product Categories';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 

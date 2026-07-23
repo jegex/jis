@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Enums\CategoryType;
 use App\Filament\Schemas\Components\MoneyInput;
 use App\Filament\Schemas\Components\MyRichEditor;
@@ -29,7 +28,7 @@ final class ProductForm
             ->columns(3)
             ->components([
                 Group::make([
-                    TranslatableTabs::make('General')
+                    Section::make('General')
                         ->columns(1)
                         ->schema([
                             TextInput::make('title')
@@ -70,6 +69,7 @@ final class ProductForm
                         ->schema([
                             Toggle::make('is_published')
                                 ->label('Published')
+                                ->visible(fn (): bool => auth()->user()?->can('Publish:Product') ?? false)
                                 ->default(false),
 
                             Select::make('category_id')
@@ -129,12 +129,12 @@ final class ProductForm
                                 ])
                                 ->label('Product File'),
                         ]),
-                ])->columnSpan(1),
 
-                Section::make('SEO')
-                    ->collapsible()
-                    ->columnSpanFull()
-                    ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                    Section::make('SEO')
+                        ->collapsed()
+                        ->columnSpanFull()
+                        ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                ])->columnSpan(1),
             ]);
     }
 }

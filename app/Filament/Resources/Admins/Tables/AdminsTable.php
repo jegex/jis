@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Admins\Tables;
 
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class AdminsTable
 {
@@ -19,6 +21,14 @@ final class AdminsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
+                    ->searchable(),
+                TextColumn::make('roles.name')
+                    ->badge()
+                    ->color(fn (User $record) => match (true) {
+                        $record->hasExactRoles(['super_admin']) => 'danger',
+                        $record->hasRole(['editor']) => 'warning',
+                        default => 'gray',
+                    })
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->searchable()
@@ -33,6 +43,8 @@ final class AdminsTable
                 //
             ])
             ->recordActions([
+                Impersonate::make()
+                    ->redirectTo(fn ($record) => $record->is_admin ? '/admin' : '/'),
                 EditAction::make(),
             ])
             ->toolbarActions([

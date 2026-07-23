@@ -15,10 +15,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use UnitEnum;
 
 final class PostResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = Post::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
@@ -32,6 +36,31 @@ final class PostResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return PostForm::configure($schema);
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        $user = auth()->user();
+
+        if ($user?->can('Publish:Post') === false) {
+            $data['is_published'] = false;
+        }
+
+        $data['author_id'] = $user?->id;
+
+        return $data;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if ($user && ! $user->can('ViewAny:Post') && $user->can('ViewOwn:Post')) {
+            $query->where('author_id', $user->id);
+        }
+
+        return $query;
     }
 
     public static function table(Table $table): Table

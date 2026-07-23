@@ -63,6 +63,7 @@ final class PostsTable
                     Action::make('unpublish')
                         ->icon(Heroicon::OutlinedXCircle)
                         ->requiresConfirmation()
+                        ->visible(fn (): bool => auth()->user()?->can('Publish:Post') ?? false)
                         ->accessSelectedRecords()
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($selectedRecords) {
@@ -75,6 +76,7 @@ final class PostsTable
                         ->icon(Heroicon::OutlinedCheckCircle)
                         ->color('success')
                         ->requiresConfirmation()
+                        ->visible(fn (): bool => auth()->user()?->can('Publish:Post') ?? false)
                         ->accessSelectedRecords()
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($selectedRecords) {

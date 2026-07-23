@@ -19,6 +19,11 @@ final class AdminForm
         return $schema
             ->components([
                 ...self::getBaseForm(),
+                Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
                 TextInput::make('password')
                     ->label(__('filament-panels::auth/pages/edit-profile.form.password.label'))
                     ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.password.validation_attribute'))

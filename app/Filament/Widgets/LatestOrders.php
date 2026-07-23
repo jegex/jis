@@ -21,6 +21,11 @@ final class LatestOrders extends TableWidget
 
     protected static ?int $paginationPageSize = 5;
 
+    public function getHeading(): ?string
+    {
+        return $this->heading;
+    }
+
     public function table(Table $table): Table
     {
         return $table

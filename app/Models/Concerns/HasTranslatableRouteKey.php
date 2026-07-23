@@ -12,4 +12,23 @@ trait HasTranslatableRouteKey
 
         return $key ?? $this->getTranslation($this->getRouteKeyName(), config('app.fallback_locale'));
     }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $result = parent::resolveRouteBinding($value, $field);
+
+        if ($result !== null) {
+            return $result;
+        }
+
+        $fallbackLocale = config('app.fallback_locale');
+
+        if (app()->getLocale() !== $fallbackLocale) {
+            $field = $field ?? $this->getRouteKeyName();
+
+            return $this->newQuery()->where("{$field}->{$fallbackLocale}", $value)->first();
+        }
+
+        return null;
+    }
 }

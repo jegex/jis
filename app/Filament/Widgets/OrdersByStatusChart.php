@@ -16,6 +16,11 @@ final class OrdersByStatusChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    public function getHeading(): ?string
+    {
+        return $this->heading;
+    }
+
     protected function getData(): array
     {
         $statuses = OrderStatus::cases();

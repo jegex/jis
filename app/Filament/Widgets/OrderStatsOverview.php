@@ -15,6 +15,11 @@ final class OrderStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
+    public function getHeading(): ?string
+    {
+        return $this->heading;
+    }
+
     protected function getColumns(): int
     {
         return 4;

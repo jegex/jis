@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Posts\Schemas;
 
-use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\SeoSchema;
 use Filament\Forms\Components\DateTimePicker;
@@ -25,26 +24,25 @@ final class PostForm
             ->columns(3)
             ->components([
                 Group::make([
-                    TranslatableTabs::make('General')
+                    Section::make('General')
                         ->columns(1)
                         ->schema([
                             TextInput::make('title')
                                 ->required()
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function ($livewire, $state, $get, $set) {
+                                    if (! empty($get('slug'))) {
+                                        return;
+                                    }
+                                    $set('slug', str($state)->slug());
+                                })
                                 ->maxLength(255),
                             TextInput::make('slug')
                                 ->required()
+                                ->unique()
                                 ->maxLength(255),
                             Textarea::make('excerpt'),
                             MyRichEditor::make('content'),
-                        ]),
-
-                    Section::make('Media')
-                        ->collapsible()
-                        ->schema([
-                            SpatieMediaLibraryFileUpload::make('featured_image')
-                                ->collection('featured_image')
-                                ->image()
-                                ->maxSize(2048),
                         ]),
                 ])->columnSpan(2),
 
@@ -54,7 +52,8 @@ final class PostForm
                         ->schema([
                             Toggle::make('is_published')
                                 ->label('Published')
-                                ->default(false),
+                                ->default(false)
+                                ->visible(fn (): bool => auth()->user()?->can('Publish:Post') ?? false),
 
                             DateTimePicker::make('published_at')
                                 ->default(now()),
@@ -65,16 +64,26 @@ final class PostForm
                                 ->preload(),
 
                             Select::make('author_id')
+                                ->default(auth()->user()->id)
                                 ->relationship('author', 'name')
                                 ->searchable()
                                 ->preload(),
                         ]),
-                ])->columnSpan(1),
 
-                Section::make('SEO')
-                    ->collapsible()
-                    ->columnSpanFull()
-                    ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                    Section::make('Featured Image')
+                        ->collapsible()
+                        ->schema([
+                            SpatieMediaLibraryFileUpload::make('featured_image')
+                                ->collection('featured_image')
+                                ->image()
+                                ->maxSize(2048),
+                        ]),
+
+                    Section::make('SEO')
+                        ->collapsed()
+                        ->columnSpanFull()
+                        ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                ])->columnSpan(1),
             ]);
     }
 }

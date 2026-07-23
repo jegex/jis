@@ -15,10 +15,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use UnitEnum;
 
 final class PageResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = Page::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocument;
@@ -32,6 +35,15 @@ final class PageResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return PageForm::configure($schema);
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (! (auth()->user()?->can('Publish:Page') ?? false)) {
+            $data['is_published'] = false;
+        }
+
+        return $data;
     }
 
     public static function table(Table $table): Table

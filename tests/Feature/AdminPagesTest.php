@@ -12,6 +12,9 @@ use App\Models\Product;
 use App\Models\Project;
 use App\Models\Tag;
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Waguilar\FilamentGuardian\Facades\Guardian;
 
 // ─── Shared route list ──────────────────────────────────────
 
@@ -27,11 +30,10 @@ $adminListUrls = [
     '/admin/products',
     '/admin/projects',
     '/admin/tags',
-    '/admin/users',
-    '/admin/settings/general-settings',
-    '/admin/settings/s-e-o-templates',
-    '/admin/settings/system-settings',
-    '/admin/settings/homepage-builder',
+    '/admin/admins',
+    '/admin/settings/settings',
+    '/admin/settings/seo',
+    '/admin/homepage-builder',
     '/admin/mail/email-templates',
     '/admin/mail/send-newsletter',
     '/admin/menus',
@@ -49,7 +51,7 @@ $adminCreateUrls = [
     '/admin/product-categories/create',
     '/admin/products/create',
     '/admin/tags/create',
-    '/admin/users/create',
+    '/admin/admins/create',
     '/admin/menu-items/create',
     '/admin/menus/create',
     '/admin/mail/email-templates/create',
@@ -75,7 +77,40 @@ test('non-admin create pages return 403', function (string $url) {
 // ─── Admin user → 200 ───────────────────────────────────────
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->admin()->create());
+    $superAdminRole = Role::findOrCreate(Guardian::getSuperAdminRoleName(), 'web');
+
+    // Create permissions needed for page access
+    $pagePermissions = [
+        'ViewAny:User', 'View:User', 'Create:User', 'Update:User', 'Delete:User', 'DeleteAny:User',
+        'ViewAny:Category', 'View:Category', 'Create:Category', 'Update:Category', 'Delete:Category', 'DeleteAny:Category',
+        'ViewAny:ProductCategory', 'View:ProductCategory', 'Create:ProductCategory', 'Update:ProductCategory', 'Delete:ProductCategory', 'DeleteAny:ProductCategory',
+        'ViewAny:Coupon', 'View:Coupon', 'Create:Coupon', 'Update:Coupon', 'Delete:Coupon', 'DeleteAny:Coupon',
+        'ViewAny:Currency', 'View:Currency', 'Create:Currency', 'Update:Currency', 'Delete:Currency', 'DeleteAny:Currency',
+        'ViewAny:Order', 'View:Order', 'Create:Order', 'Update:Order', 'Delete:Order', 'DeleteAny:Order',
+        'ViewAny:Page', 'View:Page', 'Create:Page', 'Update:Page', 'Delete:Page', 'DeleteAny:Page',
+        'ViewAny:Post', 'View:Post', 'Create:Post', 'Update:Post', 'Delete:Post', 'DeleteAny:Post',
+        'ViewAny:Product', 'View:Product', 'Create:Product', 'Update:Product', 'Delete:Product', 'DeleteAny:Product',
+        'ViewAny:Project', 'View:Project', 'Create:Project', 'Update:Project', 'Delete:Project', 'DeleteAny:Project',
+        'ViewAny:Tag', 'View:Tag', 'Create:Tag', 'Update:Tag', 'Delete:Tag', 'DeleteAny:Tag',
+        'ViewAny:EmailTemplate', 'View:EmailTemplate', 'Create:EmailTemplate', 'Update:EmailTemplate', 'Delete:EmailTemplate',
+        'ViewAny:Mail', 'View:Mail', 'Create:Mail', 'Update:Mail', 'Delete:Mail', 'DeleteAny:Mail',
+        'ViewAny:MenuItem', 'View:MenuItem', 'Create:MenuItem', 'Update:MenuItem', 'Delete:MenuItem', 'DeleteAny:MenuItem',
+        'ViewAny:Menu', 'View:Menu', 'Create:Menu', 'Update:Menu', 'Delete:Menu', 'DeleteAny:Menu',
+        'View:HomepageBuilder', 'View:Settings', 'View:SEO', 'View:SendNewsletter',
+        'Publish:Post', 'Publish:Page',
+        'View:Dashboard',
+        'ViewOwn:Post',
+    ];
+
+    foreach ($pagePermissions as $permName) {
+        Permission::findOrCreate($permName, 'web');
+    }
+
+    $superAdminRole->givePermissionTo(Permission::all());
+
+    $user = User::factory()->admin()->create();
+    $user->assignRole($superAdminRole);
+    $this->actingAs($user);
 
     $this->category = Category::factory()->forPosts()->create();
     $this->post = Post::factory()->create();

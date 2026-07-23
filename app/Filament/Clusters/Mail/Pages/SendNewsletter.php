@@ -34,6 +34,19 @@ final class SendNewsletter extends Page
 
     protected static ?int $navigationSort = 3;
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        $permission = 'View:'.class_basename(self::class);
+
+        return $user->hasPermissionTo($permission);
+    }
+
     public static function getNavigationLabel(): string
     {
         return 'Send Newsletter';

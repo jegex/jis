@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\URL;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'locale', 'admin_locale', 'timezone', 'is_admin', 'avatar', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
@@ -24,6 +25,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    use HasRoles;
+
     protected function casts(): array
     {
         return [
@@ -31,6 +34,11 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             'password' => 'hashed',
             'is_admin' => 'boolean',
         ];
+    }
+
+    public function canImpersonate(): self|bool
+    {
+        return $this->hasRole(['super_admin']);
     }
 
     public function canAccessPanel(Panel $panel): bool

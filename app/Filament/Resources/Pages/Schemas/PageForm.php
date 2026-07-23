@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Pages\Schemas;
 
-use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\SeoSchema;
 use Filament\Forms\Components\TextInput;
@@ -20,33 +19,30 @@ final class PageForm
         return $schema
             ->columns(3)
             ->components([
-                Group::make([
-                    TranslatableTabs::make('General')
-                        ->columns(1)
-                        ->schema([
-                            TextInput::make('title')
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('slug')
-                                ->required()
-                                ->maxLength(255),
-                            MyRichEditor::make('content'),
-                        ]),
+                Section::make([
+                    TextInput::make('title')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('slug')
+                        ->required()
+                        ->maxLength(255),
+                    MyRichEditor::make('content'),
                 ])->columnSpan(2),
 
                 Group::make([
                     Section::make('Publishing')
                         ->collapsible()
+                        ->visible(fn (): bool => auth()->user()?->can('Publish:Page') ?? false)
                         ->schema([
                             Toggle::make('is_published')
                                 ->default(false),
                         ]),
-                ])->columnSpan(1),
 
-                Section::make('SEO')
-                    ->collapsible()
-                    ->columnSpanFull()
-                    ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                    Section::make('SEO')
+                        ->collapsed()
+                        ->columnSpanFull()
+                        ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
+                ])->columnSpan(1),
             ]);
     }
 }
