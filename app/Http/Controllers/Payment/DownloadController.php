@@ -23,7 +23,7 @@ final class DownloadController extends Controller
         $isValidSignature = $request->hasValidSignature();
         $isOwner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
 
-        if (! $isValidSignature || ! $isOwner) {
+        if (! $isValidSignature && ! $isOwner) {
             abort(401, 'Invalid or expired download link.');
         }
 
