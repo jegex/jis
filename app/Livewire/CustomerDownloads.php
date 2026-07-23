@@ -25,7 +25,14 @@ final class CustomerDownloads extends Component
 
     public function getDownloadUrl($orderId, $productId)
     {
-        $order = Order::findOrFail($orderId);
+        $order = Order::where('id', $orderId)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (! $order) {
+            return '#';
+        }
+
         $product = $order->items()->where('product_id', $productId)->first()?->product;
 
         if (! $product) {

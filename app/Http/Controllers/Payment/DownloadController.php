@@ -18,9 +18,10 @@ final class DownloadController extends Controller
 
     public function download(Request $request, Order $order, Product $product)
     {
-        $isOwner = $request->user() && $order->user_id == $request->user()->id;
+        $isValidSignature = $request->hasValidSignature();
+        $isOwner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
 
-        if (! $request->hasValidSignature() && ! $isOwner) {
+        if (! $isValidSignature && ! $isOwner) {
             abort(401, 'Invalid or expired download link.');
         }
 
