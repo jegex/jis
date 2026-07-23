@@ -18,7 +18,7 @@ final class Tag extends Model
 
     public function posts(): MorphToMany
     {
-        return $this->morphedByMany(Post::class, 'taggable');
+        return $this->morphedByMany(Post::class, 'taggable')->withoutGlobalScope('published');
     }
 
     public function products(): MorphToMany

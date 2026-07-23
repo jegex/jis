@@ -53,7 +53,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
     public function posts(): HasMany
     {
-        return $this->hasMany(Post::class, 'author_id');
+        return $this->hasMany(Post::class, 'author_id')->withoutGlobalScope('published');
     }
 
     public function socialAccounts(): HasMany

@@ -16,14 +16,14 @@ final class BlogController extends Controller
 
         $post->load('category', 'author', 'media', 'tags');
 
-        $relatedPosts = Post::where('is_published', true)
+        $relatedPosts = Post::query()
             ->where('id', '!=', $post->id)
             ->where('category_id', $post->category_id)
             ->latest('published_at')
             ->take(3)
             ->get();
 
-        $recentPosts = Post::where('is_published', true)
+        $recentPosts = Post::query()
             ->where('id', '!=', $post->id)
             ->latest('published_at')
             ->take(3)

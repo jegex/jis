@@ -20,7 +20,7 @@ final class BlogList extends Component
 
     public function render()
     {
-        $query = Post::published()
+        $query = Post::query()
             ->with('category', 'author', 'media', 'tags');
 
         if ($this->categoryId) {
@@ -42,7 +42,7 @@ final class BlogList extends Component
             default => $query->latest('published_at'),
         };
 
-        $featuredPosts = Post::published()->latest()->take(5)->get();
+        $featuredPosts = Post::query()->latest()->take(5)->get();
         $posts = $query->paginate(9);
         $categories = Category::where('type', CategoryType::Post->value)
             ->published()

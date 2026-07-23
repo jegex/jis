@@ -149,7 +149,7 @@
                         <button
                             wire:click="filterByCategory(null)"
                             class="group relative text-gray-500 hover:text-gray-900 px-4 xl:px-8 {{ is_null($categoryId) ? 'text-gray-900 font-semibold' : '' }}">
-                            {{ __('All') }} <span class="text-sm {{ is_null($categoryId) ? 'text-red-500' : 'text-gray-500' }}">{{ \App\Models\Post::published()->count() }}</span>
+                            {{ __('All') }} <span class="text-sm {{ is_null($categoryId) ? 'text-red-500' : 'text-gray-500' }}">{{ \App\Models\Post::query()->count() }}</span>
                         </button>
                         @foreach($categories as $category)
                             <button

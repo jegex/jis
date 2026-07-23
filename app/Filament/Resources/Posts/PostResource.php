@@ -53,7 +53,7 @@ final class PostResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->withoutGlobalScope('published');
         $user = auth()->user();
 
         if ($user && ! $user->can('ViewAny:Post') && $user->can('ViewOwn:Post')) {

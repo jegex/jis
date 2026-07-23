@@ -12,7 +12,6 @@ use Database\Factories\PostFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +49,14 @@ final class Post extends Model implements HasMedia, HasRichContent
         'category_id',
         'author_id',
         'published_at',
+    ];
+
+    protected $hidden = [
+        'is_published',
+        'category_id',
+        'author_id',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -169,9 +176,8 @@ final class Post extends Model implements HasMedia, HasRichContent
             );
     }
 
-    #[Scope]
-    protected function published(Builder $query): void
+    protected static function booted(): void
     {
-        $query->where('is_published', true);
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
     }
 }

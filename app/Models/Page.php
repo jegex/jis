@@ -11,6 +11,7 @@ use Database\Factories\PageFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -38,6 +39,12 @@ final class Page extends Model implements HasRichContent
         'content',
         'slug',
         'is_published',
+    ];
+
+    protected $hidden = [
+        'is_published',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -115,5 +122,10 @@ final class Page extends Model implements HasRichContent
                 SpatieMediaLibraryFileAttachmentProvider::make()
                     ->collection('content-file-attachments')
             );
+    }
+
+    protected static function booted(): void
+    {
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
     }
 }
