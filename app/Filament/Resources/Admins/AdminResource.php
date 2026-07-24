@@ -17,9 +17,13 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
+use Waguilar\FilamentGuardian\Concerns\HasResourcePolicy;
 
 final class AdminResource extends Resource
 {
+    use HasResourcePolicy;
+
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
@@ -27,6 +31,10 @@ final class AdminResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $modelLabel = 'Admin';
+
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 99;
 
     public static function form(Schema $schema): Schema
     {
