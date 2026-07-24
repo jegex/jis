@@ -9,8 +9,15 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class AdminsTable
@@ -39,8 +46,11 @@ final class AdminsTable
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->dateTime(),
             ])
+            ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]))
             ->filters([
-                //
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 Impersonate::make()
@@ -48,11 +58,16 @@ final class AdminsTable
                 EditAction::make(),
                 DeleteAction::make()
                     ->visible(fn (User $record) => $record->id !== auth()->user()->id),
+                RestoreAction::make(),
+                ForceDeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->checkIfRecordIsSelectableUsing(fn ($record) => $record->id !== auth()->user()->id);
     }
 }
