@@ -9,6 +9,7 @@ use App\Models\Currency;
 use App\Models\Order;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Throwable;
 
 final class SalesOverview extends StatsOverviewWidget
 {
@@ -18,12 +19,13 @@ final class SalesOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasPermissionTo('View:SalesOverview');
+        try {
+            return auth()->user()->hasPermissionTo('View:SalesOverview');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
-    /**
-     * @return string|null
-     */
     public function getHeading(): ?string
     {
         return $this->heading;

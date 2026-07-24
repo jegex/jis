@@ -7,6 +7,7 @@ namespace App\Filament\Widgets;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
+use Throwable;
 
 final class OrdersByStatusChart extends ChartWidget
 {
@@ -18,12 +19,13 @@ final class OrdersByStatusChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasPermissionTo('View:OrdersByStatusChart');
+        try {
+            return auth()->user()->hasPermissionTo('View:OrdersByStatusChart');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
-    /**
-     * @return string|null
-     */
     public function getHeading(): ?string
     {
         return $this->heading;

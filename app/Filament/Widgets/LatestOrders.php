@@ -10,6 +10,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
+use Throwable;
 
 final class LatestOrders extends TableWidget
 {
@@ -23,12 +24,13 @@ final class LatestOrders extends TableWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasPermissionTo('View:LatestOrders');
+        try {
+            return auth()->user()->hasPermissionTo('View:LatestOrders');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
-    /**
-     * @return string|null
-     */
     public function getHeading(): ?string
     {
         return $this->heading;

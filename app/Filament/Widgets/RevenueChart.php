@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Models\Currency;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
+use Throwable;
 
 final class RevenueChart extends ChartWidget
 {
@@ -21,12 +22,13 @@ final class RevenueChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasPermissionTo('View:RevenueChart');
+        try {
+            return auth()->user()->hasPermissionTo('View:RevenueChart');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
-    /**
-     * @return string|null
-     */
     public function getHeading(): ?string
     {
         return $this->heading;
