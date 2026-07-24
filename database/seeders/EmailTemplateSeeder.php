@@ -139,6 +139,27 @@ Total: {total}</p>
                 'variables' => ['customer_name', 'site_name', 'newsletter_content'],
                 'is_active' => true,
             ],
+            [
+                'type' => EmailTemplateType::AdminInvitation,
+                'subject' => [
+                    'en' => 'You have been invited to join as admin',
+                    'id' => 'Anda diundang untuk bergabung sebagai admin',
+                ],
+                'body' => [
+                    'en' => '<h1>Welcome!</h1>
+<p>Hello {name},</p>
+<p>You have been invited by {inviter_name} to join as a <strong>{role}</strong>.</p>
+<p><a href="{invite_link}">Click here to set your password</a></p>
+<p>This link will expire in 7 days.</p>',
+                    'id' => '<h1>Selamat Datang!</h1>
+<p>Halo {name},</p>
+<p>Anda diundang oleh {inviter_name} untuk bergabung sebagai <strong>{role}</strong>.</p>
+<p><a href="{invite_link}">Klik di sini untuk mengatur kata sandi Anda</a></p>
+<p>Tautan ini akan kedaluwarsa dalam 7 hari.</p>',
+                ],
+                'variables' => ['name', 'email', 'role', 'invite_link', 'inviter_name'],
+                'is_active' => true,
+            ],
         ];
 
         foreach ($templates as $template) {

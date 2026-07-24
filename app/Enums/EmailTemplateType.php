@@ -12,4 +12,5 @@ enum EmailTemplateType: string
     case Newsletter = 'newsletter';
     case PasswordReset = 'password_reset';
     case EmailVerification = 'email_verification';
+    case AdminInvitation = 'admin_invitation';
 }

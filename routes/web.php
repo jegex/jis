@@ -18,6 +18,7 @@ use App\Livewire\CustomerProfile;
 use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
+use App\Livewire\SetPassword;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
 
@@ -37,6 +38,10 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
     ->middleware('auth')
     ->name('payment.download');
+
+// Invitation routes (public)
+Route::get('/invitation/{token}', SetPassword::class)
+    ->name('invitation.set-password');
 
 // ──────────────────────────────────────────────
 // 2. LOCALIZED FRONTEND ROUTES

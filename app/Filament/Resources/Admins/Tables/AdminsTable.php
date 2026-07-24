@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Admins\Tables;
 
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -45,6 +46,8 @@ final class AdminsTable
                 Impersonate::make()
                     ->redirectTo(fn ($record) => $record->is_admin ? '/admin' : '/'),
                 EditAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (User $record) => $record->id !== auth()->user()->id),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

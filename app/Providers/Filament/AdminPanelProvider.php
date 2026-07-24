@@ -67,6 +67,7 @@ final class AdminPanelProvider extends PanelProvider
                 'Content',
                 'Menu',
                 'Settings',
+                'Admin',
             ])
             ->widgets([
                 OrderStatsOverview::class,

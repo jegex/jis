@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\EmailTemplateType;
 use App\Models\EmailTemplate;
+use App\Models\Invitation;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -119,6 +120,25 @@ final class EmailService
             'customer_name' => $user->name,
             'site_title' => config('app.name'),
         ], $user);
+    }
+
+    public function sendInvitationEmail(Invitation $invitation): void
+    {
+        $template = EmailTemplate::where('type', EmailTemplateType::AdminInvitation)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $template) {
+            return;
+        }
+
+        $this->send($template, $invitation->email, [
+            'name' => 'Admin',
+            'email' => $invitation->email,
+            'role' => $invitation->role,
+            'invite_link' => route('invitation.set-password', $invitation->token),
+            'inviter_name' => $invitation->inviter?->name ?? 'Admin',
+        ]);
     }
 
     public function parseTemplate(string $template, array $variables): string

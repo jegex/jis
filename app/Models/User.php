@@ -18,7 +18,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\URL;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'locale', 'admin_locale', 'timezone', 'avatar', 'email_verified_at'])]
+#[Fillable(['name', 'email', 'password', 'locale', 'is_admin', 'admin_locale', 'timezone', 'avatar', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 final class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
