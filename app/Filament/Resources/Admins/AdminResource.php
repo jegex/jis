@@ -32,7 +32,7 @@ final class AdminResource extends Resource
 
     protected static ?string $modelLabel = 'Admin';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 99;
 

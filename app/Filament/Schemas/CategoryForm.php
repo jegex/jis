@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Schemas;
 
 use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
+use App\Actions\GenerateSlug;
+use App\Models\Category;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -28,9 +30,16 @@ final class CategoryForm
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                    ->afterStateUpdated(function ($state, $set, $get, $livewire, $record) {
                                         if (blank($get('slug'))) {
-                                            $set('slug', str($state)->slug());
+                                            $type = $livewire->getResource()::getType()->value;
+                                            $set('slug', GenerateSlug::run(
+                                                title: $state,
+                                                modelClass: Category::class,
+                                                locale: app()->getLocale(),
+                                                ignoreId: $record?->id,
+                                                modifyRule: fn ($query) => $query->where('type', $type),
+                                            ));
                                         }
                                     }),
 

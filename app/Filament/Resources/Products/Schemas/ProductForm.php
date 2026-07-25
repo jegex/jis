@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Actions\GenerateSlug;
 use App\Enums\CategoryType;
 use App\Filament\Schemas\Components\MoneyInput;
 use App\Filament\Schemas\Components\MyRichEditor;
+use App\Filament\Schemas\Components\TitleWithSlug;
 use App\Filament\Schemas\SeoSchema;
 use App\Models\Category;
 use App\Models\Currency;
@@ -18,7 +20,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 final class ProductForm
 {
@@ -31,12 +32,7 @@ final class ProductForm
                     Section::make('General')
                         ->columns(1)
                         ->schema([
-                            TextInput::make('title')
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('slug')
-                                ->required()
-                                ->maxLength(255),
+                            TitleWithSlug::make(),
                             Textarea::make('short_description'),
                             MyRichEditor::make('description'),
                         ]),
@@ -81,10 +77,17 @@ final class ProductForm
                                         ->required()
                                         ->maxLength(255)
                                         ->live(onBlur: true)
-                                        ->afterStateUpdated(fn ($state, $set) => $set('slug', Str::slug($state))),
+                                        ->afterStateUpdated(function ($state, $set, $get) {
+                                            if (blank($get('slug'))) {
+                                                $set('slug', GenerateSlug::run($state, Category::class, app()->getLocale()));
+                                            }
+                                        }),
                                     TextInput::make('slug')
                                         ->required()
-                                        ->unique(Category::class)
+                                        ->unique(
+                                            Category::class,
+                                            modifyRuleUsing: fn ($rule) => $rule->where('type', CategoryType::Product->value)
+                                        )
                                         ->maxLength(255),
                                     Toggle::make('is_published')
                                         ->default(true),

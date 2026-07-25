@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Schemas\Components\MyRichEditor;
+use App\Filament\Schemas\Components\TitleWithSlug;
 use App\Filament\Schemas\SeoSchema;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -27,20 +27,7 @@ final class PostForm
                     Section::make('General')
                         ->columns(1)
                         ->schema([
-                            TextInput::make('title')
-                                ->required()
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function ($livewire, $state, $get, $set) {
-                                    if (! empty($get('slug'))) {
-                                        return;
-                                    }
-                                    $set('slug', str($state)->slug());
-                                })
-                                ->maxLength(255),
-                            TextInput::make('slug')
-                                ->required()
-                                ->unique()
-                                ->maxLength(255),
+                            TitleWithSlug::make(),
                             Textarea::make('excerpt'),
                             MyRichEditor::make('content'),
                         ]),
