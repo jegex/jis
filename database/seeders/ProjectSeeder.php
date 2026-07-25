@@ -119,7 +119,7 @@ final class ProjectSeeder extends Seeder
 
         foreach ($projects as $data) {
             Project::firstOrCreate(
-                ['name' => $data['name'], 'type' => $data['type'], 'size' => $data['size'], 'unit' => $data['unit'], 'date' => $data['date']],
+                ['name' => $data['name'], 'type' => $data['type'], 'size' => $data['size'], 'unit' => $data['unit'], 'date' => $data['date'], 'is_published' => true],
                 $data,
             );
         }

@@ -13,10 +13,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\FusedGroup;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -55,6 +57,8 @@ final class ProjectResource extends Resource
                 DatePicker::make('date')
                     ->required()
                     ->native(false),
+                Toggle::make('is_published')
+                    ->default(false),
             ]);
     }
 
@@ -76,6 +80,8 @@ final class ProjectResource extends Resource
                 TextColumn::make('date')
                     ->date()
                     ->sortable(),
+                IconColumn::make('is_published')
+                    ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
