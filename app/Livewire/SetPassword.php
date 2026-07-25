@@ -51,9 +51,9 @@ final class SetPassword extends Component
     {
         $this->validate();
 
-        $invitation = Invitation::where('token', $this->token)->firstOrFail();
+        $invitation = $this->invitation;
 
-        if (! $invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             abort(404);
         }
 
