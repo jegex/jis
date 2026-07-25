@@ -43,7 +43,7 @@ final class GenerateSlug extends AbstractAction
     ): bool {
         $query = $modelClass::withoutGlobalScopes();
 
-        $isJsonColumn = in_array($column, $modelClass::translatable ?? [], true);
+        $isJsonColumn = in_array($column, $modelClass::$translatable ?? [], true);
 
         if ($isJsonColumn) {
             $query->whereJsonContainsLocale($column, $locale, $slug);
