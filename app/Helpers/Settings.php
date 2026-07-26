@@ -7,7 +7,18 @@ use App\Models\Setting;
 if (! function_exists('setting')) {
     function setting(string $key, mixed $default = null): mixed
     {
-        return Setting::get($key, $default);
+        $value = Setting::get($key, $default);
+
+        $fileKeys = ['logo_dark', 'logo_light', 'favicon'];
+
+        if (in_array($key, $fileKeys) && is_string($value) && $value !== ''
+            && !str_starts_with($value, 'media/')
+            && !str_starts_with($value, 'http')
+        ) {
+            return 'media/' . $value;
+        }
+
+        return $value;
     }
 }
 
