@@ -5,7 +5,7 @@
 <div
     class="flex h-11 items-stretch bg-gray-200 text-sm font-medium text-gray-800 transition-all duration-300 ease-out group-hover:bg-white overflow-hidden">
     @isset($price)
-        <div class="inline-grid min-w-25 place-items-center border-r border-r-gray-300">
+        <div class="inline-grid min-w-30 place-items-center border-r border-r-gray-300">
             {{ $price }}
         </div>
     @endisset
