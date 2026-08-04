@@ -13,6 +13,7 @@ final class MoneyInput
     {
         return TextInput::make($name)
             ->mask(RawJs::make('$money($input)'))
+            ->stripCharacters(',')
             ->numeric();
     }
 }
