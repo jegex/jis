@@ -7,11 +7,10 @@ namespace App\Jobs;
 use App\Enums\EmailTemplateType;
 use App\Models\Order;
 use App\Services\EmailService;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-final class SendOrderEmail implements ShouldBeUnique, ShouldQueue
+final class SendOrderEmail implements ShouldQueue
 {
     use Queueable;
 
@@ -24,11 +23,6 @@ final class SendOrderEmail implements ShouldBeUnique, ShouldQueue
         public Order $order,
         public EmailTemplateType $type,
     ) {}
-
-    public function uniqueId(): string
-    {
-        return $this->order->id.'-'.$this->type->value;
-    }
 
     public function handle(EmailService $emailService): void
     {

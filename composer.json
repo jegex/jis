@@ -11,6 +11,7 @@
         "awcodes/richer-editor": "^2.2",
         "backstage/laravel-mails": "^5.0",
         "backstage/mails": "^5.0",
+        "barryvdh/laravel-dompdf": "^3.1",
         "biostate/filament-menu-builder": "^5.1",
         "calebporzio/sushi": "^2.5",
         "filament/filament": "^5.7",

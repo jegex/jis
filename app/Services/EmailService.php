@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\EmailTemplateType;
+use App\Enums\OrderStatus;
+use App\Mail\OrderConfirmationMail;
+use App\Models\EmailLog;
 use App\Models\EmailTemplate;
 use App\Models\Invitation;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 final class EmailService
 {
@@ -31,14 +37,43 @@ final class EmailService
             return;
         }
 
-        $this->send($template, $recipient, [
+        if ($order->status === OrderStatus::Paid && ! $order->relationLoaded('invoice') && ! $order->invoice()->exists()) {
+            try {
+                app(InvoicePdfGenerator::class)->generate($order);
+            } catch (Throwable $exception) {
+                Log::warning('Failed to resolve invoice before order confirmation email', [
+                    'order_id' => $order->id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        $locale = $order->user?->locale ?? app()->getLocale();
+
+        $variables = [
             'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
             'order_id' => $order->id,
             'order_number' => $order->order_number,
             'product_name' => $order->items->first()?->product_name ?? '',
             'total' => Str::price($order->total, $order->currency_code),
             'download_url' => $this->getDownloadUrl($order),
-        ], $order);
+            'invoice_number' => $order->invoice?->number ?? '-',
+        ];
+
+        Mail::to($recipient)->send(new OrderConfirmationMail(
+            recipient: $recipient,
+            subjectTemplate: (string) $template->getTranslation('subject', $locale),
+            bodyTemplate: (string) $template->getTranslation('body', $locale),
+            invoice: $this->getInvoiceAttachment($order),
+            variables: $variables,
+        ));
+
+        $this->recordEmailLog(
+            $order,
+            EmailTemplateType::OrderConfirmation,
+            $recipient,
+            $this->parseTemplate((string) $template->getTranslation('subject', $locale), $variables),
+        );
     }
 
     public function sendDownloadLink(Order $order): void
@@ -148,6 +183,40 @@ final class EmailService
         return str_replace($search, array_values($variables), $template);
     }
 
+    /**
+     * @return array{name: string, contents: string}|null
+     */
+    private function getInvoiceAttachment(Order $order): ?array
+    {
+        if ($order->status !== OrderStatus::Paid) {
+            return null;
+        }
+
+        try {
+            $invoice = app(InvoicePdfGenerator::class)->generate($order);
+
+            $media = $order->getFirstMedia(InvoicePdfGenerator::MEDIA_COLLECTION);
+
+            if (! $media) {
+                return null;
+            }
+
+            $contents = Storage::disk($media->disk)->get($media->getPathRelativeToRoot());
+
+            return [
+                'name' => $invoice->fileName(),
+                'contents' => (string) $contents,
+            ];
+        } catch (Throwable $exception) {
+            Log::warning('Failed to attach invoice PDF to order confirmation email', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
     private function getDownloadUrl(Order $order): string
     {
         $product = $order->items->first()?->product;
@@ -175,5 +244,26 @@ final class EmailService
             $message->to($recipient)
                 ->subject($subject);
         });
+
+        /** @var EmailTemplateType $type */
+        $type = $template->type;
+
+        $this->recordEmailLog(
+            $loggable instanceof Order ? $loggable : null,
+            $type,
+            $recipient,
+            $subject,
+        );
+    }
+
+    private function recordEmailLog(?Order $order, EmailTemplateType $type, string $recipient, string $subject): void
+    {
+        EmailLog::create([
+            'order_id' => $order?->id,
+            'type' => $type,
+            'recipient' => $recipient,
+            'subject' => $subject !== '' ? $subject : null,
+            'sent_at' => now(),
+        ]);
     }
 }

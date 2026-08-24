@@ -14,7 +14,7 @@ final class CustomerDownloads extends Component
     {
         $orders = Order::where('user_id', auth()->id())
             ->paid()
-            ->with('items.product', 'items.product.media')
+            ->with('items.product', 'items.product.media', 'invoice')
             ->latest('paid_at')
             ->get();
 

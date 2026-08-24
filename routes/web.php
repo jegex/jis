@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payment\DownloadController;
 use App\Http\Controllers\Payment\PaymentController;
@@ -19,8 +20,18 @@ use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
 use App\Livewire\SetPassword;
+use App\Services\InvoicePdfGenerator;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
+
+Route::get('/test', function () {
+    $order = App\Models\Order::first();
+
+    $generator = new InvoicePdfGenerator(app(App\Services\InvoiceNumberGenerator::class));
+    $viewData = $generator->buildViewData($order);
+
+    return view('invoice.pdf', $viewData);
+});
 
 // ──────────────────────────────────────────────
 // 1. NON-LOCALIZED ROUTES
@@ -38,6 +49,10 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
     ->middleware('auth')
     ->name('payment.download');
+
+Route::get('/invoices/{invoice}/download', InvoiceDownloadController::class)
+    ->middleware('auth')
+    ->name('invoices.download');
 
 // Invitation routes (public)
 Route::get('/invitation/{token}', SetPassword::class)

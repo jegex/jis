@@ -45,6 +45,7 @@
                                             <tr class="text-left">
                                                 <th class="px-5 py-3.5 font-semibold text-gray-700 w-16">{{ __('No') }}</th>
                                                 <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Ship Name') }}</th>
+                                                <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Type') }}</th>
                                                 <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Size') }}</th>
                                                 <th class="px-5 py-3.5 font-semibold text-gray-700 w-24">{{ __('Year') }}</th>
                                             </tr>
@@ -59,6 +60,7 @@
                                                 <tr class="hover:bg-primary-light/50 transition-colors">
                                                     <td class="px-5 py-3.5 text-gray-400">{{ $number }}</td>
                                                     <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['name'] ?? '' }}</td>
+                                                    <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['type'] ?? '' }}</td>
                                                     <td class="px-5 py-3.5 text-gray-500">{{ isset($project['size']) && $project['size'] ? number_format((float) $project['size'], 0, ',', '.') : '' }}{{ isset($project['unit']) && $project['unit'] ? ' ' . $project['unit'] : '' }}</td>
                                                     <td class="px-5 py-3.5 text-gray-500">{{ isset($project['date']) && $project['date'] ? \Carbon\Carbon::parse($project['date'])->format('Y') : '-' }}</td>
                                                 </tr>
@@ -77,6 +79,7 @@
                                                 <tr class="text-left">
                                                     <th class="px-5 py-3.5 font-semibold text-gray-700 w-[64px]">{{ __('No') }}</th>
                                                     <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Ship Name') }}</th>
+                                                    <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Type') }}</th>
                                                     <th class="px-5 py-3.5 font-semibold text-gray-700">{{ __('Size') }}</th>
                                                     <th class="px-5 py-3.5 font-semibold text-gray-700 w-[80px]">{{ __('Year') }}</th>
                                                 </tr>
@@ -91,6 +94,7 @@
                                                     <tr class="hover:bg-primary-light/50 transition-colors">
                                                         <td class="px-5 py-3.5 text-gray-400">{{ $number }}</td>
                                                         <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['name'] ?? '' }}</td>
+                                                        <td class="px-5 py-3.5 font-medium text-gray-900">{{ $project['type'] ?? '' }}</td>
                                                         <td class="px-5 py-3.5 text-gray-500">{{ isset($project['size']) && $project['size'] ? number_format((float) $project['size'], 0, ',', '.') : '' }}{{ isset($project['unit']) && $project['unit'] ? ' ' . $project['unit'] : '' }}</td>
                                                         <td class="px-5 py-3.5 text-gray-500">{{ isset($project['date']) && $project['date'] ? \Carbon\Carbon::parse($project['date'])->format('Y') : '-' }}</td>
                                                     </tr>

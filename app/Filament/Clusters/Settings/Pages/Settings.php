@@ -208,6 +208,41 @@ final class Settings extends SettingPage
                                     ]),
                             ]),
 
+                        Tab::make('Invoice')
+                            ->icon(Heroicon::OutlinedDocumentText)
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        FileUpload::make('invoice_logo')
+                                            ->label('Invoice Logo')
+                                            ->disk('public')
+                                            ->preserveFilenames()
+                                            ->image()
+                                            ->helperText('Shown at the top of the invoice PDF'),
+                                        TextInput::make('invoice_npwp')
+                                            ->label('NPWP'),
+                                    ]),
+
+                                TextInput::make('invoice_company_name')
+                                    ->label('Company Name'),
+                                Textarea::make('invoice_company_address')
+                                    ->label('Company Address')
+                                    ->rows(3),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('invoice_company_phone')
+                                            ->label('Phone')
+                                            ->tel(),
+                                        TextInput::make('invoice_company_email')
+                                            ->label('Email')
+                                            ->email(),
+                                    ]),
+                                Textarea::make('invoice_footer_note')
+                                    ->label('Footer Note')
+                                    ->rows(2)
+                                    ->helperText('Small note displayed at the bottom of the invoice'),
+                            ]),
+
                         Tab::make('Custom Scripts')
                             ->icon(Heroicon::OutlinedCodeBracket)
                             ->schema([
