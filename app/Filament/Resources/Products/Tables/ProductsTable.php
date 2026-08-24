@@ -35,6 +35,16 @@ final class ProductsTable
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
                     ->sortable(),
 
+                TextColumn::make('release_date')
+                    ->label('Release Date')
+                    ->dateTime()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn ($record) => $record->isPreorder() ? 'warning' : 'success')
+                    ->formatStateUsing(fn ($record) => $record->isPreorder()
+                        ? 'Preorder'
+                        : ($record->release_date ? 'Released' : 'Regular')),
+
                 TextColumn::make('discount_price')
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
                     ->sortable()
@@ -55,6 +65,22 @@ final class ProductsTable
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
+
+                SelectFilter::make('release_status')
+                    ->label('Release Status')
+                    ->options([
+                        'regular' => 'Regular',
+                        'preorder' => 'Preorder',
+                        'released' => 'Released',
+                    ])
+                    ->query(function ($query, $state) {
+                        return match ($state['value'] ?? null) {
+                            'regular' => $query->whereNull('release_date'),
+                            'preorder' => $query->where('release_date', '>', now()),
+                            'released' => $query->where('release_date', '<=', now())->whereNotNull('release_date'),
+                            default => $query,
+                        };
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -28,6 +28,10 @@ final class DownloadService
             return false;
         }
 
+        if ($order->preorder_released_at === null && $product->isPreorder()) {
+            return false;
+        }
+
         return $order->items()->where('product_id', $product->id)->exists();
     }
 }

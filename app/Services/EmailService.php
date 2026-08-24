@@ -50,6 +50,10 @@ final class EmailService
 
         $locale = $order->user?->locale ?? app()->getLocale();
 
+        $product = $order->items->first()?->product;
+        $isPreorder = $product?->isPreorder() ?? false;
+        $releaseDate = $product?->release_date?->translatedFormat('j F Y');
+
         $variables = [
             'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
             'order_id' => $order->id,
@@ -58,6 +62,11 @@ final class EmailService
             'total' => Str::price($order->total, $order->currency_code),
             'download_url' => $this->getDownloadUrl($order),
             'invoice_number' => $order->invoice?->number ?? '-',
+            'is_preorder' => $isPreorder,
+            'release_date' => $releaseDate,
+            'preorder_info' => $isPreorder
+                ? __('This product is a preorder and will be available on :date. Download will be opened automatically.', ['date' => $releaseDate])
+                : null,
         ];
 
         Mail::to($recipient)->send(new OrderConfirmationMail(
@@ -79,6 +88,28 @@ final class EmailService
     public function sendDownloadLink(Order $order): void
     {
         $template = EmailTemplate::where('type', EmailTemplateType::DownloadLink)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $template) {
+            return;
+        }
+
+        $recipient = $order->user?->email ?? $order->guest_email;
+        if (! $recipient) {
+            return;
+        }
+
+        $this->send($template, $recipient, [
+            'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
+            'product_name' => $order->items->first()?->product_name ?? '',
+            'download_url' => $this->getDownloadUrl($order),
+        ], $order);
+    }
+
+    public function sendPreorderRelease(Order $order): void
+    {
+        $template = EmailTemplate::where('type', EmailTemplateType::PreorderRelease)
             ->where('is_active', true)
             ->first();
 

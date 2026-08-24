@@ -50,6 +50,7 @@ final class OrderService
                 'total' => $total,
                 'coupon_id' => isset($coupon) ? $coupon->id : null,
                 'status' => OrderStatus::Pending,
+                'preorder_released_at' => $product->isPreorder() ? null : now(),
                 'notes' => $notes,
                 'locale' => app()->getLocale(),
             ]);

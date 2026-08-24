@@ -14,6 +14,11 @@
     <div class="p-5">
         @if($item && $item->getFirstMediaUrl($mediaCollection))
             <div class="relative overflow-hidden aspect-video">
+                @if($item instanceof \App\Models\Product && $item->isPreorder())
+                    <div class="absolute top-2 left-2 z-20 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+                        {{ __('Preorder') }}
+                    </div>
+                @endif
                 <img src="{{ $item->getFirstMediaUrl($mediaCollection, $mediaVariant) }}" alt="{{ $item->title }}" class="w-full h-full object-cover transition-transform will-change-transform duration-700 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             </div>

@@ -12,6 +12,7 @@ use App\Filament\Schemas\Components\TitleWithSlug;
 use App\Filament\Schemas\SeoSchema;
 use App\Models\Category;
 use App\Models\Currency;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -67,6 +68,12 @@ final class ProductForm
                                 ->label('Published')
                                 ->visible(fn (): bool => auth()->user()?->can('Publish:Product') ?? false)
                                 ->default(false),
+
+                            DateTimePicker::make('release_date')
+                                ->label('Release Date')
+                                ->helperText('Leave empty for regular products. Set a future date for preorders.')
+                                ->native(false)
+                                ->timezone(config('app.timezone')),
 
                             Select::make('category_id')
                                 ->relationship('category', 'name')

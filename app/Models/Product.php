@@ -53,6 +53,7 @@ final class Product extends Model implements HasMedia, HasRichContent
         'slug',
         'price',
         'is_published',
+        'release_date',
         'category_id',
         'currency_id',
     ];
@@ -71,6 +72,7 @@ final class Product extends Model implements HasMedia, HasRichContent
             'description' => 'array',
             'price' => MoneyCast::class,
             'is_published' => 'boolean',
+            'release_date' => 'datetime',
         ];
     }
 
@@ -163,10 +165,16 @@ final class Product extends Model implements HasMedia, HasRichContent
         }
 
         if ($this->price && $this->currency) {
+            $availability = match (true) {
+                ! $this->is_published => 'https://schema.org/OutOfStock',
+                $this->isPreorder() => 'https://schema.org/PreOrder',
+                default => 'https://schema.org/InStock',
+            };
+
             $schema->offers(Schema::offer()
                 ->price($this->price)
                 ->priceCurrency($this->currency->code)
-                ->availability($this->is_published ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'));
+                ->availability($availability));
         }
 
         $seoConfig = setting('seo', []);
@@ -207,6 +215,21 @@ final class Product extends Model implements HasMedia, HasRichContent
     public function getExcerptAttribute(): ?string
     {
         return $this->short_description ?? Str::limit(strip_tags((string) $this->description), 160);
+    }
+
+    public function isPreorder(): bool
+    {
+        return $this->release_date !== null && $this->release_date->isFuture();
+    }
+
+    public function isReleased(): bool
+    {
+        return $this->release_date === null || $this->release_date->isPast();
+    }
+
+    public function scopePreorder(Builder $query): Builder
+    {
+        return $query->where('release_date', '>', now());
     }
 
     public function getPublishedAtAttribute(): mixed

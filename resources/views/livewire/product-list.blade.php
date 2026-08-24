@@ -94,6 +94,38 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap gap-2 text-xs items-center">
+                            <div class="text-gray-500">{{ __('Status:') }}</div>
+                            <div>
+                                <x-button
+                                    wire:click="filterByReleaseStatus(null)"
+                                    variant="flat"
+                                    color="gray"
+                                    size="xs"
+                                    :variant="is_null($releaseStatus) ? 'solid' : 'flat'">
+                                    {{ __('All') }}
+                                </x-button>
+                                <x-button
+                                    wire:click="filterByReleaseStatus('regular')"
+                                    color="gray"
+                                    size="xs"
+                                    :variant="$releaseStatus === 'regular' ? 'solid' : 'flat'"
+                                >
+                                    {{ __('Regular') }}
+                                </x-button>
+                                <x-button
+                                    wire:click="filterByReleaseStatus('preorder')"
+                                    color="warning"
+                                    size="xs"
+                                    :variant="$releaseStatus === 'preorder' ? 'solid' : 'flat'"
+                                >
+                                    {{ __('Preorder') }}
+                                </x-button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
