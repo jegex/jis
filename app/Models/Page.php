@@ -19,18 +19,21 @@ use RalphJSmit\Laravel\SEO\SchemaCollection;
 use RalphJSmit\Laravel\SEO\Support\AlternateTag;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\SchemaOrg\Schema;
 use Spatie\Sluggable\HasTranslatableSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
 
-final class Page extends Model implements HasRichContent
+final class Page extends Model implements HasRichContent, HasMedia
 {
     /** @use HasFactory<PageFactory> */
     use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations;
 
     use InteractsWithRichContent;
     use Menuable;
+    use InteractsWithMedia;
 
     public array $translatable = ['title', 'content', 'slug'];
 

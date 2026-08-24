@@ -103,7 +103,7 @@ return [
          * This should be a path to an image. The url to the path is generated using the `secure_url()` function
          * (`secure_url($yourProvidedPath)`), so make sure the image is accessible from the public folder.
          */
-        'fallback' => 'images/og-default.jpg',
+        'fallback' => 'images/og-default.png',
     ],
 
     'author' => [
