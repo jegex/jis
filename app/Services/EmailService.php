@@ -54,13 +54,21 @@ final class EmailService
         $isPreorder = $product?->isPreorder() ?? false;
         $releaseDate = $product?->release_date?->translatedFormat('j F Y');
 
+        $downloadUrl = $this->getDownloadUrl($order);
+        $productName = $order->items->first()?->product_name ?? '';
+
+        $downloadSection = $isPreorder
+            ? '<p>'.__('Download will be available on :date.', ['date' => $releaseDate ?? '']).'</p>'
+            : '<p><a href="'.$downloadUrl.'" target="_blank">'.__('Download Now').'</a></p>';
+
         $variables = [
             'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
             'order_id' => $order->id,
             'order_number' => $order->order_number,
-            'product_name' => $order->items->first()?->product_name ?? '',
+            'product_name' => $productName,
             'total' => Str::price($order->total, $order->currency_code),
-            'download_url' => $this->getDownloadUrl($order),
+            'download_url' => $downloadUrl,
+            'download_section' => $downloadSection,
             'invoice_number' => $order->invoice?->number ?? '-',
             'is_preorder' => $isPreorder,
             'release_date' => $releaseDate,
@@ -100,11 +108,28 @@ final class EmailService
             return;
         }
 
-        $this->send($template, $recipient, [
+        $locale = $order->user?->locale ?? app()->getLocale();
+        $product = $order->items->first()?->product;
+        $isPreorder = $product?->isPreorder() ?? false;
+        $releaseDate = $product?->release_date?->translatedFormat('j F Y');
+        $downloadUrl = $this->getDownloadUrl($order);
+
+        $downloadSection = $isPreorder
+            ? '<p>'.__('This is a preorder product. Download will be available on :date.', ['date' => $releaseDate ?? '']).'</p>'
+            : '<p><a href="'.$downloadUrl.'" target="_blank">'.__('Download :product_name', ['product_name' => $order->items->first()?->product_name ?? '']).'</a></p>';
+
+        $variables = [
             'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
             'product_name' => $order->items->first()?->product_name ?? '',
-            'download_url' => $this->getDownloadUrl($order),
-        ], $order);
+            'download_url' => $downloadUrl,
+            'download_section' => $downloadSection,
+            'is_preorder' => $isPreorder,
+            'preorder_info' => $isPreorder
+                ? __('This product is a preorder and will be available on :date. Download will be opened automatically.', ['date' => $releaseDate])
+                : null,
+        ];
+
+        $this->send($template, $recipient, $variables, $order);
     }
 
     public function sendPreorderRelease(Order $order): void
@@ -114,6 +139,10 @@ final class EmailService
             ->first();
 
         if (! $template) {
+            Log::warning('PreorderRelease email template not found or inactive', [
+                'order_id' => $order->id,
+            ]);
+
             return;
         }
 

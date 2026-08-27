@@ -45,6 +45,12 @@ final class CustomerDownloads extends Component
             return '#';
         }
 
-        return app(DownloadService::class)->generateDownloadUrl($order, $orderItem->product);
+        $downloadService = app(DownloadService::class);
+
+        if (! $downloadService->canDownload($order, $orderItem->product)) {
+            return '#';
+        }
+
+        return $downloadService->generateDownloadUrl($order, $orderItem->product);
     }
 }

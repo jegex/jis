@@ -51,13 +51,7 @@ final class Post extends Model implements HasMedia, HasRichContent
         'published_at',
     ];
 
-    protected $hidden = [
-        'is_published',
-        'category_id',
-        'author_id',
-        'created_at',
-        'updated_at',
-    ];
+    protected $hidden = [];
 
     protected function casts(): array
     {

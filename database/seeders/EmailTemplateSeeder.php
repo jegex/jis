@@ -24,16 +24,18 @@ final class EmailTemplateSeeder extends Seeder
 <p>Your payment for order <strong>#{order_id}</strong> has been confirmed.</p>
 <p>Product: {product_name}<br>
 Total: {total}</p>
-<p><a href="{download_url}" target="_blank">Download Now</a></p>
+{download_section}
+{preorder_info}
 <p>Thank you for your purchase!</p>',
                     'id' => '<p>Halo {customer_name},</p>
 <p>Pembayaran untuk pesanan <strong>#{order_id}</strong> telah dikonfirmasi.</p>
 <p>Produk: {product_name}<br>
 Total: {total}</p>
-<p><a href="{download_url}" target="_blank">Unduh Sekarang</a></p>
+{download_section}
+{preorder_info}
 <p>Terima kasih!</p>',
                 ],
-                'variables' => ['customer_name', 'order_id', 'product_name', 'total', 'download_url'],
+                'variables' => ['customer_name', 'order_id', 'product_name', 'total', 'download_url', 'download_section', 'invoice_number', 'is_preorder', 'release_date', 'preorder_info'],
                 'is_active' => true,
             ],
             [
@@ -45,14 +47,35 @@ Total: {total}</p>
                 'body' => [
                     'en' => '<p>Hello {customer_name},</p>
 <p>Here is your download link for <strong>{product_name}</strong>:</p>
-<p><a href="{download_url}" target="_blank">Download {product_name}</a></p>
+{download_section}
 <p><em>This link will expire in 24 hours.</em></p>
 <p>Thank you!</p>',
                     'id' => '<p>Halo {customer_name},</p>
 <p>Berikut link unduhan untuk <strong>{product_name}</strong>:</p>
-<p><a href="{download_url}" target="_blank">Unduh {product_name}</a></p>
+{download_section}
 <p><em>Link ini akan kedaluwarsa dalam 24 jam.</em></p>
 <p>Terima kasih!</p>',
+                ],
+                'variables' => ['customer_name', 'product_name', 'download_url', 'download_section', 'is_preorder', 'preorder_info'],
+                'is_active' => true,
+            ],
+            [
+                'type' => EmailTemplateType::PreorderRelease,
+                'subject' => [
+                    'en' => '{product_name} is now available!',
+                    'id' => '{product_name} sudah tersedia!',
+                ],
+                'body' => [
+                    'en' => '<p>Hello {customer_name},</p>
+<p>Great news! <strong>{product_name}</strong> is now available for download.</p>
+<p><a href="{download_url}" target="_blank">Download {product_name}</a></p>
+<p><em>This link will expire in 24 hours.</em></p>
+<p>Thank you for your patience!</p>',
+                    'id' => '<p>Halo {customer_name},</p>
+<p>Kabar baik! <strong>{product_name}</strong> sekarang sudah tersedia untuk diunduh.</p>
+<p><a href="{download_url}" target="_blank">Unduh {product_name}</a></p>
+<p><em>Link ini akan kedaluwarsa dalam 24 jam.</em></p>
+<p>Terima kasih atas kesabaran Anda!</p>',
                 ],
                 'variables' => ['customer_name', 'product_name', 'download_url'],
                 'is_active' => true,

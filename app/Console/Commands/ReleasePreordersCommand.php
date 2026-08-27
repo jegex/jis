@@ -36,9 +36,13 @@ final class ReleasePreordersCommand extends Command
         $released = 0;
 
         foreach ($orders as $order) {
-            $product = $order->items->first()?->product;
+            $releasedItems = $order->items->filter(function ($item) {
+                $product = $item->product;
 
-            if (! $product) {
+                return $product && $product->release_date !== null && $product->release_date->isPast();
+            });
+
+            if ($releasedItems->isEmpty()) {
                 continue;
             }
 
@@ -48,7 +52,8 @@ final class ReleasePreordersCommand extends Command
 
             $released++;
 
-            $this->line("Released: {$order->order_number} ({$product->title})");
+            $productNames = $releasedItems->pluck('product_name')->implode(', ');
+            $this->line("Released: {$order->order_number} ({$productNames})");
         }
 
         $this->info("Done. Released {$released} preorder(s).");

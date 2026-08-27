@@ -58,13 +58,7 @@ final class Product extends Model implements HasMedia, HasRichContent
         'currency_id',
     ];
 
-    protected $hidden = [
-        'currency_id',
-        'category_id',
-        'is_published',
-        'created_at',
-        'updated_at',
-    ];
+    protected $hidden = [];
 
     protected function casts(): array
     {

@@ -26,14 +26,14 @@ use Spatie\Sluggable\HasTranslatableSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
 
-final class Page extends Model implements HasRichContent, HasMedia
+final class Page extends Model implements HasMedia, HasRichContent
 {
     /** @use HasFactory<PageFactory> */
     use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations;
 
+    use InteractsWithMedia;
     use InteractsWithRichContent;
     use Menuable;
-    use InteractsWithMedia;
 
     public array $translatable = ['title', 'content', 'slug'];
 
@@ -44,11 +44,7 @@ final class Page extends Model implements HasRichContent, HasMedia
         'is_published',
     ];
 
-    protected $hidden = [
-        'is_published',
-        'created_at',
-        'updated_at',
-    ];
+    protected $hidden = [];
 
     protected function casts(): array
     {

@@ -123,6 +123,14 @@
                                 >
                                     {{ __('Preorder') }}
                                 </x-button>
+                                <x-button
+                                    wire:click="filterByReleaseStatus('released')"
+                                    color="success"
+                                    size="xs"
+                                    :variant="$releaseStatus === 'released' ? 'solid' : 'flat'"
+                                >
+                                    {{ __('Released') }}
+                                </x-button>
                             </div>
                         </div>
                     </div>
