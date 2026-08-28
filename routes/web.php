@@ -20,18 +20,8 @@ use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
 use App\Livewire\SetPassword;
-use App\Services\InvoicePdfGenerator;
 use Illuminate\Support\Facades\Route;
 use NielsNumbers\LaravelLocalizer\Facades\Localizer;
-
-Route::get('/test', function () {
-    $order = App\Models\Order::first();
-
-    $generator = new InvoicePdfGenerator(app(App\Services\InvoiceNumberGenerator::class));
-    $viewData = $generator->buildViewData($order);
-
-    return view('invoice.pdf', $viewData);
-});
 
 // ──────────────────────────────────────────────
 // 1. NON-LOCALIZED ROUTES

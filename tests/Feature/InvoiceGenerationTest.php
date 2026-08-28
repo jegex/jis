@@ -176,9 +176,10 @@ it('includes payment information on the invoice', function () {
     app()->setLocale('id');
     $html = view('invoice.pdf', $generator->buildViewData($order))->render();
 
-    expect($html)->toContain('Midtrans')
-        ->toContain('tx-invoice-123')
-        ->toContain('Informasi pembayaran');
+    expect($html)->toContain('tx-invoice-123')
+        ->toContain('Informasi pembayaran')
+        ->not->toContain('Metode pembayaran')
+        ->not->toContain('Payment method');
 });
 
 it('dispatches a chained invoice and email jobs on payment success', function () {

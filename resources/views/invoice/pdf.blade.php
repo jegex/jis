@@ -391,7 +391,6 @@
         <div class="box">
             <div class="box-title">{{ __('Payment information') }}</div>
             <div class="box-body">
-                {{ __('Payment method') }}: {{ ucfirst($payment->gateway) }}<br>
                 {{ __('Paid at') }}: {{ $payment->paid_at?->translatedFormat('j F Y H:i') }}<br>
                 {{ __('Transaction ID') }}: {{ $payment->gateway_transaction_id ?? '-' }}
             </div>
