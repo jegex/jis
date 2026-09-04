@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ContentStatus;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\Product;
@@ -48,7 +49,7 @@ final class SitemapController extends Controller
         ];
 
         foreach ($modelRoutes as $modelClass => $routeName) {
-            $query = $modelClass::where('is_published', true);
+            $query = $modelClass::where('status', ContentStatus::Publish->value);
 
             if ($modelClass === Post::class) {
                 $query->latest('published_at');

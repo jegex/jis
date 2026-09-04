@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CategoryType;
+use App\Enums\ContentStatus;
 use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Biostate\FilamentMenuBuilder\Traits\Menuable;
@@ -22,6 +23,8 @@ use RalphJSmit\Laravel\SEO\SchemaCollection;
 use RalphJSmit\Laravel\SEO\Support\AlternateTag;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\SchemaOrg\Schema;
@@ -32,7 +35,7 @@ use Spatie\Translatable\HasTranslations;
 final class Post extends Model implements HasMedia, HasRichContent
 {
     /** @use HasFactory<PostFactory> */
-    use HasFactory, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations, InteractsWithMedia;
+    use HasFactory, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations, InteractsWithMedia, LogsActivity;
 
     use HasSEO;
     use InteractsWithRichContent;
@@ -45,7 +48,8 @@ final class Post extends Model implements HasMedia, HasRichContent
         'content',
         'excerpt',
         'slug',
-        'is_published',
+        'status',
+        'scheduled_at',
         'category_id',
         'author_id',
         'published_at',
@@ -53,10 +57,15 @@ final class Post extends Model implements HasMedia, HasRichContent
 
     protected $hidden = [];
 
+    protected $attributes = [
+        'status' => ContentStatus::Draft->value,
+    ];
+
     protected function casts(): array
     {
         return [
-            'is_published' => 'boolean',
+            'status' => ContentStatus::class,
+            'scheduled_at' => 'datetime',
             'published_at' => 'datetime',
         ];
     }
@@ -82,6 +91,19 @@ final class Post extends Model implements HasMedia, HasRichContent
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug')
             ->doNotGenerateSlugsOnUpdate();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['title', 'content', 'excerpt', 'slug'])
+            ->useAttributeRawValues(['title', 'content', 'excerpt', 'slug'])
+            ->dontLogEmptyChanges();
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === ContentStatus::Publish;
     }
 
     public function category(): BelongsTo
@@ -172,6 +194,6 @@ final class Post extends Model implements HasMedia, HasRichContent
 
     protected static function booted(): void
     {
-        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('status', ContentStatus::Publish));
     }
 }

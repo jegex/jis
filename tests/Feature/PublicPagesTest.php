@@ -91,21 +91,21 @@ test('currency switch redirects', function () {
 
 test('english blog detail returns 200 with published post', function () {
     refreshApplicationWithLocale('en');
-    Post::factory()->create(['is_published' => true]);
+    Post::factory()->create();
 
     $this->get('/blog/'.Post::first()->slug)->assertSuccessful();
 });
 
 test('english product detail returns 200 with published product', function () {
     refreshApplicationWithLocale('en');
-    Product::factory()->create(['is_published' => true]);
+    Product::factory()->create();
 
     $this->get('/products/'.Product::first()->slug)->assertSuccessful();
 });
 
 test('english custom page returns 200 with published page', function () {
     refreshApplicationWithLocale('en');
-    Page::factory()->create(['is_published' => true]);
+    Page::factory()->create();
 
     $this->get('/pages/'.Page::first()->slug)->assertSuccessful();
 });
@@ -180,21 +180,21 @@ test('indonesian payment finish redirects', function () {
 
 test('indonesian blog detail returns 200 with published post', function () {
     refreshApplicationWithLocale('id');
-    Post::factory()->create(['is_published' => true]);
+    Post::factory()->create();
 
     $this->get('/id/artikel/'.Post::first()->slug)->assertSuccessful();
 });
 
 test('indonesian product detail returns 200 with published product', function () {
     refreshApplicationWithLocale('id');
-    Product::factory()->create(['is_published' => true]);
+    Product::factory()->create();
 
     $this->get('/id/produk/'.Product::first()->slug)->assertSuccessful();
 });
 
 test('indonesian custom page returns 200 with published page', function () {
     refreshApplicationWithLocale('id');
-    Page::factory()->create(['is_published' => true]);
+    Page::factory()->create();
 
     $this->get('/id/halaman/'.Page::first()->slug)->assertSuccessful();
 });

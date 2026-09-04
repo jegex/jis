@@ -24,8 +24,7 @@ final class ProductList extends Component
 
     public function render()
     {
-        $query = Product::where('is_published', true)
-            ->with('category', 'media', 'tags');
+        $query = Product::query()->with('category', 'media', 'tags');
 
         if ($this->categoryId) {
             $query->where('category_id', $this->categoryId);

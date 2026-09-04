@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Pages;
 
+use App\Enums\ContentStatus;
 use App\Filament\Resources\Pages\Pages\CreatePage;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Pages\Pages\ListPages;
+use App\Filament\Resources\Pages\Pages\PageRevisions;
 use App\Filament\Resources\Pages\Schemas\PageForm;
 use App\Filament\Resources\Pages\Tables\PagesTable;
 use App\Models\Page;
@@ -41,7 +43,7 @@ final class PageResource extends Resource
     public static function mutateFormDataBeforeCreate(array $data): array
     {
         if (! (auth()->user()?->can('Publish:Page') ?? false)) {
-            $data['is_published'] = false;
+            $data['status'] = ContentStatus::Draft->value;
         }
 
         return $data;
@@ -65,6 +67,7 @@ final class PageResource extends Resource
             'index' => ListPages::route('/'),
             'create' => CreatePage::route('/create'),
             'edit' => EditPage::route('/{record}/edit'),
+            'revisions' => PageRevisions::route('/{record}/revisions'),
         ];
     }
 

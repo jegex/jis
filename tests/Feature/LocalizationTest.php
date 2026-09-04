@@ -38,7 +38,7 @@ it('returns 200 for English blog page', function () {
 it('returns 200 for English product detail page', function () {
     refreshApplicationWithLocale('en');
 
-    $product = Product::factory()->create(['is_published' => true]);
+    $product = Product::factory()->create();
 
     $response = $this->get('/products/'.$product->slug);
 
@@ -48,7 +48,7 @@ it('returns 200 for English product detail page', function () {
 it('returns 200 for English blog detail page', function () {
     refreshApplicationWithLocale('en');
 
-    $post = Post::factory()->create(['is_published' => true]);
+    $post = Post::factory()->create();
 
     $response = $this->get('/blog/'.$post->slug);
 
@@ -84,7 +84,7 @@ it('returns 200 for Indonesian blog page', function () {
 it('returns 200 for Indonesian product detail page', function () {
     refreshApplicationWithLocale('id');
 
-    $product = Product::factory()->create(['is_published' => true]);
+    $product = Product::factory()->create();
 
     $response = $this->get('/id/produk/'.$product->slug);
 
@@ -94,7 +94,7 @@ it('returns 200 for Indonesian product detail page', function () {
 it('returns 200 for Indonesian blog detail page', function () {
     refreshApplicationWithLocale('id');
 
-    $post = Post::factory()->create(['is_published' => true]);
+    $post = Post::factory()->create();
 
     $response = $this->get('/id/artikel/'.$post->slug);
 

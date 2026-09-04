@@ -31,7 +31,7 @@ final class CheckoutForm extends Component
 
     public function mount(Product $product): void
     {
-        if (! $product->is_published) {
+        if (! $product->isPublished()) {
             abort(404);
         }
 

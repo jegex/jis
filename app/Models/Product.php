@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Enums\CategoryType;
+use App\Enums\ContentStatus;
 use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Awcodes\RicherEditor\Plugins\CodeBlockShikiPlugin;
@@ -26,6 +27,8 @@ use RalphJSmit\Laravel\SEO\SchemaCollection;
 use RalphJSmit\Laravel\SEO\Support\AlternateTag;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -38,7 +41,7 @@ use Spatie\Translatable\HasTranslations;
 final class Product extends Model implements HasMedia, HasRichContent
 {
     /** @use HasFactory<ProductFactory> */
-    use HasFactory, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations, InteractsWithMedia;
+    use HasFactory, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations, InteractsWithMedia, LogsActivity;
 
     use HasSEO;
     use InteractsWithRichContent;
@@ -52,7 +55,8 @@ final class Product extends Model implements HasMedia, HasRichContent
         'short_description',
         'slug',
         'price',
-        'is_published',
+        'status',
+        'scheduled_at',
         'release_date',
         'category_id',
         'currency_id',
@@ -60,12 +64,20 @@ final class Product extends Model implements HasMedia, HasRichContent
 
     protected $hidden = [];
 
+    protected $attributes = [
+        'status' => ContentStatus::Draft->value,
+    ];
+
     protected function casts(): array
     {
         return [
+            'title' => 'array',
+            'slug' => 'array',
             'description' => 'array',
+            'short_description' => 'array',
             'price' => MoneyCast::class,
-            'is_published' => 'boolean',
+            'status' => ContentStatus::class,
+            'scheduled_at' => 'datetime',
             'release_date' => 'datetime',
         ];
     }
@@ -91,6 +103,14 @@ final class Product extends Model implements HasMedia, HasRichContent
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug')
             ->doNotGenerateSlugsOnUpdate();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['title', 'description', 'short_description', 'slug'])
+            ->useAttributeRawValues(['title', 'description', 'short_description', 'slug'])
+            ->dontLogEmptyChanges();
     }
 
     public function category(): BelongsTo
@@ -160,7 +180,7 @@ final class Product extends Model implements HasMedia, HasRichContent
 
         if ($this->price && $this->currency) {
             $availability = match (true) {
-                ! $this->is_published => 'https://schema.org/OutOfStock',
+                ! $this->isPublished() => 'https://schema.org/OutOfStock',
                 $this->isPreorder() => 'https://schema.org/PreOrder',
                 default => 'https://schema.org/InStock',
             };
@@ -221,6 +241,11 @@ final class Product extends Model implements HasMedia, HasRichContent
         return $this->release_date === null || $this->release_date->isPast();
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === ContentStatus::Publish;
+    }
+
     public function scopePreorder(Builder $query): Builder
     {
         return $query->where('release_date', '>', now());
@@ -233,7 +258,7 @@ final class Product extends Model implements HasMedia, HasRichContent
 
     protected static function booted(): void
     {
-        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('status', ContentStatus::Publish));
 
         self::saving(function (Model $model) {
             if (! $model->currency_id) {

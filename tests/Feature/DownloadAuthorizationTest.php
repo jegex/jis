@@ -15,7 +15,7 @@ it('prevents downloading order belonging to another user without signature', fun
     $order = Order::factory()->forUser()->paid()->create([
         'user_id' => $owner->id,
     ]);
-    $product = Product::factory()->create(['is_published' => true]);
+    $product = Product::factory()->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
     $url = route('payment.download', [
@@ -34,7 +34,7 @@ it('allows owner to download with valid signature', function () {
     $order = Order::factory()->forUser()->paid()->create([
         'user_id' => $owner->id,
     ]);
-    $product = Product::factory()->create(['is_published' => true]);
+    $product = Product::factory()->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
     $fileContent = 'fake file content';
@@ -61,7 +61,7 @@ it('prevents getDownloadUrl from generating url for other users order', function
     $order = Order::factory()->forUser()->paid()->create([
         'user_id' => $owner->id,
     ]);
-    $product = Product::factory()->create(['is_published' => true]);
+    $product = Product::factory()->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
     $this->actingAs($other);

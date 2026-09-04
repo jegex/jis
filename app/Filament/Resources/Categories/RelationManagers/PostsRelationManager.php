@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Categories\RelationManagers;
 
+use App\Enums\ContentStatus;
 use App\Filament\Resources\Posts\PostResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 final class PostsRelationManager extends RelationManager
@@ -36,15 +36,16 @@ final class PostsRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
 
-                IconColumn::make('is_published')
-                    ->boolean(),
+                TextColumn::make('status')
+                    ->badge(),
 
                 TextColumn::make('published_at')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                TernaryFilter::make('is_published'),
+                SelectFilter::make('status')
+                    ->options(ContentStatus::class),
             ])
             ->recordActions([
                 ViewAction::make(),

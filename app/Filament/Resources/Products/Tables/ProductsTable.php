@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Enums\ContentStatus;
+use App\Filament\Actions\PreviewAction;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 final class ProductsTable
@@ -50,8 +50,8 @@ final class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                IconColumn::make('is_published')
-                    ->boolean(),
+                TextColumn::make('status')
+                    ->badge(),
 
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -59,7 +59,8 @@ final class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TernaryFilter::make('is_published'),
+                SelectFilter::make('status')
+                    ->options(ContentStatus::class),
 
                 SelectFilter::make('category')
                     ->relationship('category', 'name')
@@ -84,6 +85,7 @@ final class ProductsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                PreviewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -94,7 +96,7 @@ final class ProductsTable
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($selectedRecords) {
                             $selectedRecords->map(function ($record) {
-                                $record->is_published = false;
+                                $record->status = ContentStatus::Draft;
                                 $record->save();
                             });
                         }),
@@ -106,7 +108,7 @@ final class ProductsTable
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($selectedRecords) {
                             $selectedRecords->map(function ($record) {
-                                $record->is_published = true;
+                                $record->status = ContentStatus::Publish;
                                 $record->save();
                             });
                         }),

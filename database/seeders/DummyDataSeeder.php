@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\CategoryType;
+use App\Enums\ContentStatus;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Post;
@@ -296,7 +297,7 @@ final class DummyDataSeeder extends Seeder
         ];
 
         foreach ($products as $index => $data) {
-            $isPublished = $data['is_published'] ?? true;
+            $status = ($data['is_published'] ?? true) ? ContentStatus::Publish : ContentStatus::Draft;
 
             $product = Product::withoutGlobalScope('published')->firstOrCreate(
                 ['title->en' => $data['title']['en']],
@@ -305,7 +306,7 @@ final class DummyDataSeeder extends Seeder
                     'description' => $data['description'],
                     'short_description' => $data['short_description'],
                     'price' => $data['price'],
-                    'is_published' => $isPublished,
+                    'status' => $status,
                     'category_id' => $data['category_id'],
                     'currency_id' => Currency::getDefault()->id,
                 ]
@@ -459,7 +460,7 @@ final class DummyDataSeeder extends Seeder
         ];
 
         foreach ($posts as $index => $data) {
-            $isPublished = $data['is_published'] ?? true;
+            $status = ($data['is_published'] ?? true) ? ContentStatus::Publish : ContentStatus::Draft;
 
             $author = $users->random();
 
@@ -469,7 +470,7 @@ final class DummyDataSeeder extends Seeder
                     'title' => $data['title'],
                     'content' => $data['content'],
                     'excerpt' => $data['excerpt'],
-                    'is_published' => $isPublished,
+                    'status' => $status,
                     'category_id' => $data['category_id'],
                     'author_id' => $author->id,
                     'published_at' => $data['published_at'],

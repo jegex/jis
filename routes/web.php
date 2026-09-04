@@ -10,6 +10,7 @@ use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payment\DownloadController;
 use App\Http\Controllers\Payment\PaymentController;
+use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\SitemapController;
 use App\Livewire\BlogList;
 use App\Livewire\CheckoutForm;
@@ -35,6 +36,12 @@ Route::prefix('auth/google')->name('auth.google.')->group(function () {
 Route::get('/currency/{currency:code}', CurrencyController::class)->name('currency.switch');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+Route::get('/preview/provisional/{key}', [PreviewController::class, 'provisional'])
+    ->name('preview.provisional');
+
+Route::get('/preview/{type}/{record}', PreviewController::class)
+    ->name('preview.show');
 
 Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
     ->middleware('auth')

@@ -10,7 +10,7 @@ final class PageController extends Controller
 {
     public function __invoke(Page $page)
     {
-        if (! $page->is_published) {
+        if (! $page->isPublished()) {
             abort(404);
         }
 

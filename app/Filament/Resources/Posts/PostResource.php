@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Posts;
 
+use App\Enums\ContentStatus;
 use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
+use App\Filament\Resources\Posts\Pages\PostRevisions;
 use App\Filament\Resources\Posts\Schemas\PostForm;
 use App\Filament\Resources\Posts\Tables\PostsTable;
 use App\Models\Post;
@@ -43,7 +45,7 @@ final class PostResource extends Resource
         $user = auth()->user();
 
         if ($user?->can('Publish:Post') === false) {
-            $data['is_published'] = false;
+            $data['status'] = ContentStatus::Draft->value;
         }
 
         $data['author_id'] = $user?->id;
@@ -81,6 +83,7 @@ final class PostResource extends Resource
             'index' => ListPosts::route('/'),
             'create' => CreatePost::route('/create'),
             'edit' => EditPost::route('/{record}/edit'),
+            'revisions' => PostRevisions::route('/{record}/revisions'),
         ];
     }
 }

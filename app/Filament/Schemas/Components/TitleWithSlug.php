@@ -20,6 +20,7 @@ final class TitleWithSlug
     {
         return Group::make([
             TextInput::make('title')
+                ->autofocus()
                 ->required()
                 ->live(onBlur: true)
                 ->afterStateUpdated(function ($state, Get $get, Set $set, $model, $livewire, $record) {

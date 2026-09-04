@@ -16,6 +16,8 @@ Schedule::command('queue:prune-batching --hours=48')->daily();
 
 Schedule::command('preorders:release')->hourly();
 
+Schedule::command('content:publish-scheduled')->everyMinute()->withoutOverlapping();
+
 Schedule::call(function () {
     Order::whereIn('status', [OrderStatus::Pending, OrderStatus::AwaitingPayment, OrderStatus::CreatingPayment])
         ->where('created_at', '<', now()->subHours(2))

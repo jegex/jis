@@ -10,7 +10,7 @@ final class BlogController extends Controller
 {
     public function show(Post $post)
     {
-        if (! $post->is_published) {
+        if (! $post->isPublished()) {
             abort(404);
         }
 

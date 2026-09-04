@@ -13,7 +13,7 @@ final class ProductDetail extends Component
 
     public function mount(Product $product)
     {
-        if (! $product->is_published) {
+        if (! $product->isPublished() && ! request()->has('preview')) {
             abort(404);
         }
 
@@ -23,7 +23,6 @@ final class ProductDetail extends Component
     public function render()
     {
         $relatedProducts = Product::query()
-            ->where('is_published', true)
             ->where('id', '!=', $this->product->id)
             ->when($this->product->category_id, fn ($q) => $q->where('category_id', $this->product->category_id))
             ->with('category', 'media')

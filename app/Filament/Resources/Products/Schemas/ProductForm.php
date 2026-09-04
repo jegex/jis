@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Actions\GenerateSlug;
 use App\Enums\CategoryType;
+use App\Enums\ContentStatus;
 use App\Filament\Schemas\Components\MoneyInput;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\Components\TitleWithSlug;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 final class ProductForm
@@ -64,10 +66,17 @@ final class ProductForm
                     Section::make('Availability')
                         ->collapsible()
                         ->schema([
-                            Toggle::make('is_published')
-                                ->label('Published')
+                            Select::make('status')
+                                ->options(ContentStatus::class)
+                                ->default(ContentStatus::Draft->value)
                                 ->visible(fn (): bool => auth()->user()?->can('Publish:Product') ?? false)
-                                ->default(false),
+                                ->live(),
+
+                            DateTimePicker::make('scheduled_at')
+                                ->label('Schedule Publish')
+                                ->native(false)
+                                ->timezone(config('app.timezone'))
+                                ->visible(fn (Get $get): bool => $get('status') === ContentStatus::Future->value),
 
                             DateTimePicker::make('release_date')
                                 ->label('Release Date')

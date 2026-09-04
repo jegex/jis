@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Enums\ContentStatus;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\Components\TitleWithSlug;
 use App\Filament\Schemas\SeoSchema;
@@ -11,9 +12,9 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 final class PostForm
@@ -37,10 +38,17 @@ final class PostForm
                     Section::make('Publishing')
                         ->collapsible()
                         ->schema([
-                            Toggle::make('is_published')
-                                ->label('Published')
-                                ->default(false)
-                                ->visible(fn (): bool => auth()->user()?->can('Publish:Post') ?? false),
+                            Select::make('status')
+                                ->options(ContentStatus::class)
+                                ->default(ContentStatus::Draft->value)
+                                ->visible(fn (): bool => auth()->user()?->can('Publish:Post') ?? false)
+                                ->live(),
+
+                            DateTimePicker::make('scheduled_at')
+                                ->label('Schedule Publish')
+                                ->native(false)
+                                ->timezone(config('app.timezone'))
+                                ->visible(fn (Get $get): bool => $get('status') === ContentStatus::Future->value),
 
                             DateTimePicker::make('published_at')
                                 ->default(now()),

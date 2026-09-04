@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ContentStatus;
 use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Biostate\FilamentMenuBuilder\Traits\Menuable;
@@ -19,6 +20,8 @@ use RalphJSmit\Laravel\SEO\SchemaCollection;
 use RalphJSmit\Laravel\SEO\Support\AlternateTag;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\SchemaOrg\Schema;
@@ -29,7 +32,7 @@ use Spatie\Translatable\HasTranslations;
 final class Page extends Model implements HasMedia, HasRichContent
 {
     /** @use HasFactory<PageFactory> */
-    use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations;
+    use HasFactory, HasSEO, HasTranslatableRouteKey, HasTranslatableSlug, HasTranslations, LogsActivity;
 
     use InteractsWithMedia;
     use InteractsWithRichContent;
@@ -41,15 +44,21 @@ final class Page extends Model implements HasMedia, HasRichContent
         'title',
         'content',
         'slug',
-        'is_published',
+        'status',
+        'scheduled_at',
     ];
 
     protected $hidden = [];
 
+    protected $attributes = [
+        'status' => ContentStatus::Draft->value,
+    ];
+
     protected function casts(): array
     {
         return [
-            'is_published' => 'boolean',
+            'status' => ContentStatus::class,
+            'scheduled_at' => 'datetime',
         ];
     }
 
@@ -74,6 +83,14 @@ final class Page extends Model implements HasMedia, HasRichContent
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug')
             ->doNotGenerateSlugsOnUpdate();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['title', 'content', 'slug'])
+            ->useAttributeRawValues(['title', 'content', 'slug'])
+            ->dontLogEmptyChanges();
     }
 
     public function getDynamicSEOData(): SEOData
@@ -123,8 +140,13 @@ final class Page extends Model implements HasMedia, HasRichContent
             );
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === ContentStatus::Publish;
+    }
+
     protected static function booted(): void
     {
-        self::addGlobalScope('published', fn (Builder $query) => $query->where('is_published', true));
+        self::addGlobalScope('published', fn (Builder $query) => $query->where('status', ContentStatus::Publish));
     }
 }
