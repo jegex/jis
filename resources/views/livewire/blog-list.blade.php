@@ -62,7 +62,7 @@
                     <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-500" />
                 </span>
                 <input
-                    class="w-full outline-none pl-10"
+                    class="w-full outline-none pl-10 border-0"
                     type="search"
                     wire:model.live.debounce.300ms="search" placeholder="{{ __('Search posts...') }}">
             </div>
