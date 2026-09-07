@@ -13,8 +13,16 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
+                <form method="POST" action="{{ route('password.email') }}" id="forgot-password-form" class="flex flex-col gap-6">
                     @csrf
+
+                    @error('g-recaptcha-response')
+                        <div class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
 
                     <x-input
                         variant="flat"
@@ -37,4 +45,22 @@
             </div>
         </div>
     </div>
+
+    @if (config('services.recaptcha.enabled'))
+        @push('scripts')
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+        <script>
+            document.getElementById('forgot-password-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const form = this;
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'forgot-password' }).then(function (token) {
+                        document.getElementById('g-recaptcha-response').value = token;
+                        form.submit();
+                    });
+                });
+            });
+        </script>
+        @endpush
+    @endif
 </x-layouts.app>

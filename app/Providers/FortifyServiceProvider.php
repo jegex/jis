@@ -8,6 +8,10 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\SendPasswordResetLinkRequest;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,11 +26,20 @@ use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Controllers\NewPasswordController as FortifyNewPasswordController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController as FortifyRegisteredUserController;
+use Laravel\Fortify\Http\Requests\LoginRequest as FortifyLoginRequest;
+use Laravel\Fortify\Http\Requests\SendPasswordResetLinkRequest as FortifySendPasswordResetLinkRequest;
 
 final class FortifyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(FortifyLoginRequest::class, LoginRequest::class);
+        $this->app->bind(FortifySendPasswordResetLinkRequest::class, SendPasswordResetLinkRequest::class);
+        $this->app->bind(FortifyRegisteredUserController::class, RegisteredUserController::class);
+        $this->app->bind(FortifyNewPasswordController::class, NewPasswordController::class);
+
         $this->app->instance(LoginResponseContract::class, new class implements LoginResponseContract
         {
             public function toResponse($request)

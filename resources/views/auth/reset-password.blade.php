@@ -6,9 +6,16 @@
                     <h1 class="text-3xl font-bold text-gray-900 font-display">{{ __('Reset Password') }}</h1>
                 </div>
 
-                <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-6">
+                <form method="POST" action="{{ route('password.update') }}" id="reset-password-form" class="flex flex-col gap-6">
                     @csrf
 
+                    @error('g-recaptcha-response')
+                        <div class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                     <input type="hidden" name="token" value="{{ $token }}">
 
                     <x-input
@@ -44,4 +51,22 @@
             </div>
         </div>
     </div>
+
+    @if (config('services.recaptcha.enabled'))
+        @push('scripts')
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+        <script>
+            document.getElementById('reset-password-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const form = this;
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', { action: 'reset-password' }).then(function (token) {
+                        document.getElementById('g-recaptcha-response').value = token;
+                        form.submit();
+                    });
+                });
+            });
+        </script>
+        @endpush
+    @endif
 </x-layouts.app>

@@ -43,4 +43,13 @@ return [
         ],
     ],
 
+    'recaptcha' => [
+        'enabled' => env('RECAPTCHA_ENABLED', false),
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'min_score' => (float) env('RECAPTCHA_MIN_SCORE', 0.5),
+        'fail_open' => (bool) env('RECAPTCHA_FAIL_OPEN', true),
+        'hostname_strict' => (bool) env('RECAPTCHA_HOSTNAME_STRICT', true),
+    ],
+
 ];
