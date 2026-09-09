@@ -127,7 +127,7 @@ final class Post extends Model implements HasMedia, HasRichContent
             ->useDisk('public')
             ->singleFile()
             ->registerMediaConversions(function () {
-                $this->addMediaConversion('thumb')->width(300)->height(200);
+                $this->addMediaConversion('thumb')->width(638)->height(359);
             });
     }
 
