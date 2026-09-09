@@ -35,15 +35,17 @@ final class ProductsTable
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
                     ->sortable(),
 
-                TextColumn::make('release_date')
-                    ->label('Release Date')
-                    ->dateTime()
+                TextColumn::make('is_preorder')
+                    ->label('Type')
                     ->sortable()
                     ->badge()
                     ->color(fn ($record) => $record->isPreorder() ? 'warning' : 'success')
-                    ->formatStateUsing(fn ($record) => $record->isPreorder()
-                        ? 'Preorder'
-                        : ($record->release_date ? 'Released' : 'Regular')),
+                    ->formatStateUsing(fn ($record) => $record->isPreorder() ? 'Preorder' : 'Regular'),
+
+                TextColumn::make('preorder_label')
+                    ->label('Wait Period')
+                    ->sortable(false)
+                    ->toggleable(),
 
                 TextColumn::make('discount_price')
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
@@ -68,17 +70,15 @@ final class ProductsTable
                     ->preload(),
 
                 SelectFilter::make('release_status')
-                    ->label('Release Status')
+                    ->label('Type')
                     ->options([
                         'regular' => 'Regular',
                         'preorder' => 'Preorder',
-                        'released' => 'Released',
                     ])
                     ->query(function ($query, $state) {
                         return match ($state['value'] ?? null) {
-                            'regular' => $query->whereNull('release_date'),
-                            'preorder' => $query->where('release_date', '>', now()),
-                            'released' => $query->where('release_date', '<=', now())->whereNotNull('release_date'),
+                            'regular' => $query->where('is_preorder', false),
+                            'preorder' => $query->where('is_preorder', true),
                             default => $query,
                         };
                     }),

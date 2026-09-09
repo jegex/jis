@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\ReleasePreordersCommand;
 use App\Enums\EmailTemplateType;
+use App\Enums\PreorderInterval;
 use App\Models\Currency;
 use App\Models\EmailTemplate;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\DownloadService;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
-function createPreorderProduct(): Product
+function createPreorderProduct(int $duration = 1, PreorderInterval $interval = PreorderInterval::Week): Product
 {
     $currency = Currency::query()->firstOrCreate(['code' => 'IDR'], [
         'name' => 'Indonesian Rupiah',
@@ -23,32 +22,39 @@ function createPreorderProduct(): Product
         'is_default' => true,
     ]);
 
-    return Product::factory()->create([
+    return Product::factory()->preorder($duration, $interval)->create([
         'currency_id' => $currency->id,
         'price' => 100000,
-        'release_date' => Carbon::now()->addDays(7),
     ]);
 }
 
-it('identifies a product as preorder when release_date is in the future', function () {
+it('identifies a product as preorder when is_preorder is true', function () {
     $product = createPreorderProduct();
 
-    expect($product->isPreorder())->toBeTrue()
-        ->and($product->isReleased())->toBeFalse();
+    expect($product->isPreorder())->toBeTrue();
 });
 
-it('identifies a product as released when release_date is null', function () {
-    $product = Product::factory()->create(['release_date' => null]);
+it('identifies a product as not preorder when is_preorder is false', function () {
+    $product = Product::factory()->create([
+        'is_preorder' => false,
+    ]);
 
-    expect($product->isPreorder())->toBeFalse()
-        ->and($product->isReleased())->toBeTrue();
+    expect($product->isPreorder())->toBeFalse();
 });
 
-it('identifies a product as released when release_date is in the past', function () {
-    $product = Product::factory()->create(['release_date' => Carbon::now()->subDay()]);
+it('computes preorder release date from paid_at', function () {
+    $product = createPreorderProduct(2, PreorderInterval::Week);
+    $paidAt = now();
 
-    expect($product->isPreorder())->toBeFalse()
-        ->and($product->isReleased())->toBeTrue();
+    $releaseDate = $product->preorderReleaseDate($paidAt);
+
+    expect($releaseDate->toDateString())->toBe($paidAt->copy()->addWeeks(2)->toDateString());
+});
+
+it('returns null preorder release date for non-preorder product', function () {
+    $product = Product::factory()->create(['is_preorder' => false]);
+
+    expect($product->preorderReleaseDate())->toBeNull();
 });
 
 it('blocks download for preorder products until released', function () {
@@ -87,7 +93,7 @@ it('allows download for preorder products after release', function () {
     expect($canDownload)->toBeTrue();
 });
 
-it('releases preorders and sends emails via artisan command', function () {
+it('sends preorder release email manually', function () {
     Storage::fake('local');
     Mail::fake();
 
@@ -99,7 +105,6 @@ it('releases preorders and sends emails via artisan command', function () {
     ]);
 
     $product = createPreorderProduct();
-    $product->update(['release_date' => Carbon::now()->subDay()]);
 
     $order = Order::factory()->forUser()->paid()->create([
         'preorder_released_at' => null,
@@ -111,13 +116,11 @@ it('releases preorders and sends emails via artisan command', function () {
         'quantity' => 1,
     ]);
 
-    $exitCode = Artisan::call(ReleasePreordersCommand::class);
-
-    expect($exitCode)->toBe(0);
+    app(App\Services\EmailService::class)->sendPreorderRelease($order);
 
     $order->refresh();
 
-    expect($order->preorder_released_at)->not->toBeNull();
+    expect($order->preorder_released_at)->toBeNull();
 });
 
 it('includes preorder variables in confirmation email', function () {

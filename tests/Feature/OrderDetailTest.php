@@ -7,10 +7,9 @@ use App\Models\Currency;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
-function createOrderDetailProduct(?Carbon $releaseDate = null): Product
+function createOrderDetailPreorderProduct(): Product
 {
     $currency = Currency::query()->firstOrCreate(['code' => 'IDR'], [
         'name' => 'Indonesian Rupiah',
@@ -20,16 +19,15 @@ function createOrderDetailProduct(?Carbon $releaseDate = null): Product
         'is_default' => true,
     ]);
 
-    return Product::factory()->create([
+    return Product::factory()->preorder()->create([
         'currency_id' => $currency->id,
         'price' => 100000,
-        'release_date' => $releaseDate,
     ]);
 }
 
 it('hides download button for unreleased preorder items', function () {
     $user = User::factory()->create();
-    $product = createOrderDetailProduct(Carbon::now()->addDays(7));
+    $product = createOrderDetailPreorderProduct();
 
     $order = Order::factory()->forUser()->paid()->create(['user_id' => $user->id]);
     $order->items()->create([
@@ -42,13 +40,13 @@ it('hides download button for unreleased preorder items', function () {
     Livewire::actingAs($user)
         ->test(OrderDetail::class, ['order' => $order])
         ->assertOk()
-        ->assertSee('Pending Release')
+        ->assertSee('Pending Delivery')
         ->assertDontSeeText('Download');
 });
 
 it('shows download button for released preorder items', function () {
     $user = User::factory()->create();
-    $product = createOrderDetailProduct(Carbon::now()->addDays(7));
+    $product = createOrderDetailPreorderProduct();
 
     $order = Order::factory()->forUser()->paid()->create([
         'user_id' => $user->id,
@@ -69,7 +67,19 @@ it('shows download button for released preorder items', function () {
 
 it('shows download button for non-preorder items', function () {
     $user = User::factory()->create();
-    $product = createOrderDetailProduct();
+    $currency = Currency::query()->firstOrCreate(['code' => 'IDR'], [
+        'name' => 'Indonesian Rupiah',
+        'symbol' => 'Rp',
+        'exchange_rate' => 1,
+        'decimal_place' => 0,
+        'is_default' => true,
+    ]);
+
+    $product = Product::factory()->create([
+        'currency_id' => $currency->id,
+        'price' => 100000,
+        'is_preorder' => false,
+    ]);
 
     $order = Order::factory()->forUser()->paid()->create(['user_id' => $user->id]);
     $order->items()->create([

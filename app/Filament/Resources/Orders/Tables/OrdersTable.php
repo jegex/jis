@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Orders\Tables;
 
-use App\Enums\EmailTemplateType;
 use App\Enums\OrderStatus;
-use App\Jobs\SendOrderEmail;
 use App\Models\Order;
+use App\Services\EmailService;
 use App\Services\InvoicePdfGenerator;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -57,6 +56,13 @@ final class OrdersTable
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-'),
+
+                TextColumn::make('preorder_released_at')
+                    ->label('Product Sent')
+                    ->dateTime()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->color(fn ($state) => $state ? 'success' : 'warning'),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -102,11 +108,32 @@ final class OrdersTable
                         ->visible(fn (Order $record): bool => $record->status === OrderStatus::Paid)
                         ->requiresConfirmation()
                         ->action(function (Order $record): void {
-                            SendOrderEmail::dispatch($record, EmailTemplateType::OrderConfirmation);
+                            app(EmailService::class)->sendOrderConfirmation($record);
 
                             Notification::make()
-                                ->title('Confirmation email queued')
-                                ->body("Order confirmation for {$record->order_number} will be resent with the invoice attached.")
+                                ->title('Confirmation email sent')
+                                ->body("Order confirmation for {$record->order_number} has been resent with the invoice attached.")
+                                ->success()
+                                ->send();
+                        }),
+
+                    Action::make('send_preorder_product')
+                        ->label('Send Product')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->color('success')
+                        ->visible(fn (Order $record): bool => $record->status === OrderStatus::Paid
+                            && $record->preorder_released_at === null
+                            && $record->items->first()?->product?->isPreorder())
+                        ->requiresConfirmation()
+                        ->tooltip('Send the preorder download link to the customer via email.')
+                        ->action(function (Order $record): void {
+                            $record->update(['preorder_released_at' => now()]);
+
+                            app(EmailService::class)->sendPreorderRelease($record);
+
+                            Notification::make()
+                                ->title('Product sent')
+                                ->body("Download link for {$record->order_number} has been sent to the customer.")
                                 ->success()
                                 ->send();
                         }),

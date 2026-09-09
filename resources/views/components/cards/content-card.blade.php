@@ -47,7 +47,7 @@
         <x-button-card href="{{ $buttonRoute ? route($buttonRoute, $item) : '#' }}">
             @if($showPrice)
                 <x-slot name="price">
-                    {{ Str::price($item->price, $item->currency_code) }}
+                    {{ $item instanceof \App\Models\Product ? $item->display_price : Str::price($item->price, $item->currency_code) }}
                 </x-slot>
             @endif
             {{ $buttonLabel }}

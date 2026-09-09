@@ -27,7 +27,7 @@
                         {{ __('Preorder') }}
                     </span>
                     <span class="text-sm text-gray-500">
-                        {{ __('Available on :date', ['date' => $product->release_date->translatedFormat('j F Y')]) }}
+                        {{ __('Delivered within :period after payment', ['period' => $product->preorder_label]) }}
                     </span>
                 </div>
             @endif
@@ -77,7 +77,7 @@
                 <div class="lg:px-8 py-10 lg:col-span-2 mt-8 lg:mt-0">
                     <div class="lg:sticky lg:top-24 space-y-6" data-animate="fade-up" data-delay="0.1">
                         <div class="pb-6 border-b border-gray-200 dark:border-gray-700">
-                            <p class="text-4xl font-bold text-primary">{{ Str::price($product->price, $product->currency_code) }}</p>
+                            <p class="text-4xl font-bold text-primary">{{ $product->display_price }}</p>
                         </div>
 
                         <div class="pt-4">
@@ -85,7 +85,7 @@
 
                                class="flex items-center justify-center gap-3 w-full px-6 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors">
                                 <x-heroicon-o-shopping-cart class="w-5 h-5"/>
-                                {{ __('Buy Now') }}
+                                {{ $product->isFree() ? __('Get Free') : __('Buy Now') }}
                             </a>
                         </div>
 
@@ -96,7 +96,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <x-heroicon-o-arrow-down-tray class="w-4 h-4 {{ $product->isPreorder() ? 'text-yellow-500' : 'text-success' }}"/>
-                                <span>{{ $product->isPreorder() ? __('Download will be available after release') : __('Instant download after payment') }}</span>
+                                <span>{{ $product->isPreorder() ? __('Product sent within :period after payment', ['period' => $product->preorder_label]) : __('Instant download after payment') }}</span>
                             </div>
                         </div>
 

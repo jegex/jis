@@ -38,7 +38,7 @@
                             @if($isPreorder && !$canDownload)
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
                                     <x-heroicon-o-clock class="w-3.5 h-3.5"/>
-                                    {{ __('Pending Release') }} &mdash; {{ $item->product->release_date?->translatedFormat('j F Y') }}
+                                    {{ __('Pending Delivery') }} &mdash; {{ __('within :period', ['period' => $item->product->preorder_label]) }}
                                 </span>
                             @else
                                 <a href="{{ route('payment.download', ['order' => $order->order_number, 'product' => $item->product]) }}"

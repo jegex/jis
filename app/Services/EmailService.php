@@ -52,7 +52,9 @@ final class EmailService
 
         $product = $order->items->first()?->product;
         $isPreorder = $product?->isPreorder() ?? false;
-        $releaseDate = $product?->release_date?->translatedFormat('j F Y');
+        $releaseDate = $isPreorder
+            ? $product->preorderReleaseDate($order->paid_at)?->translatedFormat('j F Y')
+            : null;
 
         $downloadUrl = $this->getDownloadUrl($order);
         $productName = $order->items->first()?->product_name ?? '';
@@ -111,7 +113,9 @@ final class EmailService
         $locale = $order->user?->locale ?? app()->getLocale();
         $product = $order->items->first()?->product;
         $isPreorder = $product?->isPreorder() ?? false;
-        $releaseDate = $product?->release_date?->translatedFormat('j F Y');
+        $releaseDate = $isPreorder
+            ? $product->preorderReleaseDate($order->paid_at)?->translatedFormat('j F Y')
+            : null;
         $downloadUrl = $this->getDownloadUrl($order);
 
         $downloadSection = $isPreorder

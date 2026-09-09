@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Products\Schemas;
 use App\Actions\GenerateSlug;
 use App\Enums\CategoryType;
 use App\Enums\ContentStatus;
+use App\Enums\PreorderInterval;
 use App\Filament\Schemas\Components\MoneyInput;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\Components\TitleWithSlug;
@@ -78,11 +79,25 @@ final class ProductForm
                                 ->timezone(config('app.timezone'))
                                 ->visible(fn (Get $get): bool => $get('status') === ContentStatus::Future->value),
 
-                            DateTimePicker::make('release_date')
-                                ->label('Release Date')
-                                ->helperText('Leave empty for regular products. Set a future date for preorders.')
-                                ->native(false)
-                                ->timezone(config('app.timezone')),
+                            Toggle::make('is_preorder')
+                                ->label('Preorder')
+                                ->helperText('Enable to offer this product as a preorder. The product will be sent manually via email after payment.')
+                                ->live(),
+
+                            Group::make([
+                                TextInput::make('preorder_duration')
+                                    ->label('Waiting Period')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                Select::make('preorder_interval')
+                                    ->label('Interval')
+                                    ->options(PreorderInterval::class)
+                                    ->default(PreorderInterval::Day->value)
+                                    ->required(),
+                            ])->columns(2)
+                                ->visible(fn (Get $get): bool => (bool) $get('is_preorder')),
 
                             Select::make('category_id')
                                 ->relationship('category', 'name')

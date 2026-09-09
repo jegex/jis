@@ -7,10 +7,12 @@ namespace App\Models;
 use App\Casts\MoneyCast;
 use App\Enums\CategoryType;
 use App\Enums\ContentStatus;
+use App\Enums\PreorderInterval;
 use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Awcodes\RicherEditor\Plugins\CodeBlockShikiPlugin;
 use Biostate\FilamentMenuBuilder\Traits\Menuable;
+use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
@@ -57,7 +59,9 @@ final class Product extends Model implements HasMedia, HasRichContent
         'price',
         'status',
         'scheduled_at',
-        'release_date',
+        'is_preorder',
+        'preorder_duration',
+        'preorder_interval',
         'category_id',
         'currency_id',
     ];
@@ -78,7 +82,8 @@ final class Product extends Model implements HasMedia, HasRichContent
             'price' => MoneyCast::class,
             'status' => ContentStatus::class,
             'scheduled_at' => 'datetime',
-            'release_date' => 'datetime',
+            'is_preorder' => 'boolean',
+            'preorder_interval' => PreorderInterval::class,
         ];
     }
 
@@ -142,7 +147,7 @@ final class Product extends Model implements HasMedia, HasRichContent
 
         $this
             ->addMediaConversion('thumb')
-            ->fit(Fit::Contain, 300, 300)
+            ->fit(Fit::Contain, 400, 300)
             ->nonQueued();
     }
 
@@ -233,12 +238,47 @@ final class Product extends Model implements HasMedia, HasRichContent
 
     public function isPreorder(): bool
     {
-        return $this->release_date !== null && $this->release_date->isFuture();
+        return $this->is_preorder && $this->preorder_duration !== null && $this->preorder_interval !== null;
     }
 
-    public function isReleased(): bool
+    public function isFree(): bool
     {
-        return $this->release_date === null || $this->release_date->isPast();
+        return (int) $this->price === 0;
+    }
+
+    public function getDisplayPriceAttribute(): ?string
+    {
+        if ($this->isFree()) {
+            return __('Free');
+        }
+
+        return $this->price !== null
+            ? Str::price($this->price, $this->currency_code)
+            : null;
+    }
+
+    public function preorderReleaseDate(?CarbonInterface $from = null): ?CarbonInterface
+    {
+        if (! $this->isPreorder()) {
+            return null;
+        }
+
+        return $this->preorder_interval->addTo($from ?? now(), (int) $this->preorder_duration);
+    }
+
+    public function getPreorderLabelAttribute(): ?string
+    {
+        if (! $this->isPreorder()) {
+            return null;
+        }
+
+        $unit = match ($this->preorder_interval) {
+            PreorderInterval::Day => $this->preorder_duration > 1 ? 'days' : 'day',
+            PreorderInterval::Week => $this->preorder_duration > 1 ? 'weeks' : 'week',
+            PreorderInterval::Month => $this->preorder_duration > 1 ? 'months' : 'month',
+        };
+
+        return "{$this->preorder_duration} {$unit}";
     }
 
     public function isPublished(): bool
@@ -248,7 +288,7 @@ final class Product extends Model implements HasMedia, HasRichContent
 
     public function scopePreorder(Builder $query): Builder
     {
-        return $query->where('release_date', '>', now());
+        return $query->where('is_preorder', true);
     }
 
     public function getPublishedAtAttribute(): mixed

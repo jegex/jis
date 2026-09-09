@@ -6,11 +6,14 @@ namespace App\Livewire;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Events\PaymentSuccess;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
 use Exception;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 final class CheckoutForm extends Component
@@ -105,6 +108,14 @@ final class CheckoutForm extends Component
 
             $order->update(['status' => OrderStatus::CreatingPayment]);
 
+            if ((int) $order->total <= 0) {
+                $this->completeFreeOrder($order);
+
+                $this->redirect(route('payment.success'));
+
+                return;
+            }
+
             $defaultGateway = config('payment.default', 'midtrans');
             $targetCurrency = config("payment.types.{$defaultGateway}.target_currency", 'IDR');
 
@@ -187,5 +198,19 @@ final class CheckoutForm extends Component
             ->layout('layouts.app', [
                 'model' => $this->product,
             ]);
+    }
+
+    private function completeFreeOrder(Order $order): void
+    {
+        $orderService = app(OrderService::class);
+
+        $orderService->markAsPaid(
+            $order,
+            'free',
+            'FREE-'.Str::upper($order->order_number),
+            orderId: $order->order_number,
+        );
+
+        PaymentSuccess::dispatch($order->refresh());
     }
 }

@@ -14,8 +14,6 @@ Artisan::command('inspire', function () {
 Schedule::command('queue:prune-failed --hours=48')->daily();
 Schedule::command('queue:prune-batching --hours=48')->daily();
 
-Schedule::command('preorders:release')->hourly();
-
 Schedule::command('content:publish-scheduled')->everyMinute()->withoutOverlapping();
 
 Schedule::call(function () {

@@ -8,7 +8,7 @@
             @endif
             <div>
                 <h2 class="text-lg font-semibold text-gray-900">{{ $product->title }}</h2>
-                <p class="text-2xl font-bold text-primary mt-1">{{ Str::price($product->price, $product->currency_code) }}</p>
+                <p class="text-2xl font-bold text-primary mt-1">{{ $product->display_price }}</p>
             </div>
         </div>
     </div>
@@ -78,48 +78,50 @@
             wire:target="pay"
             id="pay-button"
         >
-            <span wire:loading.remove wire:target="pay">{{ __('Pay Now') }}</span>
+            <span wire:loading.remove wire:target="pay">{{ $total <= 0 ? __('Get Free') : __('Pay Now') }}</span>
             <span wire:loading wire:target="pay">{{ __('Processing...') }}</span>
         </x-button>
     </form>
 
-    @push('scripts')
-        <script src="{{ $snapJsUrl }}" data-client-key="{{ $clientKey }}"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const snapToken = '{{ session('snap_token') }}';
+    @if($total > 0)
+        @push('scripts')
+            <script src="{{ $snapJsUrl }}" data-client-key="{{ $clientKey }}"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const snapToken = '{{ session('snap_token') }}';
 
-                if (snapToken) {
-                    window.snap.pay(snapToken, {
-                        onSuccess: function () {
-                            window.location.href = '{{ route("payment.success") }}';
-                        },
-                        onPending: function () {
-                            window.location.href = '{{ route("payment.pending") }}';
-                        },
-                        onError: function () {
-                            window.location.href = '{{ route("payment.error") }}';
-                        },
-                    });
-                }
+                    if (snapToken) {
+                        window.snap.pay(snapToken, {
+                            onSuccess: function () {
+                                window.location.href = '{{ route("payment.success") }}';
+                            },
+                            onPending: function () {
+                                window.location.href = '{{ route("payment.pending") }}';
+                            },
+                            onError: function () {
+                                window.location.href = '{{ route("payment.error") }}';
+                            },
+                        });
+                    }
 
-                window.addEventListener('snap-token-ready', function (event) {
-                    window.snap.pay(event.detail.token, {
-                        onSuccess: function () {
-                            window.location.href = '{{ route("payment.success") }}';
-                        },
-                        onPending: function () {
-                            window.location.href = '{{ route("payment.pending") }}';
-                        },
-                        onError: function () {
-                            window.location.href = '{{ route("payment.error") }}';
-                        },
-                        onClose: function () {
-                            document.getElementById('pay-button')?.removeAttribute('disabled');
-                        },
+                    window.addEventListener('snap-token-ready', function (event) {
+                        window.snap.pay(event.detail.token, {
+                            onSuccess: function () {
+                                window.location.href = '{{ route("payment.success") }}';
+                            },
+                            onPending: function () {
+                                window.location.href = '{{ route("payment.pending") }}';
+                            },
+                            onError: function () {
+                                window.location.href = '{{ route("payment.error") }}';
+                            },
+                            onClose: function () {
+                                document.getElementById('pay-button')?.removeAttribute('disabled');
+                            },
+                        });
                     });
                 });
-            });
-        </script>
-    @endpush
+            </script>
+        @endpush
+    @endif
 </div>

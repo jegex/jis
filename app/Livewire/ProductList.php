@@ -36,9 +36,8 @@ final class ProductList extends Component
 
         if ($this->releaseStatus) {
             match ($this->releaseStatus) {
-                'regular' => $query->whereNull('release_date'),
-                'preorder' => $query->where('release_date', '>', now()),
-                'released' => $query->where('release_date', '<=', now())->whereNotNull('release_date'),
+                'regular' => $query->where('is_preorder', false),
+                'preorder' => $query->where('is_preorder', true),
             };
         }
 
