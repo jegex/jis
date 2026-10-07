@@ -10,7 +10,6 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 final class OrderService
 {
@@ -40,7 +39,6 @@ final class OrderService
             $total = $subtotal - $discount;
 
             $order = Order::create([
-                'order_number' => $this->generateOrderNumber(),
                 'user_id' => $user?->id,
                 'guest_email' => $guestEmail,
                 'guest_name' => $guestName,
@@ -76,15 +74,6 @@ final class OrderService
 
             return $order;
         });
-    }
-
-    public function generateOrderNumber(): string
-    {
-        do {
-            $number = 'ORD-'.Str::upper(Str::random(8));
-        } while (Order::where('order_number', $number)->exists());
-
-        return $number;
     }
 
     public function markAsPaid(Order $order, string $gateway, string $transactionId, ?string $orderId = null): void

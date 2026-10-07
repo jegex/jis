@@ -8,7 +8,10 @@ use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Filament\Supports\SettingPage;
 use App\Models\Language;
+use App\Services\OrderNumberFormat;
+use App\Services\OrderNumberGenerator;
 use BackedEnum;
+use Closure;
 use Filament\Forms\Components\CodeEditor;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
@@ -22,6 +25,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -243,6 +247,53 @@ final class Settings extends SettingPage
                                     ->helperText('Small note displayed at the bottom of the invoice'),
                             ]),
 
+                        Tab::make('Order')
+                            ->icon(Heroicon::OutlinedClipboardDocumentList)
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('order_number_format')
+                                            ->label('Format')
+                                            ->placeholder(OrderNumberFormat::DEFAULT_PATTERN)
+                                            ->required()
+                                            ->live(debounce: 300)
+                                            ->helperText('Tokens: {YYYY}, {YY}, {MM}, {DD} for dates; {SEQ} (never resets), {SEQ:M} (resets monthly), {SEQ:Y} (resets yearly). Use exactly one sequence token; anything outside tokens becomes literal text.')
+                                            ->rules([
+                                                fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {
+                                                    $error = OrderNumberFormat::validate(
+                                                        (string) $value,
+                                                        (int) $get('order_number_padding'),
+                                                    );
+
+                                                    if ($error !== null) {
+                                                        $fail($error);
+                                                    }
+                                                },
+                                            ]),
+                                        TextInput::make('order_number_padding')
+                                            ->label('Sequence digits')
+                                            ->helperText('Padding of the sequence number, e.g. 4 gives 0001')
+                                            ->numeric()
+                                            ->minValue(OrderNumberFormat::MIN_PADDING)
+                                            ->maxValue(OrderNumberFormat::MAX_PADDING)
+                                            ->default(OrderNumberFormat::DEFAULT_PADDING)
+                                            ->live(debounce: 300),
+                                    ]),
+
+                                Text::make(function (Get $get): string {
+                                    $numbers = app(OrderNumberGenerator::class)->preview(
+                                        count: 3,
+                                        pattern: (string) $get('order_number_format'),
+                                        padding: (int) $get('order_number_padding'),
+                                    );
+
+                                    return $numbers === []
+                                        ? 'Enter a valid format to preview the next order numbers.'
+                                        : 'Preview — next: '.implode(', ', $numbers);
+                                })
+                                    ->color('gray'),
+                            ]),
+
                         Tab::make('Custom Scripts')
                             ->icon(Heroicon::OutlinedCodeBracket)
                             ->schema([
@@ -255,5 +306,17 @@ final class Settings extends SettingPage
                             ]),
                     ]),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return array_replace_recursive([
+            'order_number_format' => OrderNumberFormat::DEFAULT_PATTERN,
+            'order_number_padding' => OrderNumberFormat::DEFAULT_PADDING,
+        ], $data);
     }
 }

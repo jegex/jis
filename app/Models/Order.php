@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Enums\OrderStatus;
+use App\Services\OrderNumberGenerator;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -88,6 +89,15 @@ final class Order extends Model implements HasMedia
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::creating(function (Order $order): void {
+            if (blank($order->order_number)) {
+                $order->order_number = app(OrderNumberGenerator::class)->generate();
+            }
+        });
     }
 
     #[Scope]
