@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ContentStatus;
-use App\Enums\PreorderInterval;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Product;
@@ -45,15 +44,6 @@ final class ProductFactory extends Factory
         return $this->state([
             'status' => ContentStatus::Future,
             'scheduled_at' => $at ?? now()->addDay(),
-        ]);
-    }
-
-    public function preorder(int $duration = 1, PreorderInterval $interval = PreorderInterval::Week): static
-    {
-        return $this->state([
-            'is_preorder' => true,
-            'preorder_duration' => $duration,
-            'preorder_interval' => $interval,
         ]);
     }
 }

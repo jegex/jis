@@ -18,9 +18,7 @@ final class ProductList extends Component
 
     public ?int $tagId = null;
 
-    public ?string $releaseStatus = null;
-
-    protected $queryString = ['categoryId', 'tagId', 'search', 'sort', 'releaseStatus'];
+    protected $queryString = ['categoryId', 'tagId', 'search', 'sort'];
 
     public function render()
     {
@@ -32,13 +30,6 @@ final class ProductList extends Component
 
         if ($this->tagId) {
             $query->whereHas('tags', fn ($q) => $q->where('tags.id', $this->tagId));
-        }
-
-        if ($this->releaseStatus) {
-            match ($this->releaseStatus) {
-                'regular' => $query->where('is_preorder', false),
-                'preorder' => $query->where('is_preorder', true),
-            };
         }
 
         if ($this->search) {
@@ -74,12 +65,6 @@ final class ProductList extends Component
     public function filterByTag(?int $id)
     {
         $this->tagId = $id;
-        $this->resetPage();
-    }
-
-    public function filterByReleaseStatus(?string $status)
-    {
-        $this->releaseStatus = $status;
         $this->resetPage();
     }
 }

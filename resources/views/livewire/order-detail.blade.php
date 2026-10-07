@@ -30,22 +30,10 @@
                             </div>
                         </div>
                         @if($order->status->value === 'paid' && $item->product)
-                            @php
-                                $isPreorder = $item->product->isPreorder();
-                                $canDownload = !$isPreorder || $order->preorder_released_at !== null;
-                            @endphp
-
-                            @if($isPreorder && !$canDownload)
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                                    <x-heroicon-o-clock class="w-3.5 h-3.5"/>
-                                    {{ __('Pending Delivery') }} &mdash; {{ __('within :period', ['period' => $item->product->preorder_label]) }}
-                                </span>
-                            @else
-                                <a href="{{ route('payment.download', ['order' => $order->order_number, 'product' => $item->product]) }}"
-                                   class="text-sm bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
-                                    {{ __('Download') }}
-                                </a>
-                            @endif
+                            <a href="{{ route('payment.download', ['order' => $order->order_number, 'product' => $item->product]) }}"
+                               class="text-sm bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                                {{ __('Download') }}
+                            </a>
                         @endif
                     </div>
                 @endforeach

@@ -35,18 +35,6 @@ final class ProductsTable
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
                     ->sortable(),
 
-                TextColumn::make('is_preorder')
-                    ->label('Type')
-                    ->sortable()
-                    ->badge()
-                    ->color(fn ($record) => $record->isPreorder() ? 'warning' : 'success')
-                    ->formatStateUsing(fn ($record) => $record->isPreorder() ? 'Preorder' : 'Regular'),
-
-                TextColumn::make('preorder_label')
-                    ->label('Wait Period')
-                    ->sortable(false)
-                    ->toggleable(),
-
                 TextColumn::make('discount_price')
                     ->money(fn ($record) => $record->currency?->code ?? 'IDR')
                     ->sortable()
@@ -68,20 +56,6 @@ final class ProductsTable
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
-
-                SelectFilter::make('release_status')
-                    ->label('Type')
-                    ->options([
-                        'regular' => 'Regular',
-                        'preorder' => 'Preorder',
-                    ])
-                    ->query(function ($query, $state) {
-                        return match ($state['value'] ?? null) {
-                            'regular' => $query->where('is_preorder', false),
-                            'preorder' => $query->where('is_preorder', true),
-                            default => $query,
-                        };
-                    }),
             ])
             ->recordActions([
                 EditAction::make(),

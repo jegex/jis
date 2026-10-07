@@ -29,7 +29,6 @@ final class SendOrderEmail implements ShouldQueue
         match ($this->type) {
             EmailTemplateType::OrderConfirmation => $emailService->sendOrderConfirmation($this->order),
             EmailTemplateType::DownloadLink => $emailService->sendDownloadLink($this->order),
-            EmailTemplateType::PreorderRelease => $emailService->sendPreorderRelease($this->order),
             default => null,
         };
     }

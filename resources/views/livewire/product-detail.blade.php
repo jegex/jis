@@ -21,17 +21,6 @@
                     class="inline-block text-secondary font-semibold text-xs tracking-widest uppercase mb-2">{{ $product->category->name }}</span>
             @endif
 
-            @if($product->isPreorder())
-                <div class="inline-flex items-center gap-2 mb-2">
-                    <span class="px-3 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
-                        {{ __('Preorder') }}
-                    </span>
-                    <span class="text-sm text-gray-500">
-                        {{ __('Delivered within :period after payment', ['period' => $product->preorder_label]) }}
-                    </span>
-                </div>
-            @endif
-
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white font-display leading-tight">{{ $product->title }}</h1>
         </div>
 
@@ -95,8 +84,8 @@
                                 <span>{{ __('Secure checkout with Midtrans') }}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <x-heroicon-o-arrow-down-tray class="w-4 h-4 {{ $product->isPreorder() ? 'text-yellow-500' : 'text-success' }}"/>
-                                <span>{{ $product->isPreorder() ? __('Product sent within :period after payment', ['period' => $product->preorder_label]) : __('Instant download after payment') }}</span>
+                                <x-heroicon-o-arrow-down-tray class="w-4 h-4 text-success"/>
+                                <span>{{ __('Instant download after payment') }}</span>
                             </div>
                         </div>
 

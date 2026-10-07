@@ -40,7 +40,6 @@ final class Order extends Model implements HasMedia
         'coupon_id',
         'status',
         'paid_at',
-        'preorder_released_at',
         'notes',
         'locale',
     ];
@@ -53,7 +52,6 @@ final class Order extends Model implements HasMedia
             'discount' => MoneyCast::class,
             'total' => MoneyCast::class,
             'paid_at' => 'datetime',
-            'preorder_released_at' => 'datetime',
         ];
     }
 

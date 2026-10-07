@@ -56,13 +56,6 @@ final class OrdersTable
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-'),
-
-                TextColumn::make('preorder_released_at')
-                    ->label('Product Sent')
-                    ->dateTime()
-                    ->sortable()
-                    ->placeholder('-')
-                    ->color(fn ($state) => $state ? 'success' : 'warning'),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -113,27 +106,6 @@ final class OrdersTable
                             Notification::make()
                                 ->title('Confirmation email sent')
                                 ->body("Order confirmation for {$record->order_number} has been resent with the invoice attached.")
-                                ->success()
-                                ->send();
-                        }),
-
-                    Action::make('send_preorder_product')
-                        ->label('Send Product')
-                        ->icon('heroicon-o-paper-airplane')
-                        ->color('success')
-                        ->visible(fn (Order $record): bool => $record->status === OrderStatus::Paid
-                            && $record->preorder_released_at === null
-                            && $record->items->first()?->product?->isPreorder())
-                        ->requiresConfirmation()
-                        ->tooltip('Send the preorder download link to the customer via email.')
-                        ->action(function (Order $record): void {
-                            $record->update(['preorder_released_at' => now()]);
-
-                            app(EmailService::class)->sendPreorderRelease($record);
-
-                            Notification::make()
-                                ->title('Product sent')
-                                ->body("Download link for {$record->order_number} has been sent to the customer.")
                                 ->success()
                                 ->send();
                         }),

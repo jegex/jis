@@ -76,6 +76,4 @@ it('completes a free order without calling a payment gateway', function () {
     expect($payment)->not->toBeNull()
         ->and($payment->gateway)->toBe('free')
         ->and($payment->status)->toBe(PaymentStatus::Success);
-
-    expect($order->preorder_released_at)->not->toBeNull();
 });
