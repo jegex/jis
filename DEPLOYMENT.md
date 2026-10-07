@@ -205,17 +205,24 @@ npm run build
 
 Buka **cPanel → Cron Jobs** → Tambahkan cron job baru.
 
-### 5.1 Laravel Scheduler (Recommended / Future-Proof)
+### 5.1 Scheduled Tasks (Cron Per-Command)
 
-Jalankan tiap menit untuk trigger scheduled tasks. Saat ini belum ada task terjadwal, tapi cron ini disarankan sebagai **future-proof** — jika nanti Anda menambahkan task di `routes/console.php`, cron akan menjalankannya otomatis tanpa perlu setup ulang.
+> **Penting:** PHP di shared hosting cPanel umumnya menonaktifkan `proc_open` (`disable_functions`), sehingga Laravel Scheduler (`schedule:run`) **tidak bisa jalan** dan selalu gagal dengan error `The Process class relies on proc_open`. Karena itu semua task dijadwalkan **langsung per command**, tanpa `schedule:run`.
+
+Tambahkan cron berikut (sesuaikan path `/home/username/laravel` dan path `/usr/local/bin/php` — cek lewat `which php` di terminal cPanel):
 
 ```cron
-* * * * * /usr/local/bin/php /home/username/laravel/artisan schedule:run >> /dev/null 2>&1
+* * * * * /usr/local/bin/php /home/username/laravel/artisan content:publish-scheduled >> /dev/null 2>&1
+*/15 * * * * /usr/local/bin/php /home/username/laravel/artisan orders:expire-pending >> /dev/null 2>&1
+0 0 * * * /usr/local/bin/php /home/username/laravel/artisan queue:prune-failed --hours=48 >> /dev/null 2>&1
+0 0 * * * /usr/local/bin/php /home/username/laravel/artisan queue:prune-batching --hours=48 >> /dev/null 2>&1
 ```
 
 **Sesuaikan:**
 - `username` → username cPanel Anda
 - `laravel` → sesuaikan jika folder penamaan berbeda
+
+> **Catatan:** Jika nanti pindah ke server yang mendukung `proc_open`, task bisa dikembalikan ke Laravel Scheduler di `routes/console.php` dan cukup satu cron `schedule:run`.
 
 ### 5.2 Queue Worker (jika pakai antrian)
 
@@ -240,8 +247,8 @@ Cek apakah cron berjalan:
 # Cek log
 cat ~/laravel/storage/logs/laravel.log | grep "processed successfully"
 
-# Cek jadwal
-cd ~/laravel && php artisan schedule:list
+# Cek command terdaftar
+cd ~/laravel && php artisan list | grep -E "content:publish|orders:expire"
 ```
 
 ---
