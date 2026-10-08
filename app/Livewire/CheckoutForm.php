@@ -20,6 +20,8 @@ final class CheckoutForm extends Component
 {
     public Product $product;
 
+    public int $quantity = 1;
+
     public string $couponCode = '';
 
     public string $appliedCode = '';
@@ -45,8 +47,30 @@ final class CheckoutForm extends Component
         }
 
         $this->product = $product->load('category', 'media');
-        $this->subtotal = (int) $product->price;
-        $this->total = $this->subtotal;
+        $this->recalculate();
+    }
+
+    public function updatedQuantity(): void
+    {
+        $this->quantity = min(max((int) $this->quantity, 1), $this->maxQuantity());
+        $this->recalculate();
+    }
+
+    public function incrementQuantity(): void
+    {
+        $this->quantity = min($this->quantity + 1, $this->maxQuantity());
+        $this->recalculate();
+    }
+
+    public function decrementQuantity(): void
+    {
+        $this->quantity = max($this->quantity - 1, 1);
+        $this->recalculate();
+    }
+
+    public function maxQuantity(): int
+    {
+        return (int) config('checkout.max_quantity', 99);
     }
 
     public function updatedCouponCode(): void
@@ -62,9 +86,8 @@ final class CheckoutForm extends Component
         $this->resetValidation('couponCode');
 
         if (blank($this->couponCode)) {
-            $this->discount = 0;
-            $this->total = $this->subtotal;
             $this->appliedCode = '';
+            $this->recalculate();
 
             return;
         }
@@ -73,9 +96,8 @@ final class CheckoutForm extends Component
         $error = $service->getValidationError($this->couponCode, $this->product);
 
         if ($error) {
-            $this->discount = 0;
-            $this->total = $this->subtotal;
             $this->appliedCode = '';
+            $this->recalculate();
             $this->addError('couponCode', $error);
 
             return;
@@ -84,9 +106,8 @@ final class CheckoutForm extends Component
         $coupon = $service->validateCoupon($this->couponCode, $this->product);
 
         if ($coupon) {
-            $this->discount = $service->calculateDiscount($coupon, $this->subtotal);
-            $this->total = $this->subtotal - $this->discount;
             $this->appliedCode = $this->couponCode;
+            $this->recalculate();
         }
     }
 
@@ -104,6 +125,7 @@ final class CheckoutForm extends Component
                 guestEmail: $user ? null : session('guest_email'),
                 guestName: $user ? null : session('guest_name'),
                 couponCode: $this->appliedCode ?: null,
+                quantity: $this->quantity,
             );
 
             $order->update(['status' => OrderStatus::CreatingPayment]);
@@ -198,6 +220,25 @@ final class CheckoutForm extends Component
             ->layout('layouts.app', [
                 'model' => $this->product,
             ]);
+    }
+
+    private function recalculate(): void
+    {
+        $this->subtotal = (int) ($this->product->price * $this->quantity);
+        $this->discount = 0;
+
+        if ($this->appliedCode !== '') {
+            $service = app(CouponService::class);
+            $coupon = $service->validateCoupon($this->appliedCode, $this->product);
+
+            if ($coupon) {
+                $this->discount = $service->calculateDiscount($coupon, $this->subtotal);
+            } else {
+                $this->appliedCode = '';
+            }
+        }
+
+        $this->total = $this->subtotal - $this->discount;
     }
 
     private function completeFreeOrder(Order $order): void

@@ -11,6 +11,38 @@
                 <p class="text-2xl font-bold text-primary mt-1">{{ $product->display_price }}</p>
             </div>
         </div>
+
+        <div class="mt-4 flex items-center gap-3">
+            <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
+            <div class="flex items-center border border-gray-300 rounded-md">
+                <button
+                    type="button"
+                    wire:click="decrementQuantity"
+                    aria-label="{{ __('Decrease quantity') }}"
+                    class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    @disabled($quantity <= 1)
+                >
+                    <x-heroicon-m-minus class="w-4 h-4" />
+                </button>
+                <input
+                    id="quantity"
+                    type="number"
+                    wire:model.live="quantity"
+                    min="1"
+                    max="{{ $this->maxQuantity() }}"
+                    class="w-14 border-0 text-center focus:ring-0 focus:border-0 p-0"
+                />
+                <button
+                    type="button"
+                    wire:click="incrementQuantity"
+                    aria-label="{{ __('Increase quantity') }}"
+                    class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    @disabled($quantity >= $this->maxQuantity())
+                >
+                    <x-heroicon-m-plus class="w-4 h-4" />
+                </button>
+            </div>
+        </div>
     </div>
 
     @if(session('error'))
@@ -52,7 +84,7 @@
 {{--            @enderror--}}
 {{--        </div>--}}
 
-        <div class="border-t border-gray-200 pt-4 flex flex-col gap-2">
+        <div class="border-t border-gray-200 pt-4 flex flex-col gap-2" aria-live="polite">
             <div class="flex justify-between text-gray-600">
                 <span>{{ __('Subtotal') }}</span>
                 <span>{{ Str::price($subtotal, $product->currency_code) }}</span>

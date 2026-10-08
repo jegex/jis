@@ -24,9 +24,11 @@ final class OrderService
         ?string $guestName = null,
         ?string $couponCode = null,
         ?string $notes = null,
+        int $quantity = 1,
     ): Order {
-        return DB::transaction(function () use ($product, $user, $guestEmail, $guestName, $couponCode, $notes) {
-            $subtotal = $product->price;
+        return DB::transaction(function () use ($product, $user, $guestEmail, $guestName, $couponCode, $notes, $quantity) {
+            $quantity = min(max($quantity, 1), (int) config('checkout.max_quantity', 99));
+            $subtotal = (int) ($product->price * $quantity);
             $discount = 0;
 
             if ($couponCode) {
@@ -56,7 +58,7 @@ final class OrderService
                 'product_id' => $product->id,
                 'product_name' => $product->title,
                 'price' => $product->price,
-                'quantity' => 1,
+                'quantity' => $quantity,
             ]);
 
             if (isset($coupon) && $discount > 0) {

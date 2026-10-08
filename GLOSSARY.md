@@ -19,3 +19,7 @@ _Avoid_: order number, receipt
 **Invoice Number**:
 The sequential document number of an Invoice (`INV/...`), independent of the Order Number.
 _Avoid_: order number
+
+**Quantity**:
+The number of units of a single product in an Order Item, chosen at checkout; the line total is the unit price multiplied by the quantity.
+_Avoid_: amount, count, units

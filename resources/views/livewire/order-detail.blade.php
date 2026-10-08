@@ -26,7 +26,10 @@
                             @endif
                             <div>
                                 <p class="text-sm font-medium text-gray-900">{{ $item->product->title }}</p>
-                                <p class="text-sm text-gray-500">{{ Str::price($item->price, $order->currency_code) }}</p>
+                                <p class="text-sm text-gray-500">
+                                    {{ Str::price($item->price, $order->currency_code) }}
+                                    <span class="text-gray-400">× {{ $item->quantity }}</span>
+                                </p>
                             </div>
                         </div>
                         @if($order->status->value === 'paid' && $item->product)
