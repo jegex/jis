@@ -1,46 +1,49 @@
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="text-3xl font-bold text-gray-900 mb-8">{{ __('Checkout') }}</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div class="flex items-center gap-4">
-            @if($product->getFirstMediaUrl('cover', 'thumb'))
-                <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt="{{ $product->title }}" class="w-20 h-20 object-cover rounded">
-            @endif
-            <div>
+        <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center gap-4 md:gap-6">
+            <div class="flex items-center gap-4">
+                @if($product->getFirstMediaUrl('cover', 'thumb'))
+                    <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt="{{ $product->title }}" class="w-20 h-20 object-cover rounded">
+                @endif
                 <h2 class="text-lg font-semibold text-gray-900">{{ $product->title }}</h2>
-                <p class="text-2xl font-bold text-primary mt-1">{{ $product->display_price }}</p>
             </div>
-        </div>
 
-        <div class="mt-4 flex items-center gap-3">
-            <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
-            <div class="flex items-center border border-gray-300 rounded-md">
-                <button
-                    type="button"
-                    wire:click="decrementQuantity"
-                    aria-label="{{ __('Decrease quantity') }}"
-                    class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                    @disabled($quantity <= 1)
-                >
-                    <x-heroicon-m-minus class="w-4 h-4" />
-                </button>
-                <input
-                    id="quantity"
-                    type="number"
-                    wire:model.live="quantity"
-                    min="1"
-                    max="{{ $this->maxQuantity() }}"
-                    class="w-14 border-0 text-center focus:ring-0 focus:border-0 p-0"
-                />
-                <button
-                    type="button"
-                    wire:click="incrementQuantity"
-                    aria-label="{{ __('Increase quantity') }}"
-                    class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                    @disabled($quantity >= $this->maxQuantity())
-                >
-                    <x-heroicon-m-plus class="w-4 h-4" />
-                </button>
+            <div class="flex items-center gap-3">
+                <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
+                <div class="flex items-center border border-gray-300 rounded-md">
+                    <button
+                        type="button"
+                        wire:click="decrementQuantity"
+                        aria-label="{{ __('Decrease quantity') }}"
+                        class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        @disabled($quantity <= 1)
+                    >
+                        <x-heroicon-m-minus class="w-4 h-4" />
+                    </button>
+                    <input
+                        id="quantity"
+                        type="number"
+                        wire:model.live="quantity"
+                        min="1"
+                        max="{{ $this->maxQuantity() }}"
+                        class="w-14 border-0 text-center focus:ring-0 focus:border-0 p-0"
+                    />
+                    <button
+                        type="button"
+                        wire:click="incrementQuantity"
+                        aria-label="{{ __('Increase quantity') }}"
+                        class="w-11 h-11 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        @disabled($quantity >= $this->maxQuantity())
+                    >
+                        <x-heroicon-m-plus class="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="md:text-right" aria-live="polite">
+                <p class="text-2xl font-bold text-primary">{{ Str::price($subtotal, $product->currency_code) }}</p>
             </div>
         </div>
     </div>
