@@ -82,3 +82,8 @@ function grantSettingsPermissions(User $user): void
 {
     grantPermissions($user, ['View:Settings', 'Update:Settings']);
 }
+
+function grantOrderPermissions(User $user): void
+{
+    grantPermissions($user, ['ViewAny:Order', 'View:Order', 'Update:Order']);
+}

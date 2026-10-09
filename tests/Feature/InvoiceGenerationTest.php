@@ -182,6 +182,46 @@ it('includes payment information on the invoice', function () {
         ->not->toContain('Payment method');
 });
 
+it('shows the order item description on the invoice', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->items()->first()->update(['description' => "Hull Construction Drawings\nMachinery Drawings"]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Hull Construction Drawings')
+        ->toContain('Machinery Drawings');
+});
+
+it('falls back to the product name when an item has no description', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Produk Uji Coba')
+        ->not->toContain('Hull Construction Drawings');
+});
+
+it('falls back to the product name when the description is blank whitespace', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->items()->first()->update(['description' => '   ']);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Produk Uji Coba');
+});
+
 it('shows quotation, purchase order references and the due date', function () {
     Storage::fake('local');
     $order = createPaidOrderWithItem();

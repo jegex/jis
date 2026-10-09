@@ -14,6 +14,7 @@ final class OrderItem extends Model
         'order_id',
         'product_id',
         'product_name',
+        'description',
         'price',
         'quantity',
     ];
@@ -34,5 +35,12 @@ final class OrderItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withoutGlobalScope('published');
+    }
+
+    public function invoiceDescription(): string
+    {
+        return blank($this->description)
+            ? (string) $this->product_name
+            : (string) $this->description;
     }
 }

@@ -17,7 +17,7 @@ it('stores the quotation and purchase order references on an order', function ()
 
     $user = User::factory()->admin()->create();
 
-    grantPermissions($user, ['ViewAny:Order', 'View:Order', 'Update:Order']);
+    grantOrderPermissions($user);
 
     Livewire::actingAs($user)
         ->test(EditOrder::class, ['record' => $order->id])

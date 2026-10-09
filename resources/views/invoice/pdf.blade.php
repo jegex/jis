@@ -365,7 +365,7 @@
             @forelse ($order->items as $item)
                 <tr>
                     <td class="no">{{ $loop->iteration }}</td>
-                    <td class="description">{{ $item->product_name }}</td>
+                    <td class="description">{!! nl2br(e($item->invoiceDescription())) !!}</td>
                     <td class="qty">{{ rtrim(rtrim(number_format((float) $item->quantity, 2, '.', ''), '0'), '.') }}</td>
                     <td class="price nowrap">{{ Str::price($item->price, $order->currency_code) }}</td>
                     <td class="amount nowrap">{{ Str::price($item->price * $item->quantity, $order->currency_code) }}</td>
