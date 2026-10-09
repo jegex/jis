@@ -16,7 +16,7 @@ Two ways to hold the new billing concepts were considered: make them global Invo
 - Hold **per-Order**: `quotation_number`, `po_number`, `down_payment_percent`. Hold **global Invoice settings**: `invoice_due_days` (default 14), `invoice_tax_percent` (default 0), `invoice_payment_terms`, `invoice_banner`.
 - The Invoice's **Total Amount is the amount billed now**, not the full Order total:
   - `base = subtotal − discount`
-  - `dp = down_payment_percent ? round(base × down_payment_percent / 100) : base`
+  - `dp = down_payment_percent > 0 ? round(base × down_payment_percent / 100) : base` (a blank or zero percentage bills the full base)
   - `tax = round(base × invoice_tax_percent / 100)`
   - `total = dp + tax`
 - **Due Date** = issue date + `invoice_due_days`.

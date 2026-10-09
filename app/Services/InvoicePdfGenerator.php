@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\PaymentStatus;
+use App\Models\Currency;
 use App\Models\Invoice;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -18,6 +19,8 @@ final class InvoicePdfGenerator
     public const MEDIA_COLLECTION = 'invoices';
 
     public const DUE_DAYS_DEFAULT = 14;
+
+    public const TAX_PERCENT_DEFAULT = 0;
 
     public function __construct(
         private InvoiceNumberGenerator $numberGenerator,
@@ -81,6 +84,7 @@ final class InvoicePdfGenerator
             'logoData' => $this->logoData(),
             'footerNote' => (string) setting('invoice_footer_note', ''),
             'couponCode' => $order->discounts->first()?->coupon_snapshot['code'],
+            'totals' => $this->totals($order),
             'payment' => $order->payments
                 ->where('status', PaymentStatus::Success)
                 ->sortByDesc('paid_at')
@@ -104,6 +108,41 @@ final class InvoicePdfGenerator
             ->first();
 
         return $media;
+    }
+
+    /**
+     * @return array{subtotal: float, discount: float, base: float, downPaymentPercent: float|null, downPayment: float, taxPercent: float, tax: float, total: float}
+     */
+    private function totals(Order $order): array
+    {
+        $decimalPlaces = (int) (Currency::where('code', $order->currency_code)->value('decimal_place') ?? 0);
+
+        $subtotal = round((float) $order->subtotal, $decimalPlaces);
+        $discount = round((float) $order->discount, $decimalPlaces);
+        $base = round($subtotal - $discount, $decimalPlaces);
+
+        $downPaymentPercent = $order->down_payment_percent;
+        $downPaymentPercent = ($downPaymentPercent === null || $downPaymentPercent <= 0)
+            ? null
+            : $downPaymentPercent;
+
+        $downPayment = $downPaymentPercent === null
+            ? $base
+            : round($base * $downPaymentPercent / 100, $decimalPlaces);
+
+        $taxPercent = (float) (setting('invoice_tax_percent') ?? self::TAX_PERCENT_DEFAULT);
+        $tax = round($base * $taxPercent / 100, $decimalPlaces);
+
+        return [
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'base' => $base,
+            'downPaymentPercent' => $downPaymentPercent,
+            'downPayment' => $downPayment,
+            'taxPercent' => $taxPercent,
+            'tax' => $tax,
+            'total' => round($downPayment + $tax, $decimalPlaces),
+        ];
     }
 
     /**

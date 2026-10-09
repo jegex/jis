@@ -53,6 +53,14 @@ final class OrderForm
                                     ->required()
                                     ->numeric()
                                     ->prefix(fn (Get $get) => $get('currency_code') ?? 'IDR'),
+
+                                TextInput::make('down_payment_percent')
+                                    ->label('Down Payment (%)')
+                                    ->helperText('Bills this share of the total now. Leave blank to bill the full amount.')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->suffix('%'),
                             ]),
                     ])
                     ->columnSpan(['lg' => fn (?Order $record) => $record === null ? 3 : 2]),

@@ -259,6 +259,122 @@ it('derives the due date from the configured invoice due days', function () {
     expect($html)->toContain($dueDate);
 });
 
+it('renders a non-VAT line and bills the full base when no down payment is set', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Non-VAT')
+        ->toContain(__('Total Amount'))
+        ->toContain('Rp 150.000')
+        ->not->toContain('DP ');
+});
+
+it('bills the down payment share when a down payment percentage is set', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->update(['down_payment_percent' => 50]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('DP 50%')
+        ->toContain('Rp 75.000')
+        ->toContain('Non-VAT');
+});
+
+it('applies VAT to the discounted base and totals the down payment plus tax', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_tax_percent', 11);
+    $order = createPaidOrderWithItem();
+    $order->update(['down_payment_percent' => 50, 'discount' => 50000]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('DP 50%')
+        ->toContain('PPN 11%')
+        ->toContain('Rp 61.000')
+        ->not->toContain('Non-VAT');
+});
+
+it('bills the full base plus VAT when no down payment is set', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_tax_percent', 11);
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $totals = $generator->buildViewData($order)['totals'];
+
+    expect($totals['downPaymentPercent'])->toBeNull()
+        ->and($totals['downPayment'])->toBe(150000.0)
+        ->and($totals['tax'])->toBe(16500.0)
+        ->and($totals['total'])->toBe(166500.0);
+});
+
+it('treats a zero down payment percentage as no down payment', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_tax_percent', 11);
+    $order = createPaidOrderWithItem();
+    $order->update(['down_payment_percent' => 0]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $totals = $generator->buildViewData($order)['totals'];
+
+    expect($totals['downPaymentPercent'])->toBeNull()
+        ->and($totals['downPayment'])->toBe(150000.0)
+        ->and($totals['total'])->toBe(166500.0);
+});
+
+it('computes base, down payment, tax and total at the view-data seam', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_tax_percent', 11);
+    $order = createPaidOrderWithItem();
+    $order->update(['down_payment_percent' => 50, 'discount' => 50000]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    expect($generator->buildViewData($order)['totals'])->toMatchArray([
+        'subtotal' => 150000.0,
+        'discount' => 50000.0,
+        'base' => 100000.0,
+        'downPaymentPercent' => 50.0,
+        'downPayment' => 50000.0,
+        'taxPercent' => 11.0,
+        'tax' => 11000.0,
+        'total' => 61000.0,
+    ]);
+});
+
+it('rounds the down payment and tax to whole currency units', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_tax_percent', 11);
+    $order = createPaidOrderWithItem();
+    $order->update(['subtotal' => 100001, 'discount' => 0, 'down_payment_percent' => 33]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $totals = $generator->buildViewData($order)['totals'];
+
+    expect($totals['downPayment'])->toBe(33000.0)
+        ->and($totals['tax'])->toBe(11000.0)
+        ->and($totals['total'])->toBe(44000.0);
+});
+
 it('dispatches a chained invoice and email jobs on payment success', function () {
     Storage::fake('local');
     Bus::fake();

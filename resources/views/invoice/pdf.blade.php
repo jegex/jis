@@ -350,6 +350,8 @@
         </table>
     </div>
 
+    @php($trimZeros = fn (float $value): string => rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.'))
+
     <table class="items">
         <thead>
             <tr>
@@ -366,7 +368,7 @@
                 <tr>
                     <td class="no">{{ $loop->iteration }}</td>
                     <td class="description">{!! nl2br(e($item->invoiceDescription())) !!}</td>
-                    <td class="qty">{{ rtrim(rtrim(number_format((float) $item->quantity, 2, '.', ''), '0'), '.') }}</td>
+                    <td class="qty">{{ $trimZeros($item->quantity) }}</td>
                     <td class="price nowrap">{{ Str::price($item->price, $order->currency_code) }}</td>
                     <td class="amount nowrap">{{ Str::price($item->price * $item->quantity, $order->currency_code) }}</td>
                 </tr>
@@ -381,10 +383,10 @@
     <table class="totals">
         <tr>
             <td class="label">{{ __('Subtotal') }}</td>
-            <td class="value nowrap">{{ Str::price($order->subtotal, $order->currency_code) }}</td>
+            <td class="value nowrap">{{ Str::price($totals['subtotal'], $order->currency_code) }}</td>
         </tr>
 
-        @if ((float) $order->discount > 0)
+        @if ($totals['discount'] > 0)
             <tr>
                 <td class="label">
                     {{ __('Discount') }}
@@ -392,13 +394,32 @@
                         ({{ $couponCode }})
                     @endif
                 </td>
-                <td class="value nowrap">-{{ Str::price($order->discount, $order->currency_code) }}</td>
+                <td class="value nowrap">-{{ Str::price($totals['discount'], $order->currency_code) }}</td>
+            </tr>
+        @endif
+
+        @if ($totals['downPaymentPercent'] !== null)
+            <tr>
+                <td class="label">DP {{ $trimZeros($totals['downPaymentPercent']) }}%</td>
+                <td class="value nowrap">{{ Str::price($totals['downPayment'], $order->currency_code) }}</td>
+            </tr>
+        @endif
+
+        @if ($totals['taxPercent'] > 0)
+            <tr>
+                <td class="label">PPN {{ $trimZeros($totals['taxPercent']) }}%</td>
+                <td class="value nowrap">{{ Str::price($totals['tax'], $order->currency_code) }}</td>
+            </tr>
+        @else
+            <tr>
+                <td class="label">{{ __('Non-VAT') }}</td>
+                <td class="value nowrap">{{ Str::price(0, $order->currency_code) }}</td>
             </tr>
         @endif
 
         <tr class="grand-total">
-            <td class="label">{{ __('Grand Total') }}</td>
-            <td class="value nowrap">{{ Str::price($order->total, $order->currency_code) }}</td>
+            <td class="label">{{ __('Total Amount') }}</td>
+            <td class="value nowrap">{{ Str::price($totals['total'], $order->currency_code) }}</td>
         </tr>
     </table>
 

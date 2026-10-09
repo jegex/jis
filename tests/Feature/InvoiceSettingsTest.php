@@ -43,3 +43,38 @@ it('saves the invoice due days setting', function () {
 
     expect((int) Setting::get('invoice_due_days'))->toBe(21);
 });
+
+it('shows the default invoice tax percent when nothing is saved yet', function () {
+    $user = User::factory()->admin()->create();
+    grantSettingsPermissions($user);
+
+    Livewire::actingAs($user)
+        ->test(Settings::class)
+        ->assertFormSet([
+            'invoice_tax_percent' => 0,
+        ]);
+});
+
+it('saves the invoice tax percent setting', function () {
+    $user = User::factory()->admin()->create();
+    grantSettingsPermissions($user);
+
+    Livewire::actingAs($user)
+        ->test(Settings::class)
+        ->fillForm([
+            'date_format' => 'Y-m-d',
+            'time_format' => 'H:i',
+            'products_per_page' => 9,
+            'posts_per_page' => 9,
+            'supported_locales' => ['en', 'id'],
+            'default_locale' => 'en',
+            'invoice_number_format' => 'INV/{YYYY}/{MM}/{SEQ:M}',
+            'invoice_number_padding' => 4,
+            'invoice_due_days' => 21,
+            'invoice_tax_percent' => 11,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect((float) Setting::get('invoice_tax_percent'))->toBe(11.0);
+});

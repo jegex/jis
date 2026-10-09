@@ -41,6 +41,7 @@ final class Order extends Model implements HasMedia
         'coupon_id',
         'quotation_number',
         'po_number',
+        'down_payment_percent',
         'status',
         'paid_at',
         'notes',
@@ -54,6 +55,7 @@ final class Order extends Model implements HasMedia
             'subtotal' => MoneyCast::class,
             'discount' => MoneyCast::class,
             'total' => MoneyCast::class,
+            'down_payment_percent' => 'float',
             'paid_at' => 'datetime',
         ];
     }

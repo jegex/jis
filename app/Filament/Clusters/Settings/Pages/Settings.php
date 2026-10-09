@@ -256,6 +256,14 @@ final class Settings extends SettingPage
                                     ->minValue(0)
                                     ->default(InvoicePdfGenerator::DUE_DAYS_DEFAULT),
 
+                                TextInput::make('invoice_tax_percent')
+                                    ->label('VAT / PPN (%)')
+                                    ->helperText('Applied to the invoice subtotal after discount. Leave 0 to print a Non-VAT line.')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->default(InvoicePdfGenerator::TAX_PERCENT_DEFAULT),
+
                                 Section::make('Numbering')
                                     ->schema([
                                         Grid::make(2)
@@ -376,6 +384,7 @@ final class Settings extends SettingPage
             'invoice_number_format' => InvoiceNumberGenerator::DEFAULT_PATTERN,
             'invoice_number_padding' => InvoiceNumberGenerator::DEFAULT_PADDING,
             'invoice_due_days' => InvoicePdfGenerator::DUE_DAYS_DEFAULT,
+            'invoice_tax_percent' => InvoicePdfGenerator::TAX_PERCENT_DEFAULT,
         ], $data);
     }
 }
