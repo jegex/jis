@@ -204,6 +204,21 @@
             font-size: 12px;
         }
 
+        .amount-in-words {
+            width: 42%;
+            margin-left: auto;
+            margin-top: 4mm;
+        }
+
+        .amount-in-words-label {
+            font-weight: 600;
+            margin-bottom: 1mm;
+        }
+
+        .amount-in-words-value {
+            font-style: italic;
+        }
+
         .box {
             margin-top: 7mm;
             border: 1px solid #222;
@@ -422,6 +437,11 @@
             <td class="value nowrap">{{ Str::price($totals['total'], $order->currency_code) }}</td>
         </tr>
     </table>
+
+    <div class="amount-in-words">
+        <div class="amount-in-words-label">{{ __('Total Amount in Words') }}</div>
+        <div class="amount-in-words-value">{{ $totalInWords }}</div>
+    </div>
 
     @if ($payment)
         <div class="box">

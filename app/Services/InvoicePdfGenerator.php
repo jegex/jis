@@ -24,6 +24,7 @@ final class InvoicePdfGenerator
 
     public function __construct(
         private InvoiceNumberGenerator $numberGenerator,
+        private AmountInWords $amountInWords,
     ) {}
 
     public function generate(Order $order): Invoice
@@ -72,6 +73,8 @@ final class InvoicePdfGenerator
         $invoice = $order->invoice;
         $issuedAt = $invoice?->issued_at ?? $order->paid_at ?? $order->created_at ?? now();
         $dueDays = (int) (setting('invoice_due_days') ?? self::DUE_DAYS_DEFAULT);
+        $locale = $order->locale ?? config('app.fallback_locale');
+        $totals = $this->totals($order);
 
         return [
             'order' => $order,
@@ -84,7 +87,8 @@ final class InvoicePdfGenerator
             'logoData' => $this->logoData(),
             'footerNote' => (string) setting('invoice_footer_note', ''),
             'couponCode' => $order->discounts->first()?->coupon_snapshot['code'],
-            'totals' => $this->totals($order),
+            'totals' => $totals,
+            'totalInWords' => $this->amountInWords->toWords($totals['total'], $order->currency_code, $locale),
             'payment' => $order->payments
                 ->where('status', PaymentStatus::Success)
                 ->sortByDesc('paid_at')
@@ -95,7 +99,7 @@ final class InvoicePdfGenerator
                 'address' => $order->user?->address ?? '-',
                 'phone' => $order->user?->phone ?? '-',
             ],
-            'locale' => $order->locale ?? config('app.fallback_locale'),
+            'locale' => $locale,
         ];
     }
 

@@ -375,6 +375,34 @@ it('rounds the down payment and tax to whole currency units', function () {
         ->and($totals['total'])->toBe(44000.0);
 });
 
+it('renders the total amount in words in the order locale', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    app()->setLocale('id');
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Seratus lima puluh ribu Indonesian Rupiah (IDR)')
+        ->toContain(__('Total Amount in Words'));
+});
+
+it('renders the total amount in words in english', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->update(['locale' => 'en']);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    app()->setLocale('en');
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('One Hundred Fifty Thousand Indonesian Rupiah (IDR)');
+});
+
 it('dispatches a chained invoice and email jobs on payment success', function () {
     Storage::fake('local');
     Bus::fake();
