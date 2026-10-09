@@ -98,7 +98,7 @@ it('renders localized invoice content in indonesian', function () {
     $html = view('invoice.pdf', $generator->buildViewData($order))->render();
     app()->setLocale(config('app.fallback_locale'));
 
-    expect($html)->toContain('FAKTUR')
+    expect($html)->toContain('<h1 class="document-title">FAKTUR</h1>')
         ->toContain($order->invoice->number)
         ->toContain('Produk Uji Coba')
         ->toContain('Pelanggan')
@@ -116,7 +116,7 @@ it('renders localized invoice content in english', function () {
     app()->setLocale('en');
     $html = view('invoice.pdf', $generator->buildViewData($order))->render();
 
-    expect($html)->toContain('INVOICE')
+    expect($html)->toContain('<h1 class="document-title">INVOICE</h1>')
         ->toContain('Customer');
 });
 
@@ -180,6 +180,43 @@ it('includes payment information on the invoice', function () {
         ->toContain('Informasi pembayaran')
         ->not->toContain('Metode pembayaran')
         ->not->toContain('Payment method');
+});
+
+it('shows quotation, purchase order references and the due date', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->update([
+        'quotation_number' => 'QT-2026-001',
+        'po_number' => 'PO-2026-777',
+    ]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    $dueDate = $order->invoice->issued_at->copy()->addDays(14)->translatedFormat('j F Y');
+
+    expect($html)->toContain('QT-2026-001')
+        ->toContain('PO-2026-777')
+        ->toContain($dueDate)
+        ->toContain(__('Quotation No.'))
+        ->toContain(__('PO No.'));
+});
+
+it('derives the due date from the configured invoice due days', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_due_days', 30);
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    $dueDate = $order->invoice->issued_at->copy()->addDays(30)->translatedFormat('j F Y');
+
+    expect($html)->toContain($dueDate);
 });
 
 it('dispatches a chained invoice and email jobs on payment success', function () {

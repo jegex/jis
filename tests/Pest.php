@@ -58,13 +58,27 @@ function refreshApplicationWithLocale(string $locale): void
     app()->setLocale($locale);
 }
 
-function grantSettingsPermissions(User $user): void
+function ensureIdrCurrency(): App\Models\Currency
 {
-    $permissions = ['View:Settings', 'Update:Settings'];
+    return App\Models\Currency::query()->firstOrCreate(['code' => 'IDR'], [
+        'name' => 'Indonesian Rupiah',
+        'symbol' => 'Rp',
+        'exchange_rate' => 1,
+        'decimal_place' => 0,
+        'is_default' => true,
+    ]);
+}
 
+function grantPermissions(User $user, array $permissions): void
+{
     foreach ($permissions as $permission) {
         Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
     }
 
     $user->givePermissionTo($permissions);
+}
+
+function grantSettingsPermissions(User $user): void
+{
+    grantPermissions($user, ['View:Settings', 'Update:Settings']);
 }

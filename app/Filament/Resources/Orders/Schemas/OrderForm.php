@@ -105,6 +105,14 @@ final class OrderForm
                 ->searchable()
                 ->preload(),
 
+            TextInput::make('quotation_number')
+                ->maxLength(255)
+                ->label('Quotation No.'),
+
+            TextInput::make('po_number')
+                ->maxLength(255)
+                ->label('PO No.'),
+
             Textarea::make('notes')
                 ->maxLength(1000)
                 ->columnSpanFull(),

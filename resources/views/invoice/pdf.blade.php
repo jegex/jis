@@ -19,7 +19,7 @@
             padding: 0;
             background: #fff;
             color: #222;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 11px;
         }
 
@@ -135,12 +135,12 @@
         }
 
         .items th {
-            background: #080884;
-            color: #fff;
+            background: #EBF0F6;
+            color: #222;
             border: 1px solid #222;
             padding: 1.5mm 2mm;
             font-size: 11px;
-            font-weight: 400;
+            font-weight: 700;
             text-align: left;
         }
 
@@ -286,18 +286,33 @@
         </div>
 
         <div class="header-right">
-            <h1 class="document-title">{{ __('DELIVERY NOTE') }}</h1>
+            <h1 class="document-title">{{ __('INVOICE') }}</h1>
 
             <table class="meta-table">
                 <tr>
-                    <td class="meta-label">{{ __('Date') }}</td>
-                    <td class="meta-colon">:</td>
-                    <td>{{ ($order->paid_at ?? $order->created_at)->translatedFormat('j F Y H:i') }}</td>
-                </tr>
-                <tr>
-                    <td class="meta-label">{{ __('Sales Order No.') }}</td>
+                    <td class="meta-label">{{ __('Invoice No.') }}</td>
                     <td class="meta-colon">:</td>
                     <td>{{ $invoice->number }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">{{ __('Date') }}</td>
+                    <td class="meta-colon">:</td>
+                    <td>{{ $issuedAt->translatedFormat('j F Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">{{ __('Due Date') }}</td>
+                    <td class="meta-colon">:</td>
+                    <td>{{ $dueDate->translatedFormat('j F Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">{{ __('Quotation No.') }}</td>
+                    <td class="meta-colon">:</td>
+                    <td>{{ $quotationNumber ?: '-' }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">{{ __('PO No.') }}</td>
+                    <td class="meta-colon">:</td>
+                    <td>{{ $poNumber ?: '-' }}</td>
                 </tr>
                 <tr>
                     <td class="meta-label">{{ __('Work Order No.') }}</td>

@@ -9,6 +9,7 @@ use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Filament\Supports\SettingPage;
 use App\Models\Language;
 use App\Services\InvoiceNumberGenerator;
+use App\Services\InvoicePdfGenerator;
 use App\Services\NumberFormat;
 use App\Services\OrderNumberGenerator;
 use BackedEnum;
@@ -247,6 +248,14 @@ final class Settings extends SettingPage
                                     ->rows(2)
                                     ->helperText('Small note displayed at the bottom of the invoice'),
 
+                                TextInput::make('invoice_due_days')
+                                    ->label('Due date (days)')
+                                    ->helperText('Invoice due date is the issue date plus this many days')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(0)
+                                    ->default(InvoicePdfGenerator::DUE_DAYS_DEFAULT),
+
                                 Section::make('Numbering')
                                     ->schema([
                                         Grid::make(2)
@@ -366,6 +375,7 @@ final class Settings extends SettingPage
             'order_number_padding' => OrderNumberGenerator::DEFAULT_PADDING,
             'invoice_number_format' => InvoiceNumberGenerator::DEFAULT_PATTERN,
             'invoice_number_padding' => InvoiceNumberGenerator::DEFAULT_PADDING,
+            'invoice_due_days' => InvoicePdfGenerator::DUE_DAYS_DEFAULT,
         ], $data);
     }
 }

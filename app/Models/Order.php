@@ -39,6 +39,8 @@ final class Order extends Model implements HasMedia
         'total',
         'exchange_rate',
         'coupon_id',
+        'quotation_number',
+        'po_number',
         'status',
         'paid_at',
         'notes',

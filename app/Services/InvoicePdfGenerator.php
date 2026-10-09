@@ -17,6 +17,8 @@ final class InvoicePdfGenerator
 {
     public const MEDIA_COLLECTION = 'invoices';
 
+    public const DUE_DAYS_DEFAULT = 14;
+
     public function __construct(
         private InvoiceNumberGenerator $numberGenerator,
     ) {}
@@ -64,9 +66,17 @@ final class InvoicePdfGenerator
     {
         $order->loadMissing(['items', 'discounts', 'payments']);
 
+        $invoice = $order->invoice;
+        $issuedAt = $invoice?->issued_at ?? $order->paid_at ?? $order->created_at ?? now();
+        $dueDays = (int) (setting('invoice_due_days') ?? self::DUE_DAYS_DEFAULT);
+
         return [
             'order' => $order,
-            'invoice' => $order->invoice,
+            'invoice' => $invoice,
+            'issuedAt' => $issuedAt,
+            'dueDate' => $issuedAt->copy()->addDays($dueDays),
+            'quotationNumber' => $order->quotation_number,
+            'poNumber' => $order->po_number,
             'seller' => $this->seller(),
             'logoData' => $this->logoData(),
             'footerNote' => (string) setting('invoice_footer_note', ''),
