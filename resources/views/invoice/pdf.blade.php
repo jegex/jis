@@ -53,6 +53,14 @@
             padding-top: 1mm;
         }
 
+        .banner {
+            width: 100%;
+            max-height: 40mm;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 6mm;
+        }
+
         .logo {
             width: 42mm;
             height: auto;
@@ -278,6 +286,10 @@
 <body>
 <div class="page">
 
+    @if ($bannerData)
+        <img src="{{ $bannerData }}" alt="{{ $seller['name'] }}" class="banner">
+    @endif
+
     <div class="header">
         <div class="header-left">
             @if ($logoData)
@@ -460,6 +472,15 @@
         </div>
     </div>
 
+    @if (trim($paymentTerms) !== '')
+        <div class="box">
+            <div class="box-title">{{ __('Payment Terms') }}</div>
+            <div class="box-body">
+                {!! nl2br(e($paymentTerms)) !!}
+            </div>
+        </div>
+    @endif
+
     <div class="signature">
         <div class="approved">{{ __('Approved by (Customer)') }}</div>
         <div class="company">{{ $customer['name'] ?? '-' }}</div>
@@ -468,7 +489,7 @@
     </div>
 
     <div class="footer">
-        DKI | <span style="font-weight: 500;">PT Desain Konsultan Indonesia</span>
+        {{ $seller['name'] }}
     </div>
 
 </div>

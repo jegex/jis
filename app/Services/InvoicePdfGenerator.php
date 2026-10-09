@@ -84,7 +84,9 @@ final class InvoicePdfGenerator
             'quotationNumber' => $order->quotation_number,
             'poNumber' => $order->po_number,
             'seller' => $this->seller(),
-            'logoData' => $this->logoData(),
+            'logoData' => $this->imageDataUri('invoice_logo'),
+            'bannerData' => $this->imageDataUri('invoice_banner'),
+            'paymentTerms' => setting_translated('invoice_payment_terms', $locale),
             'footerNote' => (string) setting('invoice_footer_note', ''),
             'couponCode' => $order->discounts->first()?->coupon_snapshot['code'],
             'totals' => $totals,
@@ -163,9 +165,9 @@ final class InvoicePdfGenerator
         ];
     }
 
-    private function logoData(): ?string
+    private function imageDataUri(string $key): ?string
     {
-        $value = setting('invoice_logo');
+        $value = setting($key);
 
         if (! is_string($value) || $value === '') {
             return null;

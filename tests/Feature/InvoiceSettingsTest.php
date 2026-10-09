@@ -78,3 +78,34 @@ it('saves the invoice tax percent setting', function () {
 
     expect((float) Setting::get('invoice_tax_percent'))->toBe(11.0);
 });
+
+it('saves the translated payment terms', function () {
+    $user = User::factory()->admin()->create();
+    grantSettingsPermissions($user);
+
+    Livewire::actingAs($user)
+        ->test(Settings::class)
+        ->fillForm([
+            'date_format' => 'Y-m-d',
+            'time_format' => 'H:i',
+            'products_per_page' => 9,
+            'posts_per_page' => 9,
+            'supported_locales' => ['en', 'id'],
+            'default_locale' => 'en',
+            'invoice_number_format' => 'INV/{YYYY}/{MM}/{SEQ:M}',
+            'invoice_number_padding' => 4,
+            'invoice_due_days' => 14,
+            'invoice_tax_percent' => 0,
+            'invoice_payment_terms' => [
+                'en' => 'Pay within 14 days.',
+                'id' => 'Bayar dalam 14 hari.',
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(Setting::get('invoice_payment_terms'))->toMatchArray([
+        'en' => 'Pay within 14 days.',
+        'id' => 'Bayar dalam 14 hari.',
+    ]);
+});

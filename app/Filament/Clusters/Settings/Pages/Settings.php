@@ -225,9 +225,16 @@ final class Settings extends SettingPage
                                             ->preserveFilenames()
                                             ->image()
                                             ->helperText('Shown at the top of the invoice PDF'),
-                                        TextInput::make('invoice_npwp')
-                                            ->label('NPWP'),
+                                        FileUpload::make('invoice_banner')
+                                            ->label('Invoice Banner')
+                                            ->disk('public')
+                                            ->preserveFilenames()
+                                            ->image()
+                                            ->helperText('Optional banner shown at the top of the invoice'),
                                     ]),
+
+                                TextInput::make('invoice_npwp')
+                                    ->label('NPWP'),
 
                                 TextInput::make('invoice_company_name')
                                     ->label('Company Name'),
@@ -263,6 +270,14 @@ final class Settings extends SettingPage
                                     ->minValue(0)
                                     ->maxValue(100)
                                     ->default(InvoicePdfGenerator::TAX_PERCENT_DEFAULT),
+
+                                TranslatableTabs::make()
+                                    ->schema([
+                                        Textarea::make('invoice_payment_terms')
+                                            ->label('Payment Terms')
+                                            ->rows(5)
+                                            ->helperText('Bank details and payment terms, shown near the bottom of the invoice'),
+                                    ]),
 
                                 Section::make('Numbering')
                                     ->schema([

@@ -403,6 +403,87 @@ it('renders the total amount in words in english', function () {
     expect($html)->toContain('One Hundred Fifty Thousand Indonesian Rupiah (IDR)');
 });
 
+it('shows the configured payment terms in the order locale', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_payment_terms', [
+        'en' => '1. 50% down payment on order.',
+        'id' => '1. DP 50% saat pemesanan.',
+    ]);
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    app()->setLocale('id');
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('DP 50% saat pemesanan')
+        ->toContain(__('Payment Terms'));
+});
+
+it('hides the payment terms block when none are configured', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->not->toContain(__('Payment Terms'));
+});
+
+it('falls back to the first locale when the order locale is not configured', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_payment_terms', [
+        'en' => 'Pay within 14 days.',
+    ]);
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Pay within 14 days.');
+});
+
+it('embeds the configured banner and hides it when unset', function () {
+    Storage::fake('local');
+    Storage::fake('public');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $withoutBanner = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($withoutBanner)->not->toContain('class="banner"');
+
+    Storage::disk('public')->put('invoice-banner.png', "\x89PNG\r\n\x1a\n");
+    App\Models\Setting::set('invoice_banner', 'invoice-banner.png');
+
+    $withBanner = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($withBanner)->toContain('class="banner"')
+        ->toContain('data:image/png;base64,');
+});
+
+it('shows the signature block and company footer', function () {
+    Storage::fake('local');
+    App\Models\Setting::set('invoice_company_name', 'PT Pembuktian');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Approved by')
+        ->toContain('Name &amp; Signature')
+        ->toContain('PT Pembuktian');
+});
+
 it('dispatches a chained invoice and email jobs on payment success', function () {
     Storage::fake('local');
     Bus::fake();
