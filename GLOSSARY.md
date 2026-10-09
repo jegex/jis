@@ -23,3 +23,35 @@ _Avoid_: order number
 **Quantity**:
 The number of units of a single product in an Order Item, chosen at checkout; the line total is the unit price multiplied by the quantity.
 _Avoid_: amount, count, units
+
+**Work Order Number**:
+The Order Number as printed on an Invoice, so the customer can tie the Invoice back to their Order.
+_Avoid_: sales order number, order code
+
+**Quotation Number**:
+The customer-facing reference of the quote an Order was accepted from; recorded per Order and printed on its Invoice.
+_Avoid_: quote id, estimate number
+
+**Purchase Order Number** (PO Number):
+The customer's procurement reference for an Order; recorded per Order and printed on its Invoice.
+_Avoid_: po, purchase reference
+
+**Down Payment** (DP):
+The portion of an Order's billable base charged up front on an Invoice, expressed as a percentage of the base; when set, the Invoice's Total Amount is the amount billed now (DP plus VAT).
+_Avoid_: deposit, advance, uang muka
+
+**VAT** (PPN):
+Value-added tax applied to an Invoice's base at a globally configured rate; shown as `PPN {rate}%`, or `Non-VAT` with a zero amount when the rate is 0.
+_Avoid_: tax, pajak, GST
+
+**Due Date**:
+The date by which an Invoice is payable, derived as the issue date plus the configured due-days period.
+_Avoid_: payment date, expiry
+
+**Payment Terms**:
+Reusable boilerplate (including bank details) printed on an Invoice describing how payment should be made.
+_Avoid_: payment method, payment info
+
+**Amount in Words**:
+An Invoice's Total Amount spelled out in words, in the Order's locale, using the currency's name and code.
+_Avoid_: total in words, terbilang

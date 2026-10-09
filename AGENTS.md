@@ -164,3 +164,14 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Do NOT delete tests without approval.
 
 </laravel-boost-guidelines>
+
+## Agent skills
+
+### Issue tracker
+Issues are tracked as GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+Five canonical triage labels (default vocabulary). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
