@@ -3,15 +3,15 @@
 
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center gap-4 md:gap-6">
-            <div class="flex items-center gap-4">
+            <div class="flex gap-4">
                 @if($product->getFirstMediaUrl('cover', 'thumb'))
                     <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt="{{ $product->title }}" class="w-20 h-20 object-cover rounded">
                 @endif
-                <h2 class="text-lg font-semibold text-gray-900">{{ $product->title }}</h2>
+                <h2 class="font-semibold text-gray-900">{{ $product->title }}</h2>
             </div>
 
             <div class="flex items-center gap-3">
-                <label for="quantity" class="text-sm font-medium text-gray-700">{{ __('Quantity') }}</label>
+                <label for="quantity" class="text-sm font-medium text-gray-700 sr-only">{{ __('Quantity') }}</label>
                 <div class="flex items-center border border-gray-300 rounded-md">
                     <button
                         type="button"
@@ -43,7 +43,7 @@
             </div>
 
             <div class="md:text-right" aria-live="polite">
-                <p class="text-2xl font-bold text-primary">{{ Str::price($subtotal, $product->currency_code) }}</p>
+                <p class="text-xl font-bold text-primary">{{ Str::price($subtotal, $product->currency_code) }}</p>
             </div>
         </div>
     </div>
