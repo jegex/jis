@@ -17,7 +17,7 @@ A billing document issued for a paid order, carrying its own sequential document
 _Avoid_: order number, receipt
 
 **Invoice Number**:
-The sequential document number of an Invoice (`INV/...`), independent of the Order Number.
+The sequential document number of an Invoice (`INV/2026/10/0001`), independent of the Order Number; generated automatically from the configurable format when the invoice is issued.
 _Avoid_: order number
 
 **Quantity**:

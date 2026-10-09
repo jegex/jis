@@ -7,9 +7,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-final class OrderNumberCounter extends Model
+final class NumberCounter extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrderNumberCounterFactory> */
+    /** @use HasFactory<\Database\Factories\NumberCounterFactory> */
     use HasFactory;
 
     protected $fillable = [

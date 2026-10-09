@@ -10,30 +10,30 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('shows the default order number format when nothing is saved yet', function () {
+it('shows the default invoice number format when nothing is saved yet', function () {
     $user = User::factory()->admin()->create();
     grantSettingsPermissions($user);
 
     Livewire::actingAs($user)
         ->test(Settings::class)
         ->assertFormSet([
-            'order_number_format' => 'ORD-{YYYY}{MM}-{SEQ:M}',
-            'order_number_padding' => 4,
+            'invoice_number_format' => 'INV/{YYYY}/{MM}/{SEQ:M}',
+            'invoice_number_padding' => 4,
         ]);
 });
 
-it('previews the next order numbers in the form', function () {
+it('previews the next invoice numbers in the form', function () {
     $user = User::factory()->admin()->create();
     grantSettingsPermissions($user);
 
-    $suffix = '-0001, ORD-'.now()->format('Ym').'-0002, ORD-'.now()->format('Ym').'-0003';
+    $prefix = 'INV/'.now()->format('Y').'/'.now()->format('m').'/';
 
     Livewire::actingAs($user)
         ->test(Settings::class)
-        ->assertSee('Preview — next: ORD-'.now()->format('Ym').$suffix);
+        ->assertSee('Preview — next: '.$prefix.'0001, '.$prefix.'0002, '.$prefix.'0003');
 });
 
-it('saves the order number format settings', function () {
+it('saves the invoice number format settings', function () {
     $user = User::factory()->admin()->create();
     grantSettingsPermissions($user);
 
@@ -46,17 +46,17 @@ it('saves the order number format settings', function () {
             'posts_per_page' => 9,
             'supported_locales' => ['en', 'id'],
             'default_locale' => 'en',
-            'order_number_format' => 'SHOP/{YYYY}/{SEQ:Y}',
-            'order_number_padding' => 5,
+            'invoice_number_format' => 'INV-{YYYY}-{SEQ:Y}',
+            'invoice_number_padding' => 5,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(Setting::get('order_number_format'))->toBe('SHOP/{YYYY}/{SEQ:Y}')
-        ->and((int) Setting::get('order_number_padding'))->toBe(5);
+    expect(Setting::get('invoice_number_format'))->toBe('INV-{YYYY}-{SEQ:Y}')
+        ->and((int) Setting::get('invoice_number_padding'))->toBe(5);
 });
 
-it('rejects an invalid order number format on save', function () {
+it('rejects an invalid invoice number format on save', function () {
     $user = User::factory()->admin()->create();
     grantSettingsPermissions($user);
 
@@ -69,11 +69,11 @@ it('rejects an invalid order number format on save', function () {
             'posts_per_page' => 9,
             'supported_locales' => ['en', 'id'],
             'default_locale' => 'en',
-            'order_number_format' => 'ORD-{UNKNOWN}',
-            'order_number_padding' => 4,
+            'invoice_number_format' => 'INV-{UNKNOWN}',
+            'invoice_number_padding' => 4,
         ])
         ->call('save')
-        ->assertHasFormErrors(['order_number_format']);
+        ->assertHasFormErrors(['invoice_number_format']);
 
-    expect(Setting::has('order_number_format'))->toBeFalse();
+    expect(Setting::has('invoice_number_format'))->toBeFalse();
 });

@@ -6,31 +6,67 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
-final class InvoiceNumberGenerator
+final class InvoiceNumberGenerator extends DocumentNumberGenerator
 {
-    public function next(CarbonInterface $date): string
+    public const DEFAULT_PATTERN = 'INV/{YYYY}/{MM}/{SEQ:M}';
+
+    public const DEFAULT_PADDING = NumberFormat::DEFAULT_PADDING;
+
+    protected function defaultPattern(): string
     {
-        $prefix = sprintf('INV/%s/%s', $date->format('Y'), $date->format('m'));
+        return self::DEFAULT_PATTERN;
+    }
 
-        return DB::transaction(function () use ($prefix) {
-            Invoice::query()
-                ->where('number', 'like', $prefix.'/%')
-                ->lockForUpdate()
-                ->first();
+    protected function defaultPadding(): int
+    {
+        return self::DEFAULT_PADDING;
+    }
 
-            $lastNumber = (string) Invoice::query()
-                ->where('number', 'like', $prefix.'/%')
-                ->orderByDesc('number')
-                ->value('number');
+    protected function patternSetting(): string
+    {
+        return 'invoice_number_format';
+    }
 
-            $sequence = $lastNumber === ''
-                ? 0
-                : (int) Str::afterLast($lastNumber, '/');
+    protected function paddingSetting(): string
+    {
+        return 'invoice_number_padding';
+    }
 
-            return sprintf('%s/%04d', $prefix, $sequence + 1);
-        });
+    protected function counterKeyPrefix(): string
+    {
+        return 'invoice:';
+    }
+
+    protected function label(): string
+    {
+        return 'invoice';
+    }
+
+    protected function numberExists(string $number): bool
+    {
+        return Invoice::query()->where('number', $number)->exists();
+    }
+
+    protected function highestExistingSequence(string $pattern, CarbonInterface $date): int
+    {
+        $regex = NumberFormat::matchingRegex($pattern, $date);
+
+        if ($regex === null) {
+            return 0;
+        }
+
+        $position = mb_strpos($pattern, '{');
+        $prefix = $position === false ? $pattern : mb_substr($pattern, 0, $position);
+
+        $highest = 0;
+
+        foreach (Invoice::query()->where('number', 'like', $prefix.'%')->pluck('number') as $number) {
+            if (preg_match($regex, (string) $number, $matches) === 1) {
+                $highest = max($highest, (int) $matches[1]);
+            }
+        }
+
+        return $highest;
     }
 }

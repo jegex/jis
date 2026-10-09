@@ -8,7 +8,8 @@ use AbdulmajeedJamaan\FilamentTranslatableTabs\TranslatableTabs;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Filament\Supports\SettingPage;
 use App\Models\Language;
-use App\Services\OrderNumberFormat;
+use App\Services\InvoiceNumberGenerator;
+use App\Services\NumberFormat;
 use App\Services\OrderNumberGenerator;
 use BackedEnum;
 use Closure;
@@ -245,6 +246,52 @@ final class Settings extends SettingPage
                                     ->label('Footer Note')
                                     ->rows(2)
                                     ->helperText('Small note displayed at the bottom of the invoice'),
+
+                                Section::make('Numbering')
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('invoice_number_format')
+                                                    ->label('Format')
+                                                    ->placeholder(InvoiceNumberGenerator::DEFAULT_PATTERN)
+                                                    ->required()
+                                                    ->live(debounce: 300)
+                                                    ->helperText('Tokens: {YYYY}, {YY}, {MM}, {DD} for dates; {SEQ} (never resets), {SEQ:M} (resets monthly), {SEQ:Y} (resets yearly). Use exactly one sequence token; anything outside tokens becomes literal text.')
+                                                    ->rules([
+                                                        fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {
+                                                            $error = NumberFormat::validate(
+                                                                (string) $value,
+                                                                (int) $get('invoice_number_padding'),
+                                                            );
+
+                                                            if ($error !== null) {
+                                                                $fail($error);
+                                                            }
+                                                        },
+                                                    ]),
+                                                TextInput::make('invoice_number_padding')
+                                                    ->label('Sequence digits')
+                                                    ->helperText('Padding of the sequence number, e.g. 4 gives 0001')
+                                                    ->numeric()
+                                                    ->minValue(NumberFormat::MIN_PADDING)
+                                                    ->maxValue(NumberFormat::MAX_PADDING)
+                                                    ->default(NumberFormat::DEFAULT_PADDING)
+                                                    ->live(debounce: 300),
+                                            ]),
+
+                                        Text::make(function (Get $get): string {
+                                            $numbers = app(InvoiceNumberGenerator::class)->preview(
+                                                count: 3,
+                                                pattern: (string) $get('invoice_number_format'),
+                                                padding: (int) $get('invoice_number_padding'),
+                                            );
+
+                                            return $numbers === []
+                                                ? 'Enter a valid format to preview the next invoice numbers.'
+                                                : 'Preview — next: '.implode(', ', $numbers);
+                                        })
+                                            ->color('gray'),
+                                    ]),
                             ]),
 
                         Tab::make('Order')
@@ -254,13 +301,13 @@ final class Settings extends SettingPage
                                     ->schema([
                                         TextInput::make('order_number_format')
                                             ->label('Format')
-                                            ->placeholder(OrderNumberFormat::DEFAULT_PATTERN)
+                                            ->placeholder(OrderNumberGenerator::DEFAULT_PATTERN)
                                             ->required()
                                             ->live(debounce: 300)
                                             ->helperText('Tokens: {YYYY}, {YY}, {MM}, {DD} for dates; {SEQ} (never resets), {SEQ:M} (resets monthly), {SEQ:Y} (resets yearly). Use exactly one sequence token; anything outside tokens becomes literal text.')
                                             ->rules([
                                                 fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {
-                                                    $error = OrderNumberFormat::validate(
+                                                    $error = NumberFormat::validate(
                                                         (string) $value,
                                                         (int) $get('order_number_padding'),
                                                     );
@@ -274,9 +321,9 @@ final class Settings extends SettingPage
                                             ->label('Sequence digits')
                                             ->helperText('Padding of the sequence number, e.g. 4 gives 0001')
                                             ->numeric()
-                                            ->minValue(OrderNumberFormat::MIN_PADDING)
-                                            ->maxValue(OrderNumberFormat::MAX_PADDING)
-                                            ->default(OrderNumberFormat::DEFAULT_PADDING)
+                                            ->minValue(NumberFormat::MIN_PADDING)
+                                            ->maxValue(NumberFormat::MAX_PADDING)
+                                            ->default(OrderNumberGenerator::DEFAULT_PADDING)
                                             ->live(debounce: 300),
                                     ]),
 
@@ -288,8 +335,8 @@ final class Settings extends SettingPage
                                     );
 
                                     return $numbers === []
-                                        ? 'Enter a valid format to preview the next order numbers.'
-                                        : 'Preview — next: '.implode(', ', $numbers);
+                                ? 'Enter a valid format to preview the next order numbers.'
+                                : 'Preview — next: '.implode(', ', $numbers);
                                 })
                                     ->color('gray'),
                             ]),
@@ -315,8 +362,10 @@ final class Settings extends SettingPage
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return array_replace_recursive([
-            'order_number_format' => OrderNumberFormat::DEFAULT_PATTERN,
-            'order_number_padding' => OrderNumberFormat::DEFAULT_PADDING,
+            'order_number_format' => OrderNumberGenerator::DEFAULT_PATTERN,
+            'order_number_padding' => OrderNumberGenerator::DEFAULT_PADDING,
+            'invoice_number_format' => InvoiceNumberGenerator::DEFAULT_PATTERN,
+            'invoice_number_padding' => InvoiceNumberGenerator::DEFAULT_PADDING,
         ], $data);
     }
 }

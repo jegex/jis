@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\OrderNumberCounter;
+use App\Models\NumberCounter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-final class OrderNumberCounterFactory extends Factory
+final class NumberCounterFactory extends Factory
 {
-    protected $model = OrderNumberCounter::class;
+    protected $model = NumberCounter::class;
 
     public function definition(): array
     {

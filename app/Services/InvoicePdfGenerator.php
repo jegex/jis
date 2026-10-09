@@ -31,7 +31,7 @@ final class InvoicePdfGenerator
 
         $invoice ??= Invoice::create([
             'order_id' => $order->id,
-            'number' => $this->numberGenerator->next($order->paid_at ?? now()),
+            'number' => $this->numberGenerator->generate($order->paid_at ?? now()),
             'issued_at' => $order->paid_at ?? now(),
         ]);
 

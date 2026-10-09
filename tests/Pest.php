@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 /*
@@ -54,4 +56,15 @@ function refreshApplicationWithLocale(string $locale): void
     $test->setUp();
 
     app()->setLocale($locale);
+}
+
+function grantSettingsPermissions(User $user): void
+{
+    $permissions = ['View:Settings', 'Update:Settings'];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+    }
+
+    $user->givePermissionTo($permissions);
 }

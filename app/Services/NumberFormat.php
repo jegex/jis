@@ -6,10 +6,8 @@ namespace App\Services;
 
 use Carbon\CarbonInterface;
 
-final class OrderNumberFormat
+final class NumberFormat
 {
-    public const DEFAULT_PATTERN = 'ORD-{YYYY}{MM}-{SEQ:M}';
-
     public const DEFAULT_PADDING = 4;
 
     public const MAX_LENGTH = 50;
@@ -51,7 +49,7 @@ final class OrderNumberFormat
         $longest = self::render($pattern, $padding, now(), 10 ** $padding - 1);
 
         if (mb_strlen($longest) > self::MAX_LENGTH) {
-            return 'The resulting order number may not exceed '.self::MAX_LENGTH.' characters.';
+            return 'The resulting number may not exceed '.self::MAX_LENGTH.' characters.';
         }
 
         return null;
@@ -83,6 +81,37 @@ final class OrderNumberFormat
         }
 
         return 'seq';
+    }
+
+    public static function matchingRegex(string $pattern, CarbonInterface $date): ?string
+    {
+        $regex = preg_quote($pattern, '~');
+
+        $replacements = [
+            '{YYYY}' => $date->format('Y'),
+            '{YY}' => $date->format('y'),
+            '{MM}' => $date->format('m'),
+            '{DD}' => $date->format('d'),
+            '{SEQ:M}' => '(\d+)',
+            '{SEQ:Y}' => '(\d+)',
+            '{SEQ}' => '(\d+)',
+        ];
+
+        $hasSequence = false;
+
+        foreach ($replacements as $token => $value) {
+            $quoted = preg_quote($token, '~');
+
+            if (str_contains($regex, $quoted)) {
+                if (str_starts_with($token, '{SEQ')) {
+                    $hasSequence = true;
+                }
+
+                $regex = str_replace($quoted, $value, $regex);
+            }
+        }
+
+        return $hasSequence ? '~^'.$regex.'$~' : null;
     }
 
     /**

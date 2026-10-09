@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\NumberCounter;
 use App\Models\Order;
-use App\Models\OrderNumberCounter;
 use App\Models\Setting;
 use App\Services\OrderNumberGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,7 +70,7 @@ it('falls back to the default format when the saved format is invalid', function
 });
 
 it('continues the sequence when the format changes', function () {
-    OrderNumberCounter::factory()->create([
+    NumberCounter::factory()->create([
         'key' => 'seq:M:'.now()->format('Y-m'),
         'value' => 41,
     ]);
