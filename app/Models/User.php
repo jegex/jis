@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Jobs\SendEmailVerification;
 use App\Services\EmailService;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -77,6 +78,6 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             ['id' => $this->getKey(), 'hash' => sha1($this->getEmailForVerification())]
         );
 
-        app(EmailService::class)->sendEmailVerificationLink($this, $url);
+        SendEmailVerification::dispatch($this->getKey(), $url);
     }
 }
