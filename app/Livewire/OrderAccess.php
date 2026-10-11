@@ -30,11 +30,17 @@ final class OrderAccess extends Component
     {
         $product = $this->order?->items->firstWhere('product_id', $productId)?->product;
 
-        if (! $product instanceof Product) {
+        if (! $this->order instanceof Order || ! $product instanceof Product) {
             return '#';
         }
 
-        return app(DownloadService::class)->generateDownloadUrl($this->order, $product);
+        $downloadService = app(DownloadService::class);
+
+        if (! $downloadService->canDownload($this->order, $product)) {
+            return '#';
+        }
+
+        return $downloadService->generateDownloadUrl($this->order, $product);
     }
 
     public function render()

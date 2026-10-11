@@ -6,7 +6,6 @@ namespace App\Providers;
 
 use App\Helpers\PriceHelper;
 use App\Models\Language;
-use App\Models\Order;
 use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
@@ -45,10 +44,10 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('order-access', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
         RateLimiter::for('order-download', function (Request $request) {
-            $order = $request->route('order');
+            $orderNumber = $request->route('order');
 
             return [
-                Limit::perHour(30)->by('download-order:'.($order instanceof Order ? $order->id : $request->ip())),
+                Limit::perHour(30)->by('download-order:'.($orderNumber ?? $request->ip())),
                 Limit::perMinute(10)->by('download-ip:'.$request->ip()),
             ];
         });

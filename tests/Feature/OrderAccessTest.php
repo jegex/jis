@@ -118,3 +118,32 @@ it('rate limits the order access page by ip', function () {
 
     $this->get(route('order.access', 'unknown-token'))->assertStatus(429);
 });
+
+it('rate limits downloads per order, not globally by ip', function () {
+    [$orderA, $product] = paidOrderWithProduct();
+
+    $orderB = Order::factory()->paid()->create();
+    $orderB->items()->create([
+        'product_id' => $product->id,
+        'product_name' => 'Digital Product',
+        'price' => 10000,
+        'quantity' => 1,
+    ]);
+
+    $urlA = route('payment.download', ['order' => $orderA->order_number, 'product' => $product->id]);
+    $urlB = route('payment.download', ['order' => $orderB->order_number, 'product' => $product->id]);
+
+    for ($i = 0; $i < 30; $i++) {
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.'.($i + 1)])
+            ->get($urlA)
+            ->assertStatus(401);
+    }
+
+    $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.250'])
+        ->get($urlA)
+        ->assertStatus(429);
+
+    $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.251'])
+        ->get($urlB)
+        ->assertStatus(401);
+});
