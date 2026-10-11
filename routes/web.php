@@ -71,8 +71,7 @@ Route::translate(function () {
     Route::get(Localizer::url('products.show'), ProductDetail::class)->name('products.show');
 
     Route::get(Localizer::url('checkout.create'), CheckoutForm::class)
-        ->name('checkout.create')
-        ->middleware(['auth', 'verified']);
+        ->name('checkout.create');
 
     Route::get(Localizer::url('payment.success'), [PaymentController::class, 'success'])->name('payment.success');
     Route::get(Localizer::url('payment.pending'), [PaymentController::class, 'pending'])->name('payment.pending');

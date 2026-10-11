@@ -34,11 +34,17 @@ final class CheckoutForm extends Component
 
     public bool $processing = false;
 
+    public string $guestEmail = '';
+
+    public string $guestName = '';
+
     public function mount(Product $product): void
     {
         if (! $product->isPublished()) {
             abort(404);
         }
+
+        $this->product = $product->load('category', 'media');
 
         if (! config('checkout.allow_guest') && ! auth()->check()) {
             $this->redirect(route('login'));
@@ -46,7 +52,6 @@ final class CheckoutForm extends Component
             return;
         }
 
-        $this->product = $product->load('category', 'media');
         $this->recalculate();
     }
 
@@ -114,6 +119,17 @@ final class CheckoutForm extends Component
     public function pay(): void
     {
         $this->resetValidation('payment');
+
+        if (! auth()->check()) {
+            $this->guestEmail = mb_trim($this->guestEmail);
+            $this->guestName = mb_trim($this->guestName);
+
+            $this->validate([
+                'guestEmail' => ['required', 'email', 'max:255'],
+                'guestName' => ['nullable', 'string', 'max:255'],
+            ]);
+        }
+
         $this->processing = true;
 
         try {
@@ -122,8 +138,8 @@ final class CheckoutForm extends Component
             $order = app(OrderService::class)->createOrder(
                 product: $this->product,
                 user: $user,
-                guestEmail: $user ? null : session('guest_email'),
-                guestName: $user ? null : session('guest_name'),
+                guestEmail: $user ? null : $this->guestEmail,
+                guestName: $user ? null : ($this->guestName ?: null),
                 couponCode: $this->appliedCode ?: null,
                 quantity: $this->quantity,
             );
