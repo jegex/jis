@@ -55,3 +55,19 @@ _Avoid_: payment method, payment info
 **Amount in Words**:
 An Invoice's Total Amount spelled out in words, in the Order's locale, using the currency's name and code.
 _Avoid_: total in words, terbilang
+
+**Guest Order**:
+An Order placed without a User, identified by the orderer's email address.
+_Avoid_: anonymous order, guest purchase
+
+**Order Access Token**:
+A rotatable secret embedded in an Order's access URL that grants its bearer access to that Order's digital items without login.
+_Avoid_: download token, magic link, access key
+
+**Order Access Page**:
+The page at `/order/{token}` listing a digital Order's items together with its download and invoice actions.
+_Avoid_: download page, delivery page
+
+**Claim**:
+The attachment of a Guest Order to a User account when that User registers with the same verified email.
+_Avoid_: merge, link

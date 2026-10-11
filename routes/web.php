@@ -17,6 +17,7 @@ use App\Livewire\CheckoutForm;
 use App\Livewire\CustomerDashboard;
 use App\Livewire\CustomerDownloads;
 use App\Livewire\CustomerProfile;
+use App\Livewire\OrderAccess;
 use App\Livewire\OrderDetail;
 use App\Livewire\ProductDetail;
 use App\Livewire\ProductList;
@@ -44,8 +45,12 @@ Route::get('/preview/{type}/{record}', PreviewController::class)
     ->name('preview.show');
 
 Route::get('download/{order:order_number}/{product}', [DownloadController::class, 'download'])
-    ->middleware('auth')
+    ->middleware('throttle:order-download')
     ->name('payment.download');
+
+Route::get('/order/{token}', OrderAccess::class)
+    ->middleware('throttle:order-access')
+    ->name('order.access');
 
 Route::get('/invoices/{invoice}/download', InvoiceDownloadController::class)
     ->middleware('auth')

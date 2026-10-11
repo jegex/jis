@@ -6,12 +6,16 @@ namespace App\Providers;
 
 use App\Helpers\PriceHelper;
 use App\Models\Language;
+use App\Models\Order;
 use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -38,10 +42,21 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('order-access', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+
+        RateLimiter::for('order-download', function (Request $request) {
+            $order = $request->route('order');
+
+            return [
+                Limit::perHour(30)->by('download-order:'.($order instanceof Order ? $order->id : $request->ip())),
+                Limit::perMinute(10)->by('download-ip:'.$request->ip()),
+            ];
+        });
+
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }
-        
+
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super_admin') ? true : null;
         });

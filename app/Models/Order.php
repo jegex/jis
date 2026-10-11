@@ -25,11 +25,13 @@ final class Order extends Model implements HasMedia
 
     use InteractsWithMedia;
 
-    protected $hidden = ['guest_email', 'guest_name'];
+    protected $hidden = ['guest_email', 'guest_name', 'access_token_hash'];
 
     protected $fillable = [
         'order_number',
         'user_id',
+        'access_token_hash',
+        'access_token_issued_at',
         'guest_email',
         'guest_name',
         'currency_code',
@@ -57,6 +59,7 @@ final class Order extends Model implements HasMedia
             'total' => MoneyCast::class,
             'down_payment_percent' => 'float',
             'paid_at' => 'datetime',
+            'access_token_issued_at' => 'datetime',
         ];
     }
 
