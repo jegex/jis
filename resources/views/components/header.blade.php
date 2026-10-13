@@ -67,9 +67,11 @@
                         </ul>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="hidden md:inline-flex nav-link">
-                        {{ __('Login') }}
-                    </a>
+                    @unless (config('checkout.allow_guest'))
+                        <a href="{{ route('login') }}" class="hidden md:inline-flex nav-link">
+                            {{ __('Login') }}
+                        </a>
+                    @endunless
                 @endauth
             </div>
         </div>

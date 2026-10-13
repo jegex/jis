@@ -209,12 +209,14 @@
                                             </form>
                                         </div>
                                     @else
-                                        <div class="space-y-2 pt-2">
-                                            <a href="{{ route('login') }}" @click="close" class="block w-full text-center px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors">{{ __('Login') }}</a>
-                                            @if (Route::has('register'))
-                                                <a href="{{ route('register') }}" @click="close" class="block w-full text-center px-4 py-2.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary-50 transition-colors">{{ __('Register') }}</a>
-                                            @endif
-                                        </div>
+                                        @unless (config('checkout.allow_guest'))
+                                            <div class="space-y-2 pt-2">
+                                                <a href="{{ route('login') }}" @click="close" class="block w-full text-center px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors">{{ __('Login') }}</a>
+                                                @if (Route::has('register'))
+                                                    <a href="{{ route('register') }}" @click="close" class="block w-full text-center px-4 py-2.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary-50 transition-colors">{{ __('Register') }}</a>
+                                                @endif
+                                            </div>
+                                        @endunless
                                     @endauth
                                 </div>
                             </div>
