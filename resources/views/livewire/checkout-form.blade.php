@@ -56,102 +56,81 @@
         <div class="bg-danger-light text-danger px-4 py-3 rounded mb-6">{{ $message }}</div>
     @enderror
 
-    <form wire:submit="pay" class="bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
-{{--        <div>--}}
-{{--            <label for="coupon_code" class="block text-sm font-medium text-gray-700">{{ __('Coupon Code') }}</label>--}}
-{{--            <div class="mt-1 flex gap-2">--}}
-{{--                <x-input--}}
-{{--                    name="coupon_code"--}}
-{{--                    id="coupon_code"--}}
-{{--                    variant="flat"--}}
-{{--                    placeholder="{{ __('e.g. SAVE10') }}"--}}
-{{--                    wire:model="couponCode"--}}
-{{--                    class="flex-1"--}}
-{{--                />--}}
-{{--                <x-button--}}
-{{--                    type="button"--}}
-{{--                    size="sm"--}}
-{{--                    wire:click="applyCoupon"--}}
-{{--                    wire:loading.attr="disabled"--}}
-{{--                    wire:target="applyCoupon"--}}
-{{--                >--}}
-{{--                    <span wire:loading.remove wire:target="applyCoupon">{{ __('Apply') }}</span>--}}
-{{--                    <span wire:loading wire:target="applyCoupon">{{ __('...') }}</span>--}}
-{{--                </x-button>--}}
-{{--            </div>--}}
-{{--            @if($appliedCode)--}}
-{{--                <p class="mt-1 text-sm text-success">{{ __('Coupon ":code" applied!', ['code' => $appliedCode]) }}</p>--}}
-{{--            @endif--}}
-{{--            @error('couponCode')--}}
-{{--                <p class="mt-1 text-sm text-danger">{{ $message }}</p>--}}
-{{--            @enderror--}}
-{{--        </div>--}}
+    <form wire:submit="pay" class="flex flex-col gap-6">
 
-        @if(! auth()->check())
-            <div class="border-t border-gray-200 pt-4 flex flex-col gap-4">
-                <div>
-                    <label for="guest_email" class="block text-sm font-medium text-gray-700">{{ __('Email') }}</label>
-                    <x-input
-                        id="guest_email"
-                        name="guest_email"
-                        type="email"
-                        autocomplete="email"
-                        placeholder="{{ __('you@example.com') }}"
-                        wire:model="guestEmail"
-                        class="mt-1"
-                    />
-                    @error('guestEmail')
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
+
+            @if(! auth()->check())
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label for="guest_email" class="block text-sm font-medium text-gray-700">{{ __('Email') }} <sup style="color: red;">*</sup></label>
+                        <x-input
+                            id="guest_email"
+                            name="guest_email"
+                            type="email"
+                            autocomplete="email"
+                            placeholder="{{ __('you@example.com') }}"
+                            wire:model="guestEmail"
+                            class="mt-1"
+                            helper-text="Harap mengisi alamat email untuk mendapatkan bukti pembayaran atas pembelian anda."
+                        />
+                        @error('guestEmail')
                         <p class="mt-1 text-sm text-danger">{{ $message }}</p>
-                    @enderror
-                </div>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label for="guest_name" class="block text-sm font-medium text-gray-700">{{ __('Name (optional)') }}</label>
-                    <x-input
-                        id="guest_name"
-                        name="guest_name"
-                        type="text"
-                        autocomplete="name"
-                        placeholder="{{ __('How should we address your order?') }}"
-                        wire:model="guestName"
-                        class="mt-1"
-                    />
-                    @error('guestName')
+                    <div>
+                        <label for="guest_name" class="block text-sm font-medium text-gray-700">{{ __('Name (optional)') }}</label>
+                        <x-input
+                            id="guest_name"
+                            name="guest_name"
+                            type="text"
+                            autocomplete="name"
+                            placeholder="{{ __('How should we address your order?') }}"
+                            wire:model="guestName"
+                            class="mt-1"
+                        />
+                        @error('guestName')
                         <p class="mt-1 text-sm text-danger">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-        @endif
-
-        <div class="border-t border-gray-200 pt-4 flex flex-col gap-2" aria-live="polite">
-            <div class="flex justify-between text-gray-600">
-                <span>{{ __('Subtotal') }}</span>
-                <span>{{ Str::price($subtotal, $product->currency_code) }}</span>
-            </div>
-
-            @if($discount > 0)
-                <div class="flex justify-between text-success">
-                    <span>{{ __('Discount') }}</span>
-                    <span>-{{ Str::price($discount, $product->currency_code) }}</span>
+                        @enderror
+                    </div>
                 </div>
             @endif
-
-            <div class="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
-                <span>{{ __('Total') }}</span>
-                <span>{{ Str::price($total, $product->currency_code) }}</span>
-            </div>
         </div>
 
-        <x-button
-            type="submit"
-            class="w-full"
-            wire:loading.attr="disabled"
-            wire:target="pay"
-            id="pay-button"
-        >
-            <span wire:loading.remove wire:target="pay">{{ $total <= 0 ? __('Get Free') : __('Pay Now') }}</span>
-            <span wire:loading wire:target="pay">{{ __('Processing...') }}</span>
-        </x-button>
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
+
+            <div class="flex flex-col gap-2" aria-live="polite">
+                <div class="flex justify-between text-gray-600">
+                    <span>{{ __('Subtotal') }}</span>
+                    <span>{{ Str::price($subtotal, $product->currency_code) }}</span>
+                </div>
+
+                @if($discount > 0)
+                    <div class="flex justify-between text-success">
+                        <span>{{ __('Discount') }}</span>
+                        <span>-{{ Str::price($discount, $product->currency_code) }}</span>
+                    </div>
+                @endif
+
+                <div class="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
+                    <span>{{ __('Total') }}</span>
+                    <span>{{ Str::price($total, $product->currency_code) }}</span>
+                </div>
+            </div>
+
+            <x-button
+                type="submit"
+                class="w-full"
+                wire:loading.attr="disabled"
+                wire:target="pay"
+                id="pay-button"
+            >
+                <span wire:loading.remove wire:target="pay">{{ $total <= 0 ? __('Get Free') : __('Pay Now') }}</span>
+                <span wire:loading wire:target="pay">{{ __('Processing...') }}</span>
+            </x-button>
+
+        </div>
     </form>
 
     @if($total > 0)

@@ -41,14 +41,20 @@ final class InvoicePdfGenerator
             'issued_at' => $order->paid_at ?? now(),
         ]);
 
-        $pdf = $this->render($order);
+        return $this->storePdf($order, $invoice);
+    }
 
-        $order->addMediaFromString($pdf)
-            ->usingFileName($invoice->fileName())
-            ->usingName($invoice->fileName())
-            ->toMediaCollection(self::MEDIA_COLLECTION, 'local');
+    public function regenerate(Order $order): Invoice
+    {
+        $invoice = $order->invoice()->first();
 
-        return $invoice;
+        if ($invoice === null) {
+            return $this->generate($order);
+        }
+
+        $order->clearMediaCollection(self::MEDIA_COLLECTION);
+
+        return $this->storePdf($order, $invoice);
     }
 
     public function render(Order $order): string
@@ -114,6 +120,20 @@ final class InvoicePdfGenerator
             ->first();
 
         return $media;
+    }
+
+    private function storePdf(Order $order, Invoice $invoice): Invoice
+    {
+        $order->setRelation('invoice', $invoice);
+
+        $pdf = $this->render($order);
+
+        $order->addMediaFromString($pdf)
+            ->usingFileName($invoice->fileName())
+            ->usingName($invoice->fileName())
+            ->toMediaCollection(self::MEDIA_COLLECTION, 'local');
+
+        return $invoice;
     }
 
     /**

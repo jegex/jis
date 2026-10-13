@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Helpers\PriceHelper;
+use App\Models\Invoice;
 use App\Models\Language;
+use App\Observers\InvoiceObserver;
 use App\Services\CouponService;
 use App\Services\CurrencyService;
 use App\Services\OrderService;
@@ -41,6 +43,8 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Invoice::observe(InvoiceObserver::class);
+
         RateLimiter::for('order-access', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
         RateLimiter::for('order-download', function (Request $request) {

@@ -125,7 +125,7 @@ final class CheckoutForm extends Component
             $this->guestName = mb_trim($this->guestName);
 
             $this->validate([
-                'guestEmail' => ['required', 'email', 'max:255'],
+                'guestEmail' => ['required', 'email:rfc,dns', 'max:255'],
                 'guestName' => ['nullable', 'string', 'max:255'],
             ]);
         }

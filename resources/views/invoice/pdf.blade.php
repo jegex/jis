@@ -143,8 +143,8 @@
         }
 
         .items th {
-            background: #EBF0F6;
-            color: #222;
+            background: #000080;
+            color: #ffffff;
             border: 1px solid #222;
             padding: 1.5mm 2mm;
             font-size: 11px;
@@ -197,7 +197,8 @@
 
         .totals .label {
             text-align: right;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 12px;
         }
 
         .totals .value {
@@ -233,7 +234,7 @@
         }
 
         .box-title {
-            background: #080884;
+            background: #000080;
             color: #fff;
             padding: 1.5mm 2mm;
             font-weight: 700;
@@ -331,18 +332,13 @@
                     <td class="meta-colon">:</td>
                     <td>{{ $dueDate->translatedFormat('j F Y') }}</td>
                 </tr>
-                <tr>
-                    <td class="meta-label">{{ __('Quotation No.') }}</td>
-                    <td class="meta-colon">:</td>
-                    <td>{{ $quotationNumber ?: '-' }}</td>
-                </tr>
+{{--                <tr>--}}
+{{--                    <td class="meta-label">{{ __('Quotation No.') }}</td>--}}
+{{--                    <td class="meta-colon">:</td>--}}
+{{--                    <td>{{ $quotationNumber ?: '-' }}</td>--}}
+{{--                </tr>--}}
                 <tr>
                     <td class="meta-label">{{ __('PO No.') }}</td>
-                    <td class="meta-colon">:</td>
-                    <td>{{ $poNumber ?: '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="meta-label">{{ __('Work Order No.') }}</td>
                     <td class="meta-colon">:</td>
                     <td>{{ $order->order_number }}</td>
                 </tr>
@@ -354,26 +350,26 @@
         <div class="customer-title">{{ __('Customer') }}</div>
 
         <table class="customer-table">
-            <tr>
-                <td class="customer-label">{{ __('Name') }}</td>
-                <td class="customer-colon">:</td>
-                <td>{{ $customer['name'] ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="customer-label">{{ __('Address') }}</td>
-                <td class="customer-colon">:</td>
-                <td>{{ $customer['address'] ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="customer-label">{{ __('Phone') }}</td>
-                <td class="customer-colon">:</td>
-                <td>{{ $customer['phone'] ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="customer-label">{{ __('Email') }}</td>
-                <td class="customer-colon">:</td>
-                <td>{{ $customer['email'] ?? '-' }}</td>
-            </tr>
+            @isset($customer['name'])
+                <tr>
+                    <td>{{ $customer['name'] ?? '-' }}</td>
+                </tr>
+            @endisset
+            @isset($customer['address'])
+                <tr>
+                    <td>{{ $customer['address'] ?? '-' }}</td>
+                </tr>
+            @endisset
+            @if($customer['phone'])
+                <tr>
+                    <td>{{ $customer['phone'] ?? '-' }}</td>
+                </tr>
+            @endif
+            @if($customer['email'])
+                <tr>
+                    <td>{{ $customer['email'] ?? '-' }}</td>
+                </tr>
+            @endif
         </table>
     </div>
 
@@ -465,12 +461,14 @@
         </div>
     @endif
 
-    <div class="box">
-        <div class="box-title">{{ __('Remarks') }}</div>
-        <div class="box-body">
-            {!! nl2br(e($footerNote)) !!}
+    @if(! blank($footerNote))
+        <div class="box">
+            <div class="box-title">{{ __('Remarks') }}</div>
+            <div class="box-body">
+                {!! nl2br(e($footerNote)) !!}
+            </div>
         </div>
-    </div>
+    @endif
 
     @if (trim($paymentTerms) !== '')
         <div class="box">
