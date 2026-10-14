@@ -341,7 +341,7 @@
     </div>
 
     <div class="customer">
-        <div class="customer-title">{{ __('Customer') }}</div>
+        <div class="customer-title">{{ __('Customer') }}:</div>
 
         <table class="customer-table">
             <tr>
@@ -373,7 +373,7 @@
         <thead>
             <tr>
                 <th class="no">No.</th>
-                <th class="description">{{ __('Item Description') }}</th>
+                <th class="description">{{ __('Item Descriptions') }}</th>
                 <th class="qty">{{ __('Quantity') }}</th>
                 <th class="price">{{ __('Unit Price') }}</th>
                 <th class="amount">{{ __('Amount') }}</th>
@@ -447,7 +447,7 @@
 
     @if ($payment)
         <div class="box">
-            <div class="box-title">{{ __('Payment information') }}</div>
+            <div class="box-title">{{ __('Payment informations') }}</div>
             <div class="box-body">
                 {{ __('Paid at') }}: {{ $payment->paid_at?->translatedFormat('j F Y H:i') }}<br>
                 {{ __('Transaction ID') }}: {{ $payment->gateway_transaction_id ?? '-' }}
