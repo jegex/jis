@@ -350,24 +350,24 @@
         <div class="customer-title">{{ __('Customer') }}</div>
 
         <table class="customer-table">
-            @isset($customer['name'])
+            @if($customer['name'] != '-')
                 <tr>
-                    <td>{{ $customer['name'] ?? '-' }}</td>
-                </tr>
-            @endisset
-            @isset($customer['address'])
-                <tr>
-                    <td>{{ $customer['address'] ?? '-' }}</td>
-                </tr>
-            @endisset
-            @if($customer['phone'])
-                <tr>
-                    <td>{{ $customer['phone'] ?? '-' }}</td>
+                    <td>{{ $customer['name'] }}</td>
                 </tr>
             @endif
-            @if($customer['email'])
+            @if($customer['address'] != '-')
                 <tr>
-                    <td>{{ $customer['email'] ?? '-' }}</td>
+                    <td>{{ $customer['address'] }}</td>
+                </tr>
+            @endif
+            @if( $customer['phone'] != '-')
+                <tr>
+                    <td>Phone: {{ $customer['phone'] }}</td>
+                </tr>
+            @endif
+            @if($customer['email'] != '-')
+                <tr>
+                    <td>Email: {{ $customer['email'] }}</td>
                 </tr>
             @endif
         </table>
@@ -480,8 +480,8 @@
     @endif
 
     <div class="signature">
-        <div class="approved">{{ __('Approved by (Customer)') }}</div>
-        <div class="company">{{ $customer['name'] ?? '-' }}</div>
+        <div class="approved">{{ __('Approved by') }}</div>
+        <div class="company">DKI Konsultan</div>
         <div class="signature-space"></div>
         <div class="name">{{ __('Name & Signature') }}</div>
     </div>

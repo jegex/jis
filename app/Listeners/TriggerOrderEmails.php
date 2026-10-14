@@ -25,7 +25,7 @@ final class TriggerOrderEmails implements ShouldQueue
         Bus::chain([
             new GenerateInvoicePdf($event->order),
             new SendOrderEmail($event->order, EmailTemplateType::OrderConfirmation),
-            new SendOrderEmail($event->order, EmailTemplateType::DownloadLink),
+            // new SendOrderEmail($event->order, EmailTemplateType::DownloadLink),
         ])->dispatch();
     }
 }

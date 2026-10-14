@@ -103,7 +103,7 @@ final class EmailService
         $downloadSection = '<p><a href="'.$downloadUrl.'" target="_blank">'.__('Download :product_name', ['product_name' => $order->items->first()?->product_name ?? '']).'</a></p>';
 
         $variables = [
-            'customer_name' => $order->user?->name ?? $order->guest_name ?? 'Customer',
+            'customer_name' => $order->user?->name ?? $order->guest_name ?? '',
             'product_name' => $order->items->first()?->product_name ?? '',
             'download_url' => $downloadUrl,
             'download_section' => $downloadSection,
