@@ -145,15 +145,39 @@ it('falls back to the company name when no logo is configured', function () {
         ->toContain((string) setting('invoice_company_name', config('app.name')));
 });
 
-it('shows order numbers and placeholder customer contacts', function () {
+it('shows the labeled customer contact placeholders', function () {
     Storage::fake('local');
     $order = createPaidOrderWithItem();
     app(InvoicePdfGenerator::class)->generate($order->refresh());
 
     $html = view('invoice.pdf', app(InvoicePdfGenerator::class)->buildViewData($order))->render();
 
-    expect($html)->toContain($order->order_number)
+    expect($html)->toContain('<td class="customer-label">'.__('Name').'</td>')
+        ->toContain('<td class="customer-label">'.__('Address').'</td>')
+        ->toContain('<td class="customer-label">'.__('Phone').'</td>')
+        ->toContain('<td class="customer-label">'.__('Email').'</td>')
         ->toContain('<td>-</td>');
+});
+
+it('shows the guest contact details on the invoice', function () {
+    Storage::fake('local');
+    $order = createPaidOrderWithItem();
+    $order->update([
+        'guest_name' => 'Guest User',
+        'guest_email' => 'guest@example.com',
+        'guest_phone' => '+628123456789',
+        'guest_address' => "123 Main Street\nJakarta",
+    ]);
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $html = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($html)->toContain('Guest User')
+        ->toContain('guest@example.com')
+        ->toContain('+628123456789')
+        ->toContain('123 Main Street');
 });
 
 it('includes payment information on the invoice', function () {
@@ -222,7 +246,7 @@ it('falls back to the product name when the description is blank whitespace', fu
     expect($html)->toContain('Produk Uji Coba');
 });
 
-it('shows quotation, purchase order references and the due date', function () {
+it('does not show quotation, purchase order references or the due date', function () {
     Storage::fake('local');
     $order = createPaidOrderWithItem();
     $order->update([
@@ -237,14 +261,15 @@ it('shows quotation, purchase order references and the due date', function () {
 
     $dueDate = $order->invoice->issued_at->copy()->addDays(14)->translatedFormat('j F Y');
 
-    expect($html)->toContain('QT-2026-001')
-        ->toContain('PO-2026-777')
-        ->toContain($dueDate)
-        ->toContain(__('Quotation No.'))
-        ->toContain(__('PO No.'));
+    expect($html)->not->toContain('QT-2026-001')
+        ->not->toContain('PO-2026-777')
+        ->not->toContain($dueDate)
+        ->not->toContain(__('Quotation No.'))
+        ->not->toContain(__('PO No.'))
+        ->not->toContain(__('Due Date'));
 });
 
-it('derives the due date from the configured invoice due days', function () {
+it('does not render the due date even when invoice due days are configured', function () {
     Storage::fake('local');
     App\Models\Setting::set('invoice_due_days', 30);
     $order = createPaidOrderWithItem();
@@ -256,7 +281,8 @@ it('derives the due date from the configured invoice due days', function () {
 
     $dueDate = $order->invoice->issued_at->copy()->addDays(30)->translatedFormat('j F Y');
 
-    expect($html)->toContain($dueDate);
+    expect($html)->not->toContain($dueDate)
+        ->not->toContain(__('Due Date'));
 });
 
 it('renders a non-VAT line and bills the full base when no down payment is set', function () {
@@ -482,6 +508,27 @@ it('shows the signature block and company footer', function () {
     expect($html)->toContain('Approved by')
         ->toContain('Name &amp; Signature')
         ->toContain('PT Pembuktian');
+});
+
+it('embeds the configured signature and hides it when unset', function () {
+    Storage::fake('local');
+    Storage::fake('public');
+    $order = createPaidOrderWithItem();
+
+    $generator = app(InvoicePdfGenerator::class);
+    $generator->generate($order->refresh());
+
+    $withoutSignature = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($withoutSignature)->not->toContain('class="signature-image"');
+
+    Storage::disk('public')->put('invoice-signature.png', "\x89PNG\r\n\x1a\n");
+    App\Models\Setting::set('invoice_signature', 'invoice-signature.png');
+
+    $withSignature = view('invoice.pdf', $generator->buildViewData($order))->render();
+
+    expect($withSignature)->toContain('class="signature-image"')
+        ->toContain('data:image/png;base64,');
 });
 
 it('dispatches a chained invoice and email jobs on payment success', function () {

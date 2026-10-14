@@ -233,6 +233,14 @@ final class Settings extends SettingPage
                                             ->helperText('Optional banner shown at the top of the invoice'),
                                     ]),
 
+                                FileUpload::make('invoice_signature')
+                                    ->label('Signature')
+                                    ->disk('public')
+                                    ->preserveFilenames()
+                                    ->image()
+                                    ->columnSpanFull()
+                                    ->helperText('Shown above the Name & Signature line on the invoice PDF'),
+
                                 TextInput::make('invoice_npwp')
                                     ->label('NPWP'),
 

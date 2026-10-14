@@ -78,7 +78,6 @@ final class InvoicePdfGenerator
 
         $invoice = $order->invoice;
         $issuedAt = $invoice?->issued_at ?? $order->paid_at ?? $order->created_at ?? now();
-        $dueDays = (int) (setting('invoice_due_days') ?? self::DUE_DAYS_DEFAULT);
         $locale = $order->locale ?? config('app.fallback_locale');
         $totals = $this->totals($order);
 
@@ -86,12 +85,12 @@ final class InvoicePdfGenerator
             'order' => $order,
             'invoice' => $invoice,
             'issuedAt' => $issuedAt,
-            'dueDate' => $issuedAt->copy()->addDays($dueDays),
             'quotationNumber' => $order->quotation_number,
             'poNumber' => $order->po_number,
             'seller' => $this->seller(),
             'logoData' => $this->imageDataUri('invoice_logo'),
             'bannerData' => $this->imageDataUri('invoice_banner'),
+            'signatureData' => $this->imageDataUri('invoice_signature'),
             'paymentTerms' => setting_translated('invoice_payment_terms', $locale),
             'footerNote' => (string) setting('invoice_footer_note', ''),
             'couponCode' => $order->discounts->first()?->coupon_snapshot['code'],
@@ -104,8 +103,8 @@ final class InvoicePdfGenerator
             'customer' => [
                 'name' => $order->user?->name ?? $order->guest_name ?? '-',
                 'email' => $order->user?->email ?? $order->guest_email ?? '-',
-                'address' => $order->user?->address ?? '-',
-                'phone' => $order->user?->phone ?? '-',
+                'address' => $order->user?->address ?? $order->guest_address ?? '-',
+                'phone' => $order->user?->phone ?? $order->guest_phone ?? '-',
             ],
             'locale' => $locale,
         ];

@@ -265,6 +265,15 @@
             height: 17mm;
         }
 
+        .signature-image {
+            display: block;
+            margin: 0 auto;
+            max-height: 15mm;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
         .signature .name {
             margin-top: 1mm;
         }
@@ -327,21 +336,6 @@
                     <td class="meta-colon">:</td>
                     <td>{{ $issuedAt->translatedFormat('j F Y') }}</td>
                 </tr>
-                <tr>
-                    <td class="meta-label">{{ __('Due Date') }}</td>
-                    <td class="meta-colon">:</td>
-                    <td>{{ $dueDate->translatedFormat('j F Y') }}</td>
-                </tr>
-{{--                <tr>--}}
-{{--                    <td class="meta-label">{{ __('Quotation No.') }}</td>--}}
-{{--                    <td class="meta-colon">:</td>--}}
-{{--                    <td>{{ $quotationNumber ?: '-' }}</td>--}}
-{{--                </tr>--}}
-                <tr>
-                    <td class="meta-label">{{ __('PO No.') }}</td>
-                    <td class="meta-colon">:</td>
-                    <td>{{ $order->order_number }}</td>
-                </tr>
             </table>
         </div>
     </div>
@@ -350,26 +344,26 @@
         <div class="customer-title">{{ __('Customer') }}</div>
 
         <table class="customer-table">
-            @if($customer['name'] != '-')
-                <tr>
-                    <td>{{ $customer['name'] }}</td>
-                </tr>
-            @endif
-            @if($customer['address'] != '-')
-                <tr>
-                    <td>{{ $customer['address'] }}</td>
-                </tr>
-            @endif
-            @if( $customer['phone'] != '-')
-                <tr>
-                    <td>Phone: {{ $customer['phone'] }}</td>
-                </tr>
-            @endif
-            @if($customer['email'] != '-')
-                <tr>
-                    <td>Email: {{ $customer['email'] }}</td>
-                </tr>
-            @endif
+            <tr>
+                <td class="customer-label">{{ __('Name') }}</td>
+                <td class="customer-colon">:</td>
+                <td>{{ $customer['name'] }}</td>
+            </tr>
+            <tr>
+                <td class="customer-label">{{ __('Address') }}</td>
+                <td class="customer-colon">:</td>
+                <td>{!! nl2br(e($customer['address'])) !!}</td>
+            </tr>
+            <tr>
+                <td class="customer-label">{{ __('Phone') }}</td>
+                <td class="customer-colon">:</td>
+                <td>{{ $customer['phone'] }}</td>
+            </tr>
+            <tr>
+                <td class="customer-label">{{ __('Email') }}</td>
+                <td class="customer-colon">:</td>
+                <td>{{ $customer['email'] }}</td>
+            </tr>
         </table>
     </div>
 
@@ -482,7 +476,11 @@
     <div class="signature">
         <div class="approved">{{ __('Approved by') }}</div>
         <div class="company">DKI Konsultan</div>
-        <div class="signature-space"></div>
+        <div class="signature-space">
+            @if ($signatureData)
+                <img src="{{ $signatureData }}" alt="Signature" class="signature-image">
+            @endif
+        </div>
         <div class="name">{{ __('Name & Signature') }}</div>
     </div>
 
