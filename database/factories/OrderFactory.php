@@ -37,6 +37,8 @@ final class OrderFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'guest_email' => fake()->email(),
             'guest_name' => fake()->name(),
+            'guest_phone' => fake()->phoneNumber(),
+            'guest_address' => fake()->address(),
         ]);
     }
 

@@ -21,15 +21,17 @@ beforeEach(function () {
     config()->set('checkout.allow_guest', true);
 });
 
-it('shows checkout to an unauthenticated visitor with a guest email field', function () {
+it('shows checkout to an unauthenticated visitor with guest contact fields', function () {
     $product = createCheckoutAsGuestProduct();
 
     Livewire::test(CheckoutForm::class, ['product' => $product])
         ->assertOk()
-        ->assertSee('guest_email');
+        ->assertSee('guest_email')
+        ->assertSee('guest_phone')
+        ->assertSee('guest_address');
 });
 
-it('lets an unauthenticated visitor buy as a guest, storing the trimmed email and name', function () {
+it('lets an unauthenticated visitor buy as a guest, storing the trimmed contact details', function () {
     Queue::fake();
 
     $product = createCheckoutAsGuestProduct();
@@ -37,6 +39,8 @@ it('lets an unauthenticated visitor buy as a guest, storing the trimmed email an
     Livewire::test(CheckoutForm::class, ['product' => $product])
         ->set('guestEmail', '  guest@example.com  ')
         ->set('guestName', '  Guest User  ')
+        ->set('guestPhone', '  +628123456789  ')
+        ->set('guestAddress', '  123 Main Street  ')
         ->call('pay')
         ->assertHasNoErrors()
         ->assertRedirect();
@@ -45,7 +49,29 @@ it('lets an unauthenticated visitor buy as a guest, storing the trimmed email an
 
     expect($order)->not->toBeNull()
         ->and($order->user_id)->toBeNull()
-        ->and($order->guest_name)->toBe('Guest User');
+        ->and($order->guest_name)->toBe('Guest User')
+        ->and($order->guest_phone)->toBe('+628123456789')
+        ->and($order->guest_address)->toBe('123 Main Street');
+});
+
+it('stores null guest phone and address when only whitespace is provided', function () {
+    Queue::fake();
+
+    $product = createCheckoutAsGuestProduct();
+
+    Livewire::test(CheckoutForm::class, ['product' => $product])
+        ->set('guestEmail', 'anon@example.com')
+        ->set('guestPhone', '   ')
+        ->set('guestAddress', '   ')
+        ->call('pay')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    $order = Order::query()->where('guest_email', 'anon@example.com')->first();
+
+    expect($order)->not->toBeNull()
+        ->and($order->guest_phone)->toBeNull()
+        ->and($order->guest_address)->toBeNull();
 });
 
 it('creates a guest order without a name when none is provided', function () {

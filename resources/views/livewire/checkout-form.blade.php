@@ -80,17 +80,49 @@
                     </div>
 
                     <div>
-                        <label for="guest_name" class="block text-sm font-medium text-gray-700">{{ __('Name (optional)') }}</label>
+                        <label for="guest_name" class="block text-sm font-medium text-gray-700">{{ __('Name') }}</label>
                         <x-input
                             id="guest_name"
                             name="guest_name"
                             type="text"
                             autocomplete="name"
-                            placeholder="{{ __('How should we address your order?') }}"
+                            placeholder="{{ __('e.g. John Doe') }}"
                             wire:model="guestName"
                             class="mt-1"
                         />
                         @error('guestName')
+                        <p class="mt-1 text-sm text-danger">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="guest_phone" class="block text-sm font-medium text-gray-700">{{ __('Phone') }}</label>
+                        <x-input
+                            id="guest_phone"
+                            name="guest_phone"
+                            type="tel"
+                            autocomplete="tel"
+                            placeholder="{{ __('e.g. +62 812 3456 7890') }}"
+                            wire:model="guestPhone"
+                            class="mt-1"
+                        />
+                        @error('guestPhone')
+                        <p class="mt-1 text-sm text-danger">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="guest_address" class="block text-sm font-medium text-gray-700">{{ __('Address') }}</label>
+                        <x-input
+                            id="guest_address"
+                            name="guest_address"
+                            type="text"
+                            autocomplete="street-address"
+                            placeholder="{{ __('e.g. 123 Main Street, City') }}"
+                            wire:model="guestAddress"
+                            class="mt-1"
+                        />
+                        @error('guestAddress')
                         <p class="mt-1 text-sm text-danger">{{ $message }}</p>
                         @enderror
                     </div>

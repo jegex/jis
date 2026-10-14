@@ -25,7 +25,7 @@ final class Order extends Model implements HasMedia
 
     use InteractsWithMedia;
 
-    protected $hidden = ['guest_email', 'guest_name', 'access_token_hash'];
+    protected $hidden = ['guest_email', 'guest_name', 'guest_phone', 'guest_address', 'access_token_hash'];
 
     protected $fillable = [
         'order_number',
@@ -34,6 +34,8 @@ final class Order extends Model implements HasMedia
         'access_token_issued_at',
         'guest_email',
         'guest_name',
+        'guest_phone',
+        'guest_address',
         'currency_code',
         'payment_currency_code',
         'subtotal',

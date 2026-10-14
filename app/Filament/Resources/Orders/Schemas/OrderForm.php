@@ -97,6 +97,15 @@ final class OrderForm
                 ->maxLength(255)
                 ->label('Guest Name'),
 
+            TextInput::make('guest_phone')
+                ->tel()
+                ->maxLength(30)
+                ->label('Guest Phone'),
+
+            TextInput::make('guest_address')
+                ->maxLength(500)
+                ->label('Guest Address'),
+
             Select::make('user_id')
                 ->relationship('user', 'email')
                 ->searchable()

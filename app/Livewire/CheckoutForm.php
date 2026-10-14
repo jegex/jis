@@ -38,6 +38,10 @@ final class CheckoutForm extends Component
 
     public string $guestName = '';
 
+    public string $guestPhone = '';
+
+    public string $guestAddress = '';
+
     public function mount(Product $product): void
     {
         if (! $product->isPublished()) {
@@ -123,10 +127,14 @@ final class CheckoutForm extends Component
         if (! auth()->check()) {
             $this->guestEmail = mb_trim($this->guestEmail);
             $this->guestName = mb_trim($this->guestName);
+            $this->guestPhone = mb_trim($this->guestPhone);
+            $this->guestAddress = mb_trim($this->guestAddress);
 
             $this->validate([
                 'guestEmail' => ['required', 'email:rfc,dns', 'max:255'],
                 'guestName' => ['nullable', 'string', 'max:255'],
+                'guestPhone' => ['nullable', 'string', 'max:30'],
+                'guestAddress' => ['nullable', 'string', 'max:500'],
             ]);
         }
 
@@ -140,6 +148,8 @@ final class CheckoutForm extends Component
                 user: $user,
                 guestEmail: $user ? null : $this->guestEmail,
                 guestName: $user ? null : ($this->guestName ?: null),
+                guestPhone: $user ? null : ($this->guestPhone ?: null),
+                guestAddress: $user ? null : ($this->guestAddress ?: null),
                 couponCode: $this->appliedCode ?: null,
                 quantity: $this->quantity,
             );

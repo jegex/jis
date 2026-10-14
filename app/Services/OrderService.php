@@ -22,11 +22,13 @@ final class OrderService
         ?User $user = null,
         ?string $guestEmail = null,
         ?string $guestName = null,
+        ?string $guestPhone = null,
+        ?string $guestAddress = null,
         ?string $couponCode = null,
         ?string $notes = null,
         int $quantity = 1,
     ): Order {
-        return DB::transaction(function () use ($product, $user, $guestEmail, $guestName, $couponCode, $notes, $quantity) {
+        return DB::transaction(function () use ($product, $user, $guestEmail, $guestName, $guestPhone, $guestAddress, $couponCode, $notes, $quantity) {
             $quantity = min(max($quantity, 1), (int) config('checkout.max_quantity', 99));
             $subtotal = (int) ($product->price * $quantity);
             $discount = 0;
@@ -44,6 +46,8 @@ final class OrderService
                 'user_id' => $user?->id,
                 'guest_email' => $guestEmail,
                 'guest_name' => $guestName,
+                'guest_phone' => $guestPhone,
+                'guest_address' => $guestAddress,
                 'currency_code' => $product->currency_code,
                 'subtotal' => $subtotal,
                 'discount' => $discount,
