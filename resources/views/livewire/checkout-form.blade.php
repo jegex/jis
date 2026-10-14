@@ -72,7 +72,7 @@
                             placeholder="{{ __('you@example.com') }}"
                             wire:model="guestEmail"
                             class="mt-1"
-                            helper-text="Harap mengisi alamat email untuk mendapatkan bukti pembayaran atas pembelian anda."
+                            helper-text="{{ __('Please enter your email address to receive proof of payment for your purchase.') }}"
                         />
                         @error('guestEmail')
                         <p class="mt-1 text-sm text-danger">{{ $message }}</p>
