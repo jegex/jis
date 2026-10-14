@@ -7,6 +7,10 @@ use App\Models\Product;
 use App\Services\OrderAccessService;
 use Illuminate\Support\Facades\URL;
 
+beforeEach(function () {
+    config(['checkout.allow_guest' => false]);
+});
+
 function paidOrderWithProduct(): array
 {
     $order = Order::factory()->paid()->create();

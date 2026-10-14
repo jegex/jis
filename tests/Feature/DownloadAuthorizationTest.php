@@ -8,6 +8,10 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 
+beforeEach(function () {
+    config(['checkout.allow_guest' => false]);
+});
+
 it('prevents downloading order belonging to another user without signature', function () {
     $owner = User::factory()->create();
     $other = User::factory()->create();

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Casts\MoneyCast;
 use App\Enums\CategoryType;
 use App\Enums\ContentStatus;
+use App\Enums\FileLocation;
 use App\Models\Concerns\HasTranslatableRouteKey;
 use App\Services\SEOTemplateResolver;
 use Awcodes\RicherEditor\Plugins\CodeBlockShikiPlugin;
@@ -59,12 +60,15 @@ final class Product extends Model implements HasMedia, HasRichContent
         'scheduled_at',
         'category_id',
         'currency_id',
+        'file_location',
+        'url_external',
     ];
 
     protected $hidden = [];
 
     protected $attributes = [
         'status' => ContentStatus::Draft->value,
+        'file_location' => FileLocation::Local->value,
     ];
 
     protected function casts(): array
@@ -76,6 +80,7 @@ final class Product extends Model implements HasMedia, HasRichContent
             'short_description' => 'array',
             'price' => MoneyCast::class,
             'status' => ContentStatus::class,
+            'file_location' => FileLocation::class,
             'scheduled_at' => 'datetime',
         ];
     }
@@ -231,6 +236,20 @@ final class Product extends Model implements HasMedia, HasRichContent
     public function isFree(): bool
     {
         return (int) $this->price === 0;
+    }
+
+    public function isExternalFile(): bool
+    {
+        return $this->file_location === FileLocation::External;
+    }
+
+    public function externalDownloadUrl(): ?string
+    {
+        if (! $this->isExternalFile()) {
+            return null;
+        }
+
+        return $this->url_external ?: null;
     }
 
     public function getDisplayPriceAttribute(): ?string

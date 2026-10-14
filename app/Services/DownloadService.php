@@ -12,6 +12,19 @@ final class DownloadService
 {
     public function generateDownloadUrl(Order $order, Product $product): string
     {
+        $externalUrl = $product->externalDownloadUrl();
+
+        if ($externalUrl !== null) {
+            return $externalUrl;
+        }
+
+        if (config('checkout.allow_guest')) {
+            return route('payment.download', [
+                'order' => $order->order_number,
+                'product' => $product->id,
+            ]);
+        }
+
         return URL::temporarySignedRoute(
             'payment.download',
             now()->addHours(24),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ContentStatus;
+use App\Enums\FileLocation;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Product;
@@ -24,9 +25,18 @@ final class ProductFactory extends Factory
             ],
             'price' => fake()->numberBetween(50000, 500000),
             'status' => ContentStatus::Publish,
+            'file_location' => FileLocation::Local,
             'category_id' => Category::factory()->forProducts(),
             'currency_id' => Currency::factory(),
         ];
+    }
+
+    public function external(string $url = 'https://example.com/download'): static
+    {
+        return $this->state([
+            'file_location' => FileLocation::External,
+            'url_external' => $url,
+        ]);
     }
 
     public function draft(): static

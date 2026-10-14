@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\DownloadService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 final class DownloadController extends Controller
 {
@@ -22,13 +23,24 @@ final class DownloadController extends Controller
 
         $isValidSignature = $request->hasValidSignature();
         $isOwner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
+        $allowsGuest = (bool) config('checkout.allow_guest');
 
-        if (! $isValidSignature && ! $isOwner) {
+        if (! $isValidSignature && ! $isOwner && ! $allowsGuest) {
             abort(401, 'Invalid or expired download link.');
         }
 
         if (! $this->downloadService->canDownload($order, $product)) {
             abort(403, 'You do not have access to this download.');
+        }
+
+        if ($product->isExternalFile()) {
+            $externalUrl = $product->externalDownloadUrl();
+
+            if ($externalUrl === null || ! Str::startsWith($externalUrl, ['http://', 'https://'])) {
+                abort(404, 'File not found.');
+            }
+
+            return redirect()->away($externalUrl);
         }
 
         $file = $product->getFirstMedia('file');

@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Products\Schemas;
 use App\Actions\GenerateSlug;
 use App\Enums\CategoryType;
 use App\Enums\ContentStatus;
+use App\Enums\FileLocation;
 use App\Filament\Schemas\Components\MoneyInput;
 use App\Filament\Schemas\Components\MyRichEditor;
 use App\Filament\Schemas\Components\TitleWithSlug;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -122,6 +124,13 @@ final class ProductForm
                             MoneyInput::make('price')
                                 ->prefix(fn ($get) => Currency::find($get('currency_id'))->code),
 
+                            ToggleButtons::make('file_location')
+                                ->label('File Location')
+                                ->options(FileLocation::class)
+                                ->default(FileLocation::Local->value)
+                                ->inline()
+                                ->live(),
+
                             SpatieMediaLibraryFileUpload::make('file')
                                 ->disk('local')
                                 ->preserveFilenames()
@@ -140,7 +149,16 @@ final class ProductForm
                                     'application/x-7z-compressed',
                                     'application/x-7z',
                                 ])
+                                ->visible(fn (Get $get): bool => self::fileLocationValue($get) !== FileLocation::External->value)
                                 ->label('Product File'),
+
+                            TextInput::make('url_external')
+                                ->label('External URL')
+                                ->url()
+                                ->maxLength(255)
+                                ->placeholder('https://example.com/file.zip')
+                                ->required(fn (Get $get): bool => self::fileLocationValue($get) === FileLocation::External->value)
+                                ->visible(fn (Get $get): bool => self::fileLocationValue($get) === FileLocation::External->value),
                         ]),
 
                     Section::make('SEO')
@@ -149,5 +167,12 @@ final class ProductForm
                         ->schema(fn (Schema $schema) => SeoSchema::configure($schema)),
                 ])->columnSpan(1),
             ]);
+    }
+
+    private static function fileLocationValue(Get $get): ?string
+    {
+        $value = $get('file_location');
+
+        return $value instanceof FileLocation ? $value->value : $value;
     }
 }

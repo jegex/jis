@@ -71,3 +71,11 @@ _Avoid_: download page, delivery page
 **Claim**:
 The attachment of a Guest Order to a User account when that User registers with the same verified email.
 _Avoid_: merge, link
+
+**File Location**:
+A Product's choice of delivery source for its downloadable item: `local` (an uploaded Product File stored on the app) or `external` (an External Download URL hosted elsewhere).
+_Avoid_: file source, storage type, delivery mode
+
+**External Download URL**:
+The third-party URL a Product delivers when its File Location is `external`; the buyer is redirected to it after the Order is verified as paid.
+_Avoid_: external file, remote link, download link
