@@ -25,7 +25,7 @@ final class Order extends Model implements HasMedia
 
     use InteractsWithMedia;
 
-    protected $hidden = ['guest_email', 'guest_name', 'guest_phone', 'guest_address', 'access_token_hash'];
+    protected $hidden = ['access_token_hash'];
 
     protected $fillable = [
         'order_number',

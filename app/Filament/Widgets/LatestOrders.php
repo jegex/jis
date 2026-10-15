@@ -55,6 +55,12 @@ final class LatestOrders extends TableWidget
                     ->sortable()
                     ->placeholder('Guest'),
 
+                Tables\Columns\TextColumn::make('email')
+                    ->getStateUsing(fn ($record) => $record->user?->email ?? $record->guest_email)
+                    ->searchable()
+                    ->sortable()
+                    ->label('Email'),
+
                 Tables\Columns\TextColumn::make('total')
                     ->money(fn (Order $record) => $record->currency_code ?? 'IDR')
                     ->sortable(),

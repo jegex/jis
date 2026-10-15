@@ -42,6 +42,12 @@ final class OrdersTable
                     ->sortable()
                     ->placeholder(fn ($state) => $state ?? 'Guest'),
 
+                TextColumn::make('email')
+                    ->getStateUsing(fn ($record) => $record->user?->email ?? $record->guest_email)
+                    ->searchable()
+                    ->sortable()
+                    ->label('Email'),
+
                 TextColumn::make('total')
                     ->money(fn ($record) => $record->currency_code ?? 'IDR')
                     ->sortable(),
