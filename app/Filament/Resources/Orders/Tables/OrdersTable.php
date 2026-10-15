@@ -111,6 +111,23 @@ final class OrdersTable
                                 ->send();
                         }),
 
+                    Action::make('resend_download_link')
+                        ->label('Resend Download Link')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->color('gray')
+                        ->visible(fn (Order $record): bool => $record->status === OrderStatus::Paid)
+                        ->requiresConfirmation()
+                        ->modalDescription('Rotates the access token and emails a fresh download link. Any previously emailed link stops working.')
+                        ->action(function (Order $record): void {
+                            app(EmailService::class)->sendDownloadLink($record);
+
+                            Notification::make()
+                                ->title('Download link sent')
+                                ->body("A new download link for {$record->order_number} has been emailed. Previous links no longer work.")
+                                ->success()
+                                ->send();
+                        }),
+
                     EditAction::make(),
                 ]),
             ])

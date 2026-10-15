@@ -6,7 +6,6 @@ use App\Livewire\CustomerDownloads;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
     config(['checkout.allow_guest' => false]);
@@ -32,7 +31,7 @@ it('prevents downloading order belonging to another user without signature', fun
         ->assertStatus(401);
 });
 
-it('allows owner to download with valid signature', function () {
+it('allows owner to download without a token', function () {
     $owner = User::factory()->create();
 
     $order = Order::factory()->forUser()->paid()->create([
@@ -48,7 +47,7 @@ it('allows owner to download with valid signature', function () {
         ->usingName('test-download.txt')
         ->toMediaCollection('file');
 
-    $url = URL::temporarySignedRoute('payment.download', now()->addHours(24), [
+    $url = route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
     ]);

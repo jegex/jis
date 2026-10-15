@@ -15,8 +15,12 @@ final class OrderAccess extends Component
 {
     public ?Order $order = null;
 
+    public string $accessToken = '';
+
     public function mount(string $token): void
     {
+        $this->accessToken = $token;
+
         $order = app(OrderAccessService::class)->resolve($token);
 
         if (! $order || $order->status !== OrderStatus::Paid) {
@@ -40,7 +44,7 @@ final class OrderAccess extends Component
             return '#';
         }
 
-        return $downloadService->generateDownloadUrl($this->order, $product);
+        return $downloadService->generateDownloadUrl($this->order, $product, $this->accessToken);
     }
 
     public function render()

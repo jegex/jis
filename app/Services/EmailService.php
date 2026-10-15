@@ -239,7 +239,13 @@ final class EmailService
             return '#';
         }
 
-        return app(DownloadService::class)->generateDownloadUrl($order, $product);
+        $downloadService = app(DownloadService::class);
+
+        return $downloadService->generateDownloadUrl(
+            $order,
+            $product,
+            $downloadService->issueAccessToken($order),
+        );
     }
 
     private function send(EmailTemplate $template, string $recipient, array $variables, ?Model $loggable = null): void

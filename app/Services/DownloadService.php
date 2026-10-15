@@ -6,33 +6,37 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Support\Facades\URL;
 
 final class DownloadService
 {
-    public function generateDownloadUrl(Order $order, Product $product): string
+    public function __construct(
+        private OrderAccessService $orderAccessService,
+    ) {}
+
+    public function generateDownloadUrl(Order $order, Product $product, ?string $accessToken = null): string
     {
-        $externalUrl = $product->externalDownloadUrl();
+        $parameters = [
+            'order' => $order->order_number,
+            'product' => $product->id,
+        ];
 
-        if ($externalUrl !== null) {
-            return $externalUrl;
+        if ($accessToken !== null) {
+            $parameters['token'] = $accessToken;
         }
 
-        if (config('checkout.allow_guest')) {
-            return route('payment.download', [
-                'order' => $order->order_number,
-                'product' => $product->id,
-            ]);
-        }
+        return route('payment.download', $parameters);
+    }
 
-        return URL::temporarySignedRoute(
-            'payment.download',
-            now()->addHours(24),
-            [
-                'order' => $order->order_number,
-                'product' => $product->id,
-            ]
-        );
+    /**
+     * Issue a fresh Order Access Token and return its plaintext.
+     *
+     * Only the hash is persisted, so a previously issued plaintext cannot be
+     * recovered; every new emailed link therefore rotates the token and
+     * invalidates previously sent links (per ADR 0002).
+     */
+    public function issueAccessToken(Order $order): string
+    {
+        return $this->orderAccessService->issue($order);
     }
 
     public function canDownload(Order $order, Product $product): bool

@@ -2,7 +2,7 @@
 
 Date: 2026-10-12
 
-Status: Accepted
+Status: Superseded by [0003](0003-emailed-download-links-carry-order-access-token.md)
 
 ## Context
 

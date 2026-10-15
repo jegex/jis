@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\DownloadService;
+use App\Services\OrderAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,17 +16,14 @@ final class DownloadController extends Controller
 {
     public function __construct(
         private DownloadService $downloadService,
+        private OrderAccessService $orderAccessService,
     ) {}
 
     public function download(Request $request, Order $order, int $product)
     {
         $product = Product::withoutGlobalScope('published')->findOrFail($product);
 
-        $isValidSignature = $request->hasValidSignature();
-        $isOwner = $request->user() && (int) $order->user_id === (int) $request->user()->id;
-        $allowsGuest = (bool) config('checkout.allow_guest');
-
-        if (! $isValidSignature && ! $isOwner && ! $allowsGuest) {
+        if (! $this->hasAccess($request, $order)) {
             abort(401, 'Invalid or expired download link.');
         }
 
@@ -50,5 +48,24 @@ final class DownloadController extends Controller
         }
 
         return $file->toResponse($request);
+    }
+
+    private function hasAccess(Request $request, Order $order): bool
+    {
+        $user = $request->user();
+
+        if ($user !== null && (int) $order->user_id === (int) $user->id) {
+            return true;
+        }
+
+        $token = (string) $request->query('token', '');
+
+        if ($token === '') {
+            return false;
+        }
+
+        $tokenOrder = $this->orderAccessService->resolve($token);
+
+        return $tokenOrder !== null && $tokenOrder->is($order);
     }
 }

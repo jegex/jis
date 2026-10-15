@@ -13,9 +13,9 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\DownloadService;
 use App\Services\EmailService;
+use App\Services\OrderAccessService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 
@@ -36,9 +36,7 @@ it('defaults a new product to a local file location', function () {
         ->and($product->externalDownloadUrl())->toBeNull();
 });
 
-it('generates a direct external url and an unsigned local url when guest checkout is allowed', function () {
-    config(['checkout.allow_guest' => true]);
-
+it('routes every product through the download endpoint regardless of file location', function () {
     $currency = Currency::factory()->create();
     $order = Order::factory()->forUser()->paid()->create();
     $external = Product::factory()->external('https://cdn.example.com/book.pdf')->create(['currency_id' => $currency->id]);
@@ -48,28 +46,29 @@ it('generates a direct external url and an unsigned local url when guest checkou
 
     $service = app(DownloadService::class);
 
-    expect($service->generateDownloadUrl($order, $external))->toBe('https://cdn.example.com/book.pdf')
+    expect($service->generateDownloadUrl($order, $external))->toContain('/download/')
+        ->and($service->generateDownloadUrl($order, $external))->not->toBe('https://cdn.example.com/book.pdf')
         ->and($service->generateDownloadUrl($order, $local))->toContain('/download/')
         ->and($service->generateDownloadUrl($order, $local))->not->toContain('signature');
 });
 
-it('signs the local download url when guest checkout is disabled', function () {
-    config(['checkout.allow_guest' => false]);
-
+it('embeds the access token in the download url when provided', function () {
     $currency = Currency::factory()->create();
     $order = Order::factory()->forUser()->paid()->create();
     $local = Product::factory()->create(['currency_id' => $currency->id]);
     $order->items()->create(['product_id' => $local->id, 'product_name' => 'Local', 'price' => 10000, 'quantity' => 1]);
 
-    $url = app(DownloadService::class)->generateDownloadUrl($order, $local);
+    $token = app(DownloadService::class)->issueAccessToken($order);
+    $url = app(DownloadService::class)->generateDownloadUrl($order, $local, $token);
 
-    expect($url)->toContain('signature');
+    expect($url)->toContain('token='.urlencode($token))
+        ->and($url)->not->toContain('signature');
 });
 
-it('serves a local file through an unsigned url when guest checkout is allowed', function () {
+it('serves a local file through a token url without authentication', function () {
     config(['checkout.allow_guest' => true]);
 
-    $order = Order::factory()->forUser()->paid()->create();
+    $order = Order::factory()->paid()->create();
     $product = Product::factory()->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Local', 'price' => 10000, 'quantity' => 1]);
 
@@ -77,10 +76,26 @@ it('serves a local file through an unsigned url when guest checkout is allowed',
     file_put_contents($tempFile, 'fake file content');
     $product->addMedia($tempFile)->usingName('test-download.txt')->toMediaCollection('file');
 
+    $token = app(OrderAccessService::class)->issue($order);
+
     $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
+        'token' => $token,
     ]))->assertOk();
+});
+
+it('rejects an unsigned local download even when guest checkout is allowed', function () {
+    config(['checkout.allow_guest' => true]);
+
+    $order = Order::factory()->forUser()->paid()->create();
+    $product = Product::factory()->create();
+    $order->items()->create(['product_id' => $product->id, 'product_name' => 'Local', 'price' => 10000, 'quantity' => 1]);
+
+    $this->get(route('payment.download', [
+        'order' => $order->order_number,
+        'product' => $product->id,
+    ]))->assertStatus(401);
 });
 
 it('rejects an unsigned local download when guest checkout is disabled', function () {
@@ -101,12 +116,24 @@ it('redirects to the external url when the product points to an external file', 
     $product = Product::factory()->external('https://cdn.example.com/book.pdf')->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
-    $url = URL::temporarySignedRoute('payment.download', now()->addHours(24), [
+    $token = app(OrderAccessService::class)->issue($order);
+
+    $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
-    ]);
+        'token' => $token,
+    ]))->assertRedirect('https://cdn.example.com/book.pdf');
+});
 
-    $this->get($url)->assertRedirect('https://cdn.example.com/book.pdf');
+it('rejects an external download without a token', function () {
+    $order = Order::factory()->forUser()->paid()->create();
+    $product = Product::factory()->external('https://cdn.example.com/book.pdf')->create();
+    $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
+
+    $this->get(route('payment.download', [
+        'order' => $order->order_number,
+        'product' => $product->id,
+    ]))->assertStatus(401);
 });
 
 it('returns not found when an external product has no valid url', function () {
@@ -114,12 +141,13 @@ it('returns not found when an external product has no valid url', function () {
     $product = Product::factory()->create(['file_location' => FileLocation::External, 'url_external' => null]);
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
-    $url = URL::temporarySignedRoute('payment.download', now()->addHours(24), [
+    $token = app(OrderAccessService::class)->issue($order);
+
+    $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
-    ]);
-
-    $this->get($url)->assertNotFound();
+        'token' => $token,
+    ]))->assertNotFound();
 });
 
 it('rejects a download when the external url is not http or https', function () {
@@ -127,12 +155,13 @@ it('rejects a download when the external url is not http or https', function () 
     $product = Product::factory()->external('ftp://cdn.example.com/book.pdf')->create();
     $order->items()->create(['product_id' => $product->id, 'product_name' => 'Test', 'price' => 10000, 'quantity' => 1]);
 
-    $url = URL::temporarySignedRoute('payment.download', now()->addHours(24), [
+    $token = app(OrderAccessService::class)->issue($order);
+
+    $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
-    ]);
-
-    $this->get($url)->assertNotFound();
+        'token' => $token,
+    ]))->assertNotFound();
 });
 
 it('stores an external file location from the product form', function () {
@@ -179,7 +208,7 @@ it('requires the external url when the file location is external', function () {
         ->assertHasFormErrors(['url_external']);
 });
 
-it('emails the external url directly without the signed download route', function () {
+it('emails a protected download route for an external product', function () {
     Storage::fake('local');
     Mail::fake();
 
@@ -210,5 +239,9 @@ it('emails the external url directly without the signed download route', functio
 
     $downloadUrl = Mail::sent(OrderConfirmationMail::class)->first()->variables['download_url'];
 
-    expect($downloadUrl)->toBe('https://cdn.example.com/book.pdf');
+    expect($downloadUrl)->toContain('/download/')
+        ->and($downloadUrl)->toContain('token=')
+        ->and($downloadUrl)->not->toContain('cdn.example.com');
+
+    $this->get($downloadUrl)->assertRedirect('https://cdn.example.com/book.pdf');
 });

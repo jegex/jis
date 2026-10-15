@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\OrderAccessService;
-use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
     config(['checkout.allow_guest' => false]);
@@ -74,7 +73,7 @@ it('returns 404 for a rotated-out access token', function () {
     $this->get(route('order.access', $old))->assertNotFound();
 });
 
-it('lets a guest download a paid order item with a valid signed url', function () {
+it('lets a guest download a paid order item with a valid access token', function () {
     [$order, $product] = paidOrderWithProduct();
 
     expect($order->user_id)->toBeNull();
@@ -83,20 +82,48 @@ it('lets a guest download a paid order item with a valid signed url', function (
     file_put_contents($tempFile, 'fake file content');
     $product->addMedia($tempFile)->usingName('test-download.txt')->toMediaCollection('file');
 
-    $url = URL::temporarySignedRoute('payment.download', now()->addHours(24), [
+    $token = app(OrderAccessService::class)->issue($order);
+
+    $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
-    ]);
-
-    $this->get($url)->assertStatus(200);
+        'token' => $token,
+    ]))->assertStatus(200);
 });
 
-it('rejects a download without a valid signature when unauthenticated', function () {
+it('rejects a download without a valid token when unauthenticated', function () {
     [$order, $product] = paidOrderWithProduct();
 
     $this->get(route('payment.download', [
         'order' => $order->order_number,
         'product' => $product->id,
+    ]))->assertStatus(401);
+});
+
+it('rejects a download when the token belongs to another order', function () {
+    [$order, $product] = paidOrderWithProduct();
+    $other = Order::factory()->paid()->create();
+
+    $token = app(OrderAccessService::class)->issue($other);
+
+    $this->get(route('payment.download', [
+        'order' => $order->order_number,
+        'product' => $product->id,
+        'token' => $token,
+    ]))->assertStatus(401);
+});
+
+it('rejects a download after the access token has been rotated', function () {
+    [$order, $product] = paidOrderWithProduct();
+
+    $service = app(OrderAccessService::class);
+    $old = $service->issue($order);
+    $service->rotate($order->fresh());
+
+    $this->get(route('payment.download', [
+        'order' => $order->order_number,
+        'product' => $product->id,
+        'token' => $old,
     ]))->assertStatus(401);
 });
 
