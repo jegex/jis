@@ -32,10 +32,7 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td style="font-size: 13px; line-height: 1.5; color: #94a3b8;">
-                                        <p style="margin: 0 0 4px;">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-                                        <p style="margin: 0;">
-                                            {{ url('/') }}
-                                        </p>
+                                        <p style="margin: 0 0 4px;">&copy; {{ date('Y') }} PT Desain Konsultan Indonesia. All rights reserved.</p>
                                     </td>
                                 </tr>
                             </table>
